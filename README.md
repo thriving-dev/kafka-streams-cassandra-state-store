@@ -17,22 +17,40 @@ TODO: describe purpose
 - [ ] tests
   - [ ] unit tests (?)
   - [ ] WordCount integration test using testcontainers
+    - Testcontainers for Java
+      https://www.testcontainers.org/
+    - Cassandra Module - Testcontainers for Java
+      https://www.testcontainers.org/modules/databases/cassandra/
+    - Cassandra 4 mit Testcontainers in Spring Boot
+      https://www.trion.de/news/2022/02/01/cassandra-4-testcontainers.html
+    - Kafka Containers - Testcontainers for Java
+      https://www.testcontainers.org/modules/kafka/
+    - testcontainers-java/settings.gradle at main · testcontainers/testcontainers-java
+      https://github.com/testcontainers/testcontainers-java/blob/main/settings.gradle
+    - testcontainers-java/examples/kafka-cluster at main · testcontainers/testcontainers-java
+      https://github.com/testcontainers/testcontainers-java/tree/main/examples/kafka-cluster
+    - testcontainers-java/RedisBackedCacheTest.java at main · testcontainers/testcontainers-java
+      https://github.com/testcontainers/testcontainers-java/blob/main/examples/redis-backed-cache/src/test/java/RedisBackedCacheTest.java
 - [ ] how best to configure? via application.conf file? Kafka props? `KafkaStreamsCassandraConfig`
-- [ ] Ops
-  - [ ] github actions
-  - [ ] gradle plugin to publish to maven central 
-  - [ ] add renovate
-  - [ ] add renovate
 - [ ] OpenSource
   - [ ] polishing
+  - [ ] choose + add license
   - [ ] make repo public
-  - [ ] Publish to maven central (?)
+  - [ ] Publish to maven central (?) https://h4pehl.medium.com/publish-your-gradle-artifacts-to-maven-central-f74a0af085b1
+- [ ] Ops
+  - [ ] github actions
+  - [ ] gradle plugin to publish to maven central https://julien.ponge.org/blog/publishing-from-gradle-to-maven-central-with-github-actions/
+  - [ ] add renovate 
+    - https://github.com/renovatebot/github-action
+    - https://docs.renovatebot.com/java/
+  - [ ] add trivy https://github.com/marketplace/actions/trivy-action
 - [ ] Documentation
   - [ ] usage
   - [ ] limitations
   - [ ] extra (TTL)
 - [ ] Next Steps
   - [ ] add WindowedStore functionality, example, ...
+  - [ ] cassandra 3.x (3.10/3.11) branch(es)? 
 
 ### draft cql schema
 
