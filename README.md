@@ -18,8 +18,15 @@ TODO: describe purpose
   - [ ] unit tests (?)
   - [ ] WordCount integration test using testcontainers
 - [ ] how best to configure? via application.conf file? Kafka props? `KafkaStreamsCassandraConfig`
+- [ ] Ops
+  - [ ] github actions
+  - [ ] gradle plugin to publish to maven central 
+  - [ ] add renovate
+  - [ ] add renovate
 - [ ] OpenSource
-- [ ] Release to maven central (?)
+  - [ ] polishing
+  - [ ] make repo public
+  - [ ] Publish to maven central (?)
 - [ ] Documentation
   - [ ] usage
   - [ ] limitations
