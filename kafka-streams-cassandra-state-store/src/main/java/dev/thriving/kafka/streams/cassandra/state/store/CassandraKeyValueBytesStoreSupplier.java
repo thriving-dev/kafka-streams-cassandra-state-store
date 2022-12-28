@@ -1,4 +1,4 @@
-package io.confluent.developer.store;
+package dev.thriving.kafka.streams.cassandra.state.store;
 
 import com.datastax.oss.driver.api.core.CqlSession;
 import org.apache.kafka.common.utils.Bytes;

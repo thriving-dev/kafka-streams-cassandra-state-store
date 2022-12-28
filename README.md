@@ -10,9 +10,9 @@ TODO: describe purpose
 ### TODOs
 
 - [x] MVP implementation
-- [ ] restructure code, split implementation & examples
-- [ ] examples
-  - [ ] WordCount Cassandra 4
+- [x] restructure code, split implementation & examples
+- [x] examples
+  - [x] WordCount Cassandra 4
   - [ ] WordCount ScyllaDB
 - [ ] tests
   - [ ] unit tests (?)
@@ -77,6 +77,10 @@ WITH CLUSTERING ORDER BY (time DESC);
 
     docker exec -it scylla-1 cqlsh
     docker exec -it broker kafka-consumer-groups --bootstrap-server broker:9092 --group kafka-streams-101 --describe
+    
+    kafka-topics --bootstrap-server=localhost:9092 --create --partitions 6 --replication-factor 1 --topic streams-plaintext-input
+    kafka-topics --bootstrap-server=localhost:9092 --create --partitions 6 --replication-factor 1 --topic streams-wordcount-output
+    kafka-topics --bootstrap-server=localhost:9092 --list
 
 
 ### commands

@@ -1,0 +1,68 @@
+---
+version: '3'
+
+services:
+  zookeeper-1:
+    image: confluentinc/cp-zookeeper:7.3.1
+    container_name: zookeeper-1
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+
+  broker-1:
+    image: confluentinc/cp-kafka:7.3.1
+    container_name: broker-1
+    ports:
+      # To learn about configuring Kafka for access across networks see
+      # https://www.confluent.io/blog/kafka-client-cannot-connect-to-broker-on-aws-on-docker-etc/
+      - "9092:9092"
+    depends_on:
+      - zookeeper-1
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper-1:2181'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,PLAINTEXT_INTERNAL://broker:29092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+
+  scylla-1:
+    image: scylladb/scylla:5.1
+    container_name: scylla-1
+    command: --smp 1 --memory 750M --overprovisioned 1 --experimental 1
+    ports:
+      - 9042:9042
+
+  datagen-1:
+    build: ../..
+    container_name: datagen-1
+    restart: on-failure
+    image: kafka-streams-cassandra-state-store
+    command: ["sh", "-c", "java -noverify -cp /app/app.jar io.confluent.developer.KafkaProducerApplication config.properties"]
+    depends_on:
+      - broker-1
+
+  app-1:
+    build: ../..
+    container_name: app-1
+    restart: on-failure
+    image: kafka-streams-cassandra-state-store
+    depends_on:
+      - broker-1
+#
+#  app-2:
+#    build: .
+#    container_name: app-2
+#    restart: on-failure
+#    image: kafka-streams-cassandra-state-store
+#    depends_on:
+#      - broker
+#
+#  app-3:
+#    build: .
+#    container_name: app-3
+#    restart: on-failure
+#    image: kafka-streams-cassandra-state-store
+#    depends_on:
+#      - broker

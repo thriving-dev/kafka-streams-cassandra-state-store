@@ -1,6 +1,5 @@
-package io.confluent.developer.store;
+package dev.thriving.kafka.streams.cassandra.state.store;
 
-import com.datastax.oss.driver.api.core.CqlIdentifier;
 import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.cql.*;
 import org.apache.kafka.common.serialization.Serializer;
@@ -17,7 +16,6 @@ import org.apache.kafka.streams.state.internals.StoreQueryUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.time.Instant;
 import java.util.Iterator;
@@ -49,7 +47,7 @@ public class CassandraKeyValueStore implements KeyValueStore<Bytes, byte[]> {
     public CassandraKeyValueStore(CqlSession session, String name) {
         this.session = session;
         this.name = name;
-        this.tableName = name + "_changelog";
+        this.tableName = name.replaceAll("[^a-zA-Z0-9_]", "_") + "_changelog";
     }
 
     @Deprecated
