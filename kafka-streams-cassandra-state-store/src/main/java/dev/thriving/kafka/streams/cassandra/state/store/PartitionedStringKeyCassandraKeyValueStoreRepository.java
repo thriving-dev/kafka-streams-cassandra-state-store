@@ -7,8 +7,6 @@ import com.datastax.oss.driver.api.core.cql.ResultSet;
 import org.apache.kafka.common.utils.Bytes;
 import org.apache.kafka.streams.state.KeyValueIterator;
 
-import java.nio.ByteBuffer;
-
 class PartitionedStringKeyCassandraKeyValueStoreRepository extends AbstractPartitionedCassandraKeyValueStoreRepository<String> {
 
     private PreparedStatement selectByPartitionAndKeyPrefix;
