@@ -10,10 +10,16 @@ TODO: describe purpose
 ### TODOs
 
 - [x] MVP implementation
-- [x] restructure code, split implementation & examples
+- [x] restructure code
+  - [x] split implementation & examples
+  - [x] Abstract store, introduce Repo, KeySerdes (Byte <> ByteBuffer|String)
 - [x] examples
   - [x] WordCount Cassandra 4
   - [ ] WordCount ScyllaDB
+- [x] Features
+  - [x] Prefix scan with `StringKeyCassandraKeyValueStore`
+  - [x] `GlobalCassandraKeyValueStore`
+  - [ ] `CassandraStoreConfig`, how best to configure? via application.conf file? Kafka props?
 - [ ] tests
   - [ ] unit tests (?)
   - [ ] WordCount integration test using testcontainers
@@ -31,7 +37,6 @@ TODO: describe purpose
       https://github.com/testcontainers/testcontainers-java/tree/main/examples/kafka-cluster
     - testcontainers-java/RedisBackedCacheTest.java at main · testcontainers/testcontainers-java
       https://github.com/testcontainers/testcontainers-java/blob/main/examples/redis-backed-cache/src/test/java/RedisBackedCacheTest.java
-- [ ] how best to configure? via application.conf file? Kafka props? `KafkaStreamsCassandraConfig`
 - [ ] OpenSource
   - [ ] polishing
   - [ ] choose + add license
@@ -47,6 +52,7 @@ TODO: describe purpose
 - [ ] Documentation
   - [ ] usage
   - [ ] limitations
+  - [ ] overview store types
   - [ ] extra (TTL)
 - [ ] Next Steps
   - [ ] add WindowedStore functionality, example, ...
@@ -398,4 +404,18 @@ partition | key_int | time                            | value_int
 
 (6 rows)
 cqlsh:test>
+```
+
+```sql
+
+CREATE TABLE xyz_global_changelog2 (
+    key BLOB,
+    time timestamp,
+    value BLOB,
+    PRIMARY KEY (key)
+);
+SELECT * FROM xyz_changelog2
+WHERE key=intAsBlob(1);
+SELECT * FROM xyz_changelog2
+WHERE key>=intAsBlob(1);
 ```
