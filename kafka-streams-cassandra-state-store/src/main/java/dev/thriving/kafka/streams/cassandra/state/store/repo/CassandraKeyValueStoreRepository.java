@@ -1,4 +1,4 @@
-package dev.thriving.kafka.streams.cassandra.state.store;
+package dev.thriving.kafka.streams.cassandra.state.store.repo;
 
 import org.apache.kafka.common.utils.Bytes;
 import org.apache.kafka.streams.KeyValue;
@@ -6,7 +6,7 @@ import org.apache.kafka.streams.state.KeyValueIterator;
 
 import java.util.List;
 
-interface CassandraKeyValueStoreRepository {
+public interface CassandraKeyValueStoreRepository {
 
     long NO_TTL = 0;
 

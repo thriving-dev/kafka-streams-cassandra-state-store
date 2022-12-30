@@ -1,7 +1,9 @@
-package dev.thriving.kafka.streams.cassandra.state.store;
+package dev.thriving.kafka.streams.cassandra.state.store.repo;
 
 import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.cql.*;
+import dev.thriving.kafka.streams.cassandra.state.store.CassandraKeyValueIterator;
+import dev.thriving.kafka.streams.cassandra.state.store.serde.KeySerdes;
 import org.apache.kafka.common.utils.Bytes;
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.state.KeyValueIterator;
@@ -10,7 +12,7 @@ import java.nio.ByteBuffer;
 import java.time.Instant;
 import java.util.List;
 
-class GlobalBlobKeyCassandraKeyValueStoreRepository extends AbstractCassandraKeyValueStoreRepository<ByteBuffer> {
+public class GlobalBlobKeyCassandraKeyValueStoreRepository extends AbstractCassandraKeyValueStoreRepository<ByteBuffer> {
     private PreparedStatement insert;
     private PreparedStatement deleteByKey;
     private PreparedStatement selectByKey;

@@ -1,13 +1,15 @@
-package dev.thriving.kafka.streams.cassandra.state.store;
+package dev.thriving.kafka.streams.cassandra.state.store.repo;
 
 import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.cql.BoundStatement;
 import com.datastax.oss.driver.api.core.cql.PreparedStatement;
 import com.datastax.oss.driver.api.core.cql.ResultSet;
+import dev.thriving.kafka.streams.cassandra.state.store.CassandraKeyValueIterator;
+import dev.thriving.kafka.streams.cassandra.state.store.serde.KeySerdes;
 import org.apache.kafka.common.utils.Bytes;
 import org.apache.kafka.streams.state.KeyValueIterator;
 
-class PartitionedStringKeyCassandraKeyValueStoreRepository extends AbstractPartitionedCassandraKeyValueStoreRepository<String> {
+public class PartitionedStringKeyCassandraKeyValueStoreRepository extends AbstractPartitionedCassandraKeyValueStoreRepository<String> {
 
     private PreparedStatement selectByPartitionAndKeyPrefix;
 
@@ -19,6 +21,7 @@ class PartitionedStringKeyCassandraKeyValueStoreRepository extends AbstractParti
                 row -> KeySerdes.String().deserialize(row.getString(0)));
     }
 
+    @Override
     protected void createTable(String tableName, Long defaultTtlSeconds) {
         StringBuilder sb = new StringBuilder()
                 .append("CREATE TABLE IF NOT EXISTS ")

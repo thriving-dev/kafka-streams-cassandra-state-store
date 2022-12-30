@@ -1,11 +1,11 @@
-package dev.thriving.kafka.streams.cassandra.state.store;
+package dev.thriving.kafka.streams.cassandra.state.store.serde;
 
 import org.apache.kafka.common.utils.Bytes;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
-abstract class KeySerdes {
+public abstract class KeySerdes {
 
     static private final class StringKeySerde implements KeySerde<String> {
         @Override
@@ -34,14 +34,14 @@ abstract class KeySerdes {
     /**
      * A serde for {@code String} type.
      */
-    static KeySerde<String> String() {
+    public static KeySerde<String> String() {
         return new StringKeySerde();
     }
 
     /**
      * A serde for {@code ByteBuffer} type.
      */
-    static KeySerde<ByteBuffer> ByteBuffer() {
+    public static KeySerde<ByteBuffer> ByteBuffer() {
         return new ByteBufferKeySerde();
     }
 }

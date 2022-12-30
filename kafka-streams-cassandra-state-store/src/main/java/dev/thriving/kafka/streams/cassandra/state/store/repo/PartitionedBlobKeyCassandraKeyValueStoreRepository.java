@@ -1,10 +1,11 @@
-package dev.thriving.kafka.streams.cassandra.state.store;
+package dev.thriving.kafka.streams.cassandra.state.store.repo;
 
 import com.datastax.oss.driver.api.core.CqlSession;
+import dev.thriving.kafka.streams.cassandra.state.store.serde.KeySerdes;
 
 import java.nio.ByteBuffer;
 
-class PartitionedBlobKeyCassandraKeyValueStoreRepository extends AbstractPartitionedCassandraKeyValueStoreRepository<ByteBuffer> {
+public class PartitionedBlobKeyCassandraKeyValueStoreRepository extends AbstractPartitionedCassandraKeyValueStoreRepository<ByteBuffer> {
 
     public PartitionedBlobKeyCassandraKeyValueStoreRepository(CqlSession session, String tableName, Long defaultTtlSeconds) {
         super(session, tableName, defaultTtlSeconds, KeySerdes.ByteBuffer(), row -> KeySerdes.ByteBuffer().deserialize(row.getByteBuffer(0)));

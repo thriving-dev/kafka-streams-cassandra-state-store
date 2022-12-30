@@ -1,8 +1,8 @@
-package dev.thriving.kafka.streams.cassandra.state.store;
+package dev.thriving.kafka.streams.cassandra.state.store.serde;
 
 import org.apache.kafka.common.utils.Bytes;
 
-interface KeySerde<T> {
+public interface KeySerde<T> {
 
     T serialize(Bytes data);
     Bytes deserialize(T data);

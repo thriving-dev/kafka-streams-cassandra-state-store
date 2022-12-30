@@ -1,7 +1,7 @@
 package dev.thriving.kafka.streams.cassandra.state.store.example.wordcount;
 
 import com.datastax.oss.driver.api.core.CqlSession;
-import dev.thriving.kafka.streams.cassandra.state.store.CassandraKeyValueBytesStoreSupplier;
+import dev.thriving.kafka.streams.cassandra.state.store.CassandraStores;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
@@ -59,7 +59,7 @@ public final class WordCountDemo {
                 .flatMapValues(value -> Arrays.asList(value.toLowerCase(Locale.getDefault()).split(" ")))
                 .groupBy((key, value) -> value)
                 .count(Named.as("word-grouped-count"),
-                        Materialized.<String, Long>as(new CassandraKeyValueBytesStoreSupplier(session, "word-grouped-count"))
+                        Materialized.<String, Long>as(CassandraStores.cassandraKeyValueStore(session, "word-grouped-count"))
                         .withLoggingDisabled()
                         .withCachingDisabled()
                         .withKeySerde(stringSerde)

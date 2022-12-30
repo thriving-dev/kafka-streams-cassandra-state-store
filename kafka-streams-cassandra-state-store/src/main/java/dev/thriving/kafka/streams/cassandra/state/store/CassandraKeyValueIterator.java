@@ -8,11 +8,11 @@ import org.apache.kafka.streams.state.KeyValueIterator;
 import java.util.Iterator;
 import java.util.function.Function;
 
-class CassandraKeyValueIterator implements KeyValueIterator<Bytes, byte[]> {
+public class CassandraKeyValueIterator implements KeyValueIterator<Bytes, byte[]> {
     private final Iterator<Row> iter;
     private final Function<Row, Bytes> extractKeyFn;
 
-    protected CassandraKeyValueIterator(Iterator<Row> iter, Function<Row, Bytes> extractKeyFn) {
+    public CassandraKeyValueIterator(Iterator<Row> iter, Function<Row, Bytes> extractKeyFn) {
         this.iter = iter;
         this.extractKeyFn = extractKeyFn;
     }
