@@ -13,13 +13,19 @@ TODO: describe purpose
 - [x] restructure code
   - [x] split implementation & examples
   - [x] Abstract store, introduce Repo, KeySerdes (Byte <> ByteBuffer|String)
+  - [ ] CassandraStoreBuilder, configurable
+    - [ ] compaction strategy
+    - [ ] table name fn
+    - [ ] table default ttl
 - [x] examples
   - [x] WordCount Cassandra 4
+  - [ ] WordCount Cassandra 3
   - [ ] WordCount ScyllaDB
+  - [ ] ??? StringKey KTable + prefixScan
+  - [ ] GlobalCassandraStore + KStream enrichment 
 - [x] Features
   - [x] Prefix scan with `StringKeyCassandraKeyValueStore`
   - [x] `GlobalCassandraKeyValueStore`
-  - [ ] `CassandraStoreConfig`, how best to configure? via application.conf file? Kafka props?
 - [ ] tests
   - [ ] unit tests (?)
   - [ ] WordCount integration test using testcontainers
