@@ -18,7 +18,7 @@ public class GlobalBlobKeyCassandraKeyValueStoreRepository extends AbstractCassa
     private PreparedStatement selectByKey;
     private PreparedStatement selectAll;
 
-    public GlobalBlobKeyCassandraKeyValueStoreRepository(CqlSession session, String tableName, String compactionStrategy, Long defaultTtlSeconds) {
+    public GlobalBlobKeyCassandraKeyValueStoreRepository(CqlSession session, String tableName, String compactionStrategy, long defaultTtlSeconds) {
         super(session, tableName, compactionStrategy, defaultTtlSeconds, KeySerdes.ByteBuffer(), row -> KeySerdes.ByteBuffer().deserialize(row.getByteBuffer(0)));
     }
 

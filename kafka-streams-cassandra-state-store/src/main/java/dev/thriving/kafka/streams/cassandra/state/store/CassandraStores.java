@@ -25,16 +25,19 @@ public final class CassandraStores {
     private Function<String, String> tableNameFn = storeName -> storeName.replaceAll("[^a-zA-Z0-9_]", "_") + "_kstreams_store";
 
     public CassandraStores withCompactionStrategy(String compactionStrategy) {
+        assert compactionStrategy != null && !compactionStrategy.isBlank() : "compactionStrategy cannot be null or blank";
         this.compactionStrategy = compactionStrategy;
         return this;
     }
 
     public CassandraStores withDefaultTtlSeconds(long defaultTtlSeconds) {
+        assert defaultTtlSeconds >= 0 : "defaultTtlSeconds cannot be null and must be >= 0";
         this.defaultTtlSeconds = defaultTtlSeconds;
         return this;
     }
 
     public CassandraStores withTableNameFn(Function<String, String> tableNameFn) {
+        assert tableNameFn != null : "tableNameFn cannot be null";
         this.tableNameFn = tableNameFn;
         return this;
     }
