@@ -9,13 +9,41 @@ import org.apache.kafka.common.utils.Bytes;
 import org.apache.kafka.streams.state.KeyValueBytesStoreSupplier;
 import org.apache.kafka.streams.state.KeyValueStore;
 
+import java.util.function.Function;
+
 public final class CassandraStores {
 
-    public static KeyValueBytesStoreSupplier cassandraKeyValueStore(final CqlSession session, final String name) {
-        return cassandraKeyValueStore(session, name, CassandraKeyValueStoreRepository.NO_TTL);
+    private CassandraStores(String name, CqlSession session) {
+        this.name = name;
+        this.session = session;
     }
 
-    public static KeyValueBytesStoreSupplier cassandraKeyValueStore(final CqlSession session, final String name, final long defaultTtlSeconds) {
+    private final String name;
+    private final CqlSession session;
+    private String compactionStrategy = "LeveledCompactionStrategy";
+    private long defaultTtlSeconds = CassandraKeyValueStoreRepository.NO_TTL;
+    private Function<String, String> tableNameFn = storeName -> storeName.replaceAll("[^a-zA-Z0-9_]", "_") + "_kstreams_store";
+
+    public CassandraStores withCompactionStrategy(String compactionStrategy) {
+        this.compactionStrategy = compactionStrategy;
+        return this;
+    }
+
+    public CassandraStores withDefaultTtlSeconds(long defaultTtlSeconds) {
+        this.defaultTtlSeconds = defaultTtlSeconds;
+        return this;
+    }
+
+    public CassandraStores withTableNameFn(Function<String, String> tableNameFn) {
+        this.tableNameFn = tableNameFn;
+        return this;
+    }
+
+    public static CassandraStores builder(final CqlSession session, final String name) {
+        return new CassandraStores(name, session);
+    }
+
+    public KeyValueBytesStoreSupplier cassandraKeyValueStore() {
         return new KeyValueBytesStoreSupplier() {
             @Override
             public String name() {
@@ -27,7 +55,8 @@ public final class CassandraStores {
                 return new CassandraKeyValueStore(name,
                         new PartitionedBlobKeyCassandraKeyValueStoreRepository(
                                 session,
-                                getTableName(name),
+                                tableNameFn.apply(name),
+                                compactionStrategy,
                                 defaultTtlSeconds));
             }
 
@@ -38,11 +67,7 @@ public final class CassandraStores {
         };
     }
 
-    public static KeyValueBytesStoreSupplier cassandraStringKeyValueStore(final CqlSession session, final String name) {
-        return cassandraStringKeyValueStore(session, name, CassandraKeyValueStoreRepository.NO_TTL);
-    }
-
-    public static KeyValueBytesStoreSupplier cassandraStringKeyValueStore(final CqlSession session, final String name, final long defaultTtlSeconds) {
+    public KeyValueBytesStoreSupplier cassandraStringKeyValueStore(final CqlSession session, final String name, final long defaultTtlSeconds) {
         return new KeyValueBytesStoreSupplier() {
             @Override
             public String name() {
@@ -54,7 +79,8 @@ public final class CassandraStores {
                 return new CassandraKeyValueStore(name,
                         new PartitionedStringKeyCassandraKeyValueStoreRepository(
                                 session,
-                                getTableName(name),
+                                tableNameFn.apply(name),
+                                compactionStrategy,
                                 defaultTtlSeconds));
             }
 
@@ -65,11 +91,7 @@ public final class CassandraStores {
         };
     }
 
-    public static KeyValueBytesStoreSupplier globalCassandraKeyValueStore(final CqlSession session, final String name) {
-        return globalCassandraKeyValueStore(session, name, CassandraKeyValueStoreRepository.NO_TTL);
-    }
-
-    public static KeyValueBytesStoreSupplier globalCassandraKeyValueStore(final CqlSession session, final String name, final long defaultTtlSeconds) {
+    public KeyValueBytesStoreSupplier globalCassandraKeyValueStore(final CqlSession session, final String name, final long defaultTtlSeconds) {
         return new KeyValueBytesStoreSupplier() {
             @Override
             public String name() {
@@ -81,7 +103,8 @@ public final class CassandraStores {
                 return new CassandraKeyValueStore(name,
                         new GlobalBlobKeyCassandraKeyValueStoreRepository(
                                 session,
-                                getTableName(name),
+                                tableNameFn.apply(name),
+                                compactionStrategy,
                                 defaultTtlSeconds));
             }
 
@@ -90,10 +113,6 @@ public final class CassandraStores {
                 return "cassandra";
             }
         };
-    }
-
-    private static String getTableName(String name) {
-        return name.replaceAll("[^a-zA-Z0-9_]", "_") + "_kstreams_store";
     }
 
 }

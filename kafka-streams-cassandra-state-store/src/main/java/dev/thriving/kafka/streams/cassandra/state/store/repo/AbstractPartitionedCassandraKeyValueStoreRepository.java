@@ -27,8 +27,8 @@ abstract class AbstractPartitionedCassandraKeyValueStoreRepository<K> extends Ab
     private PreparedStatement selectByPartitionAndKeyToReversed;
     private PreparedStatement selectByPartitionAndKeyRangeReversed;
 
-    public AbstractPartitionedCassandraKeyValueStoreRepository(CqlSession session, String tableName, Long defaultTtlSeconds, KeySerde<K> keySerde, Function<Row, Bytes> extractKeyFn) {
-        super(session, tableName, defaultTtlSeconds, keySerde, extractKeyFn);
+    public AbstractPartitionedCassandraKeyValueStoreRepository(CqlSession session, String tableName, String compactionStrategy, Long defaultTtlSeconds, KeySerde<K> keySerde, Function<Row, Bytes> extractKeyFn) {
+        super(session, tableName, compactionStrategy, defaultTtlSeconds, keySerde, extractKeyFn);
     }
 
     protected void initPreparedStatements(String tableName) {

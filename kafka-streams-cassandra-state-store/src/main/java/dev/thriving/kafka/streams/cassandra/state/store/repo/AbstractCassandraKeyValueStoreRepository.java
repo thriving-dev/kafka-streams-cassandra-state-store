@@ -12,7 +12,7 @@ abstract class AbstractCassandraKeyValueStoreRepository<K> implements CassandraK
     protected final KeySerde<K> keySerde;
     protected final Function<Row, Bytes> extractKeyFn;
 
-    public AbstractCassandraKeyValueStoreRepository(CqlSession session, String tableName, Long defaultTtlSeconds, KeySerde<K> keySerde, Function<Row, Bytes> extractKeyFn) {
+    public AbstractCassandraKeyValueStoreRepository(CqlSession session, String tableName, String compactionStrategy, Long defaultTtlSeconds, KeySerde<K> keySerde, Function<Row, Bytes> extractKeyFn) {
         assert session != null : "session cannot be null";
         assert tableName != null && !tableName.isBlank() : "tableName cannot be null or blank";
         assert defaultTtlSeconds != null && defaultTtlSeconds > 0 : "defaultTtlSeconds cannot be null and must be > 0";
@@ -23,11 +23,11 @@ abstract class AbstractCassandraKeyValueStoreRepository<K> implements CassandraK
         this.keySerde = keySerde;
         this.extractKeyFn = extractKeyFn;
 
-        createTable(tableName, defaultTtlSeconds);
+        createTable(tableName, compactionStrategy, defaultTtlSeconds);
         initPreparedStatements(tableName);
     }
 
-    protected abstract void createTable(String tableName, Long defaultTtlSeconds);
+    protected abstract void createTable(String tableName, String compactionStrategy, Long defaultTtlSeconds);
 
     protected abstract void initPreparedStatements(String tableName);
 }

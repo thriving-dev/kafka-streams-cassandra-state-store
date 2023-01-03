@@ -13,31 +13,27 @@ public class PartitionedStringKeyCassandraKeyValueStoreRepository extends Abstra
 
     private PreparedStatement selectByPartitionAndKeyPrefix;
 
-    public PartitionedStringKeyCassandraKeyValueStoreRepository(CqlSession session, String tableName, Long defaultTtlSeconds) {
+    public PartitionedStringKeyCassandraKeyValueStoreRepository(CqlSession session, String tableName, String compactionStrategy, Long defaultTtlSeconds) {
         super(session,
                 tableName,
+                compactionStrategy,
                 defaultTtlSeconds,
                 KeySerdes.String(),
                 row -> KeySerdes.String().deserialize(row.getString(0)));
     }
 
     @Override
-    protected void createTable(String tableName, Long defaultTtlSeconds) {
-        StringBuilder sb = new StringBuilder()
-                .append("CREATE TABLE IF NOT EXISTS ")
-                .append(tableName).append(" (")
-                .append("partition int, ")
-                .append("key text, ")
-                .append("time timestamp, ")
-                .append("value blob, ")
-                .append("PRIMARY KEY ((partition), key)")
-                .append(") WITH compaction = { 'class' : 'LeveledCompactionStrategy' } ");
-
-        if (defaultTtlSeconds != null && defaultTtlSeconds > 0) {
-            sb.append("AND default_time_to_live = ").append(defaultTtlSeconds).append(" ");
-        }
-
-        session.execute(sb.toString());
+    protected void createTable(String tableName, String compactionStrategy, Long defaultTtlSeconds) {
+        session.execute("""
+           CREATE TABLE IF NOT EXISTS %s (
+               partition int,
+               key text,
+               time timestamp,
+               value blob,
+               PRIMARY KEY ((partition), key)
+           ) WITH compaction = { 'class' : '%s' }
+             AND  default_time_to_live = %d
+           """.formatted(tableName, compactionStrategy, defaultTtlSeconds));
     }
 
     @Override

@@ -18,26 +18,21 @@ public class GlobalBlobKeyCassandraKeyValueStoreRepository extends AbstractCassa
     private PreparedStatement selectByKey;
     private PreparedStatement selectAll;
 
-    public GlobalBlobKeyCassandraKeyValueStoreRepository(CqlSession session, String tableName, Long defaultTtlSeconds) {
-        super(session, tableName, defaultTtlSeconds, KeySerdes.ByteBuffer(), row -> KeySerdes.ByteBuffer().deserialize(row.getByteBuffer(0)));
+    public GlobalBlobKeyCassandraKeyValueStoreRepository(CqlSession session, String tableName, String compactionStrategy, Long defaultTtlSeconds) {
+        super(session, tableName, compactionStrategy, defaultTtlSeconds, KeySerdes.ByteBuffer(), row -> KeySerdes.ByteBuffer().deserialize(row.getByteBuffer(0)));
     }
 
     @Override
-    protected void createTable(String tableName, Long defaultTtlSeconds) {
-        StringBuilder sb = new StringBuilder()
-                .append("CREATE TABLE IF NOT EXISTS ")
-                .append(tableName).append(" (")
-                .append("key blob, ")
-                .append("time timestamp, ")
-                .append("value blob, ")
-                .append("PRIMARY KEY (key)")
-                .append(") WITH compaction = { 'class' : 'LeveledCompactionStrategy' } ");
-
-        if (defaultTtlSeconds != null && defaultTtlSeconds > 0) {
-            sb.append("AND default_time_to_live = ").append(defaultTtlSeconds).append(" ");
-        }
-
-        session.execute(sb.toString());
+    protected void createTable(String tableName, String compactionStrategy, Long defaultTtlSeconds) {
+        session.execute("""
+           CREATE TABLE IF NOT EXISTS %s (
+               key blob,
+               time timestamp,
+               value blob,
+               PRIMARY KEY (key)
+           ) WITH compaction = { 'class' : '%s' }
+             AND  default_time_to_live = %d
+           """.formatted(tableName, compactionStrategy, defaultTtlSeconds));
     }
 
     @Override

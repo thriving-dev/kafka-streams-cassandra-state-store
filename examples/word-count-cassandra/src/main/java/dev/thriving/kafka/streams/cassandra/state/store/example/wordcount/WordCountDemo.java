@@ -8,7 +8,12 @@ import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.StreamsConfig;
-import org.apache.kafka.streams.kstream.*;
+import org.apache.kafka.streams.kstream.KStream;
+import org.apache.kafka.streams.kstream.KTable;
+import org.apache.kafka.streams.kstream.Materialized;
+import org.apache.kafka.streams.kstream.Produced;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.Locale;
@@ -29,6 +34,8 @@ import java.util.concurrent.CountDownLatch;
  * {@code bin/kafka-console-producer.sh}). Otherwise you won't see any data arriving in the output topic.
  */
 public final class WordCountDemo {
+
+    private static final Logger LOG = LoggerFactory.getLogger(WordCountDemo.class);
 
     public static final String INPUT_TOPIC = "streams-plaintext-input";
     public static final String OUTPUT_TOPIC = "streams-wordcount-output";
@@ -56,9 +63,13 @@ public final class WordCountDemo {
         final Serde<Long> longSerde = Serdes.Long();
 
         final KTable<String, Long> counts = source
+                .peek((k, v) -> LOG.debug("in => {}::{}", k, v))
                 .flatMapValues(value -> Arrays.asList(value.toLowerCase(Locale.getDefault()).split(" ")))
                 .groupBy((key, value) -> value)
-                .count(Materialized.<String, Long>as(CassandraStores.cassandraKeyValueStore(session, "word-grouped-count"))
+                .count(Materialized.<String, Long>as(
+                                CassandraStores.builder(session, "word-grouped-count")
+                                        .cassandraKeyValueStore()
+                        )
                         .withLoggingDisabled()
                         .withCachingDisabled()
                         .withKeySerde(stringSerde)
@@ -66,7 +77,7 @@ public final class WordCountDemo {
 
         // need to override value serde to Long type
         counts.toStream()
-                .peek((k, v) -> System.out.println(k + "::" + v))
+                .peek((k, v) -> LOG.debug("out => {}::{}", k, v))
                 .to(OUTPUT_TOPIC, Produced.with(Serdes.String(), Serdes.Long()));
     }
 
