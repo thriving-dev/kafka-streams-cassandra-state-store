@@ -58,8 +58,7 @@ public final class WordCountDemo {
         final KTable<String, Long> counts = source
                 .flatMapValues(value -> Arrays.asList(value.toLowerCase(Locale.getDefault()).split(" ")))
                 .groupBy((key, value) -> value)
-                .count(Named.as("word-grouped-count"),
-                        Materialized.<String, Long>as(CassandraStores.cassandraKeyValueStore(session, "word-grouped-count"))
+                .count(Materialized.<String, Long>as(CassandraStores.cassandraKeyValueStore(session, "word-grouped-count"))
                         .withLoggingDisabled()
                         .withCachingDisabled()
                         .withKeySerde(stringSerde)
