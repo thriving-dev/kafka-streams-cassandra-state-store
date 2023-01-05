@@ -1,17 +1,35 @@
-Source: https://docs.confluent.io/5.5.1/streams/quickstart.html
+# kafka-streams-cassandra-state-store/examples
+## word-count-scylladb
 
-### TODOs
+### run example
 
-- [ ] configurable via env vars
-- [ ] docker-compose creates cql keyspace
-- [ ] docker-compose creates kafka topics
+Note: Run from the directory of this README.md
 
-### howto
+1. Terminal 1: Start docker-compose stack
+```bash
+docker-compose up -d
+```
 
-    kafka-console-consumer --bootstrap-server localhost:9092 \
-        --topic streams-wordcount-output \
-        --from-beginning \
-        --formatter kafka.tools.DefaultMessageFormatter \
-        --property print.key=true \
-        --property key.deserializer=org.apache.kafka.common.serialization.StringDeserializer \
-        --property value.deserializer=org.apache.kafka.common.serialization.LongDeserializer
+2. Terminal 2: Produce some messages via kcat to the input topic
+```bash
+echo "Hello world" | kcat -b localhost:19092 -t streams-plaintext-input
+echo "What a wonderful world" | kcat -b localhost:19092 -t streams-plaintext-input
+echo "What a day to say hello" | kcat -b localhost:19092 -t streams-plaintext-input
+```
+
+3. Terminal 3: Start the example app
+```bash
+../../gradlew run
+```
+
+4. Terminal 4: Start a console-consumer on the output topic
+```bash
+kcat -b localhost:19092 -t streams-wordcount-output -K:: -s key=s -s value=q
+```
+
+#### (Cleanup)
+
+Remove docker-compose stack (run from the directory of this README.md)
+```bash
+docker-compose down
+```

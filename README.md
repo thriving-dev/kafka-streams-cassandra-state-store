@@ -19,7 +19,6 @@ TODO: describe purpose
     - [x] table default ttl
 - [x] examples
   - [x] WordCount Cassandra 4
-  - [ ] WordCount Cassandra 3
   - [x] WordCount ScyllaDB
   - [ ] ??? StringKey KTable + prefixScan
   - [ ] GlobalCassandraStore + KStream enrichment 

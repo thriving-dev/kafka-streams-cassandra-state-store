@@ -26,6 +26,7 @@ services:
       - CLUSTER_ID=5Yr1SIgYQz-b-dgRabWx4g
       - NODE_ID=2
       - KAFKA_CONTROLLER_QUORUM_VOTERS=1@kafka-1:9093,2@kafka-2:9093,3@kafka-3:9093
+      - CREATE_TOPICS=streams-plaintext-input:6:3,streams-wordcount-output:6:3
       - KAFKA_AUTO_CREATE_TOPICS_ENABLE=true
       - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://localhost:29092
 
@@ -39,6 +40,7 @@ services:
       - CLUSTER_ID=5Yr1SIgYQz-b-dgRabWx4g
       - NODE_ID=3
       - KAFKA_CONTROLLER_QUORUM_VOTERS=1@kafka-1:9093,2@kafka-2:9093,3@kafka-3:9093
+      - CREATE_TOPICS=streams-plaintext-input:6:3,streams-wordcount-output:6:3
       - KAFKA_AUTO_CREATE_TOPICS_ENABLE=true
       - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://localhost:39092
 
