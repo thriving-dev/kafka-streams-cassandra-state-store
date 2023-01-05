@@ -18,7 +18,7 @@ TODO: describe purpose
     - [x] table name fn
     - [x] table default ttl
 - [x] examples
-  - [ ] WordCount Cassandra 4
+  - [x] WordCount Cassandra 4
   - [ ] WordCount Cassandra 3
   - [x] WordCount ScyllaDB
   - [ ] ??? StringKey KTable + prefixScan
@@ -26,7 +26,13 @@ TODO: describe purpose
 - [x] Features
   - [x] Prefix scan with `StringKeyCassandraKeyValueStore`
   - [x] `GlobalCassandraKeyValueStore`
-  - [ ] (?) simple inMemory read cache -> Caffeine?
+- [ ] Ops
+  - [ ] github actions to build (+test)
+  - [ ] gradle plugin to publish to maven central https://julien.ponge.org/blog/publishing-from-gradle-to-maven-central-with-github-actions/
+  - [ ] ? add renovate 
+    - https://github.com/renovatebot/github-action
+    - https://docs.renovatebot.com/java/
+  - [ ] ? add trivy https://github.com/marketplace/actions/trivy-action
 - [ ] tests
   - [ ] unit tests (?)
   - [ ] WordCount integration test using testcontainers
@@ -49,21 +55,17 @@ TODO: describe purpose
   - [ ] choose + add license
   - [ ] make repo public
   - [ ] Publish to maven central (?) https://h4pehl.medium.com/publish-your-gradle-artifacts-to-maven-central-f74a0af085b1
-- [ ] Ops
-  - [ ] github actions
-  - [ ] gradle plugin to publish to maven central https://julien.ponge.org/blog/publishing-from-gradle-to-maven-central-with-github-actions/
-  - [ ] add renovate 
-    - https://github.com/renovatebot/github-action
-    - https://docs.renovatebot.com/java/
-  - [ ] add trivy https://github.com/marketplace/actions/trivy-action
 - [ ] Documentation
   - [ ] usage
   - [ ] limitations
   - [ ] overview store types
-  - [ ] extra (TTL)
+  - [ ] builder / config options
+  - [ ] Caching options
+  - [ ] JavaDocs 
 - [ ] Next Steps
+  - [ ] (?) simple inMemory read cache -> Caffeine?
   - [ ] add WindowedStore functionality, example, ...
-  - [ ] cassandra 3.x (3.10/3.11) branch(es)? 
+  - [ ] cassandra 3.x (3.10/3.11) branch(es)? needed?
 
 ### draft cql schema
 

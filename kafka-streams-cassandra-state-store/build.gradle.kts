@@ -25,7 +25,6 @@ dependencies {
 
     // This dependency is used internally, and not exposed to consumers on their own compile classpath.
     implementation("org.apache.kafka:kafka-streams:3.3.1")
-    // implementation("com.scylladb:java-driver-core:4.14.1.0")
     implementation("com.datastax.oss:java-driver-core:4.15.0")
 }
 

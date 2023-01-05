@@ -31,7 +31,7 @@ dependencies {
 
 application {
     // Define the main class for the application.
-    mainClass.set("dev.thriving.kafka.streams.cassandra.state.store.example.wordcount.WordCountDemo")
+    mainClass.set("dev.thriving.kafka.streams.cassandra.state.store.example.wordcount.cassandra4.WordCountDemo")
 }
 
 tasks.named<Test>("test") {

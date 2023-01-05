@@ -1,4 +1,4 @@
-package dev.thriving.kafka.streams.cassandra.state.store.example.wordcount;
+package dev.thriving.kafka.streams.cassandra.state.store.example.wordcount.cassandra4;
 
 import com.datastax.oss.driver.api.core.CqlSession;
 import dev.thriving.kafka.streams.cassandra.state.store.CassandraStores;
@@ -42,10 +42,10 @@ public final class WordCountDemo {
 
     static Properties getStreamsConfig() {
         final Properties props = new Properties();
-        props.put(StreamsConfig.APPLICATION_ID_CONFIG, "word-count-cassandra");
+        props.put(StreamsConfig.APPLICATION_ID_CONFIG, "word-count-cassandra4");
         props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG,
                 Optional.ofNullable(System.getenv("BOOTSTRAP_SERVERS_CONFIG"))
-                        .orElse("localhost:9092"));
+                        .orElse("localhost:19092"));
         props.put(StreamsConfig.CACHE_MAX_BYTES_BUFFERING_CONFIG, 0);
         props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
         props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());

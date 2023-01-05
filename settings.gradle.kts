@@ -9,4 +9,5 @@
 
 rootProject.name = "kafka-streams-cassandra-state-store"
 include("kafka-streams-cassandra-state-store")
-include("examples:word-count-cassandra")
+include("examples:word-count-cassandra4")
+include("examples:word-count-scylladb")
