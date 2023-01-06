@@ -22,7 +22,7 @@ TODO: describe purpose
   - [x] WordCount Cassandra 3 (v4 client lib)
   - [x] WordCount ScyllaDB
   - [x] WordCount Processor + all + range + prefixScan
-  - [ ] GlobalCassandraStore + KStream enrichment 
+  - [x] GlobalCassandraStore + KStream enrichment 
 - [x] Features
   - [x] Prefix scan with `StringKeyCassandraKeyValueStore`
   - [x] `GlobalCassandraKeyValueStore`
