@@ -1,6 +1,9 @@
 ## kafka-streams-cassandra-state-store
 
+[![Java CI](https://github.com/hartmut-co-uk/kafka-streams-cassandra-state-store/actions/workflows/build-gradle-project.yml/badge.svg)](https://github.com/hartmut-co-uk/kafka-streams-cassandra-state-store/actions/workflows/build-gradle-project.yml)
+
 TODO: describe purpose
+
 
 ### stack
 
@@ -27,8 +30,13 @@ TODO: describe purpose
 - [x] Features
   - [x] Prefix scan with `StringKeyCassandraKeyValueStore`
   - [x] `GlobalCassandraKeyValueStore`
+- [ ] OpenSource
+  - [ ] polishing
+  - [ ] choose + add license
+  - [ ] make repo public
+  - [ ] Publish to maven central (?) https://h4pehl.medium.com/publish-your-gradle-artifacts-to-maven-central-f74a0af085b1
 - [ ] Ops
-  - [ ] github actions to build (+test)
+  - [x] github actions to build (+test)
   - [ ] gradle plugin to publish to maven central https://julien.ponge.org/blog/publishing-from-gradle-to-maven-central-with-github-actions/
   - [ ] ? add renovate 
     - https://github.com/renovatebot/github-action
@@ -51,11 +59,6 @@ TODO: describe purpose
       https://github.com/testcontainers/testcontainers-java/tree/main/examples/kafka-cluster
     - testcontainers-java/RedisBackedCacheTest.java at main · testcontainers/testcontainers-java
       https://github.com/testcontainers/testcontainers-java/blob/main/examples/redis-backed-cache/src/test/java/RedisBackedCacheTest.java
-- [ ] OpenSource
-  - [ ] polishing
-  - [ ] choose + add license
-  - [ ] make repo public
-  - [ ] Publish to maven central (?) https://h4pehl.medium.com/publish-your-gradle-artifacts-to-maven-central-f74a0af085b1
 - [ ] Documentation
   - [ ] usage
   - [ ] limitations
