@@ -1,4 +1,4 @@
-package dev.thriving.kafka.streams.cassandra.state.store.example.wordcount.scylladb;
+package dev.thriving.kafka.streams.cassandra.state.store.example.processor.prefixscan;
 
 import com.datastax.oss.driver.api.core.CqlSession;
 import dev.thriving.kafka.streams.cassandra.state.store.CassandraStores;
@@ -6,23 +6,23 @@ import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KafkaStreams;
+import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.StreamsConfig;
-import org.apache.kafka.streams.kstream.KStream;
-import org.apache.kafka.streams.kstream.KTable;
-import org.apache.kafka.streams.kstream.Materialized;
+import org.apache.kafka.streams.kstream.Named;
 import org.apache.kafka.streams.kstream.Produced;
+import org.apache.kafka.streams.state.Stores;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
+import java.util.stream.Stream;
 
 /**
- * Demonstrates, using the high-level KStream DSL, how to implement the WordCount program
+ * Demonstrates, using the low-level Processor API, how to implement the WordCount program
  * that computes a simple word occurrence histogram from an input text.
  * <p>
  * In this example, the input stream reads from a topic named "streams-plaintext-input", where the values of messages
@@ -33,16 +33,18 @@ import java.util.concurrent.CountDownLatch;
  * {@code bin/kafka-topics.sh --create ...}), and write some data to the input topic (e.g. via
  * {@code bin/kafka-console-producer.sh}). Otherwise you won't see any data arriving in the output topic.
  */
-public final class WordCountDemo {
+public final class ProcessorApiPrefixscanDemo {
 
-    private static final Logger LOG = LoggerFactory.getLogger(WordCountDemo.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ProcessorApiPrefixscanDemo.class);
 
     public static final String INPUT_TOPIC = "streams-plaintext-input";
     public static final String OUTPUT_TOPIC = "streams-wordcount-output";
 
+    public static final String WORD_GROUPED_COUNT_STORE = "word-grouped-count";
+
     static Properties getStreamsConfig() {
         final Properties props = new Properties();
-        props.put(StreamsConfig.APPLICATION_ID_CONFIG, "word-count-scylladb");
+        props.put(StreamsConfig.APPLICATION_ID_CONFIG, "word-count-cassandra4");
         props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG,
                 Optional.ofNullable(System.getenv("BOOTSTRAP_SERVERS_CONFIG"))
                         .orElse("localhost:19092"));
@@ -58,27 +60,29 @@ public final class WordCountDemo {
     }
 
     static void createWordCountStream(CqlSession session, final StreamsBuilder builder) {
-        final KStream<String, String> source = builder.stream(INPUT_TOPIC);
-        final Serde<String> stringSerde = Serdes.String();
-        final Serde<Long> longSerde = Serdes.Long();
+        Serde<String> stringSerde = Serdes.String();
+        Serde<Long> longSerde = Serdes.Long();
 
-        final KTable<String, Long> counts = source
+        builder.addStateStore(
+                Stores.keyValueStoreBuilder(
+                        CassandraStores.builder(session, WORD_GROUPED_COUNT_STORE)
+                                .stringKeyValueStore(),
+                        stringSerde,
+                        longSerde
+                )
+        );
+
+        builder.<String, String>stream(INPUT_TOPIC)
                 .peek((k, v) -> LOG.debug("in => {}::{}", k, v))
-                .flatMapValues(value -> Arrays.asList(value.toLowerCase(Locale.getDefault()).split(" ")))
-                .groupBy((key, value) -> value)
-                .count(Materialized.<String, Long>as(
-                                CassandraStores.builder(session, "word-grouped-count")
-                                        .keyValueStore()
-                        )
-                        .withLoggingDisabled()
-                        .withCachingDisabled()
-                        .withKeySerde(stringSerde)
-                        .withValueSerde(longSerde));
-
-        // need to override value serde to Long type
-        counts.toStream()
+                .flatMap((key, value) -> {
+                    String[] words = value.toLowerCase(Locale.getDefault()).split(" ");
+                    return Stream.of(words).map(it -> KeyValue.pair(it, it)).toList();
+                })
+                .repartition()
+                .process(WordCountProcessor::new, Named.as("wordCountProcessor"), WORD_GROUPED_COUNT_STORE)
                 .peek((k, v) -> LOG.debug("out => {}::{}", k, v))
-                .to(OUTPUT_TOPIC, Produced.with(Serdes.String(), Serdes.Long()));
+                // need to override value serde to Long type
+                .to(OUTPUT_TOPIC, Produced.with(stringSerde, longSerde));
     }
 
     public static void main(final String[] args) {

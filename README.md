@@ -20,7 +20,7 @@ TODO: describe purpose
 - [x] examples
   - [x] WordCount Cassandra 4
   - [x] WordCount ScyllaDB
-  - [ ] ??? StringKey KTable + prefixScan
+  - [x] WordCount Processor + all + range + prefixScan
   - [ ] GlobalCassandraStore + KStream enrichment 
 - [x] Features
   - [x] Prefix scan with `StringKeyCassandraKeyValueStore`

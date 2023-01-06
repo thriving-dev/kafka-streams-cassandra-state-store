@@ -15,17 +15,17 @@ import java.util.function.Function;
 
 abstract class AbstractPartitionedCassandraKeyValueStoreRepository<K> extends AbstractCassandraKeyValueStoreRepository<K> {
 
-    private PreparedStatement insert;
-    private PreparedStatement selectByPartitionAndKey;
-    private PreparedStatement deleteByPartitionAndKey;
-    private PreparedStatement selectByPartition;
-    private PreparedStatement selectByPartitionReversed;
-    private PreparedStatement selectByPartitionAndKeyFrom;
-    private PreparedStatement selectByPartitionAndKeyTo;
-    private PreparedStatement selectByPartitionAndKeyRange;
-    private PreparedStatement selectByPartitionAndKeyFromReversed;
-    private PreparedStatement selectByPartitionAndKeyToReversed;
-    private PreparedStatement selectByPartitionAndKeyRangeReversed;
+    protected PreparedStatement insert;
+    protected PreparedStatement selectByPartitionAndKey;
+    protected PreparedStatement deleteByPartitionAndKey;
+    protected PreparedStatement selectByPartition;
+    protected PreparedStatement selectByPartitionReversed;
+    protected PreparedStatement selectByPartitionAndKeyFrom;
+    protected PreparedStatement selectByPartitionAndKeyTo;
+    protected PreparedStatement selectByPartitionAndKeyRange;
+    protected PreparedStatement selectByPartitionAndKeyFromReversed;
+    protected PreparedStatement selectByPartitionAndKeyToReversed;
+    protected PreparedStatement selectByPartitionAndKeyRangeReversed;
 
     public AbstractPartitionedCassandraKeyValueStoreRepository(CqlSession session, String tableName, String compactionStrategy, Long defaultTtlSeconds, KeySerde<K> keySerde, Function<Row, Bytes> extractKeyFn) {
         super(session, tableName, compactionStrategy, defaultTtlSeconds, keySerde, extractKeyFn);

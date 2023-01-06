@@ -46,7 +46,7 @@ public final class CassandraStores {
         return new CassandraStores(name, session);
     }
 
-    public KeyValueBytesStoreSupplier cassandraKeyValueStore() {
+    public KeyValueBytesStoreSupplier keyValueStore() {
         return new KeyValueBytesStoreSupplier() {
             @Override
             public String name() {
@@ -70,7 +70,7 @@ public final class CassandraStores {
         };
     }
 
-    public KeyValueBytesStoreSupplier cassandraStringKeyValueStore(final CqlSession session, final String name, final long defaultTtlSeconds) {
+    public KeyValueBytesStoreSupplier stringKeyValueStore() {
         return new KeyValueBytesStoreSupplier() {
             @Override
             public String name() {
@@ -94,7 +94,7 @@ public final class CassandraStores {
         };
     }
 
-    public KeyValueBytesStoreSupplier globalCassandraKeyValueStore(final CqlSession session, final String name, final long defaultTtlSeconds) {
+    public KeyValueBytesStoreSupplier globalKeyValueStore() {
         return new KeyValueBytesStoreSupplier() {
             @Override
             public String name() {
