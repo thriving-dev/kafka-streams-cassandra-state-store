@@ -12,9 +12,7 @@ docker-compose up -d
 
 2. Terminal 2: Produce some messages via kcat to the input topic
 ```bash
-echo "Hello world" | kcat -b localhost:19092 -t streams-plaintext-input
-echo "What a wonderful world" | kcat -b localhost:19092 -t streams-plaintext-input
-echo "What a day to say hello" | kcat -b localhost:19092 -t streams-plaintext-input
+echo "Albania  Andorra  Armenia  Austria  Azerbaijan  Belarus  Belgium  BosniaAndHerzegovina  Bulgaria  Croatia  Cyprus  Czechia  Denmark  Estonia  Finland  France  Georgia  Germany  Greece  Hungary  Iceland  Ireland  Italy  Kazakhstan  Kosovo  Latvia  Liechtenstein  Lithuania  Luxembourg  Malta  Moldova  Monaco  Montenegro  Netherlands  NorthMacedonia  Norway  Poland  Portugal  Romania  Russia  SanMarino  Serbia  Slovakia  Slovenia  Spain  Sweden  Switzerland  Turkey  Ukraine  UnitedKingdom  VaticanCity" | kcat -b localhost:19092 -t streams-plaintext-input
 ```
 
 3. Terminal 3: Start the example app
