@@ -6,6 +6,7 @@ TODO: describe purpose
 
 * Java 17
 * kafka-streams 3.3.1
+* datastax java-driver-core 4.15.0
 
 ### TODOs
 
