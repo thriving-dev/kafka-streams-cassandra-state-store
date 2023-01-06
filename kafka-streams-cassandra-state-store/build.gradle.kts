@@ -11,7 +11,7 @@ plugins {
     `java-library`
 }
 
-version = "0.1.0"
+version = "0.1.0-SNAPSHOT"
 group = "dev.thriving.oss"
 
 repositories {
