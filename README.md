@@ -31,10 +31,18 @@ TODO: describe purpose
   - [x] Prefix scan with `StringKeyCassandraKeyValueStore`
   - [x] `GlobalCassandraKeyValueStore`
 - [ ] OpenSource
+  - [x] choose + add license
   - [ ] polishing
-  - [ ] choose + add license
   - [ ] make repo public
+  - [x] choose + add license
+  - [x] add CHANGELOG.md
+  - [x] add CODE_OF_CONDUCT.md
+  - [ ] add CONTRIBUTING.md
   - [ ] Publish to maven central (?) https://h4pehl.medium.com/publish-your-gradle-artifacts-to-maven-central-f74a0af085b1
+    - [x] request namespace ownership
+    - [ ] add JavaDocs
+    - [ ] other -> maven central compliant
+    - [ ] tag + publish initial version
 - [ ] Ops
   - [x] github actions to build (+test)
   - [ ] gradle plugin to publish to maven central https://julien.ponge.org/blog/publishing-from-gradle-to-maven-central-with-github-actions/
@@ -65,7 +73,6 @@ TODO: describe purpose
   - [ ] overview store types
   - [ ] builder / config options
   - [ ] Caching options
-  - [ ] JavaDocs 
 - [ ] Next Steps
   - [ ] (?) simple inMemory read cache -> Caffeine?
   - [ ] add WindowedStore functionality, example, ...
