@@ -19,6 +19,7 @@ TODO: describe purpose
     - [x] table default ttl
 - [x] examples
   - [x] WordCount Cassandra 4
+  - [x] WordCount Cassandra 3 (v4 client lib)
   - [x] WordCount ScyllaDB
   - [x] WordCount Processor + all + range + prefixScan
   - [ ] GlobalCassandraStore + KStream enrichment 
@@ -64,7 +65,7 @@ TODO: describe purpose
 - [ ] Next Steps
   - [ ] (?) simple inMemory read cache -> Caffeine?
   - [ ] add WindowedStore functionality, example, ...
-  - [ ] cassandra 3.x (3.10/3.11) branch(es)? needed?
+  - [ ] cassandra 3.x (3.10/3.11) branch(es)?
 
 ### draft cql schema
 

@@ -1,0 +1,69 @@
+---
+version: '3'
+
+services:
+
+  kafka:
+    container_name: kafka
+    image: debezium/kafka:2.1.1.Final
+    ports:
+      - 19092:19092
+    restart: always
+    environment:
+      - CLUSTER_ID=5Yr1SIgYQz-b-dgRabWx4g
+      - NODE_ID=1
+      - KAFKA_CONTROLLER_QUORUM_VOTERS=1@kafka:9093
+      - KAFKA_AUTO_CREATE_TOPICS_ENABLE=true
+      - KAFKA_LISTENERS=CONTROLLER://0.0.0.0:9093,INSIDE://0.0.0.0:9092,OUTSIDE://0.0.0.0:19092
+      - KAFKA_ADVERTISED_LISTENERS=INSIDE://kafka:9092,OUTSIDE://localhost:19092
+      - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
+      - KAFKA_INTER_BROKER_LISTENER_NAME=INSIDE
+      - KAFKA_CONTROLLER_LISTENER_NAMES=CONTROLLER
+    healthcheck:
+      test: [ "CMD", "/kafka/bin/kafka-topics.sh", "--bootstrap-server=localhost:9092", "--list" ]
+      interval: 2s
+      timeout: 2s
+      retries: 10
+
+  kafka-create-topic-1:
+    container_name: kafka-create-topic-1
+    image: debezium/kafka:2.1.1.Final
+    depends_on:
+      kafka:
+        condition: service_healthy
+    entrypoint: ''
+    command: /bin/bash -c "echo creating topic streams-plaintext-input && /kafka/bin/kafka-topics.sh --bootstrap-server=kafka:9092 --create --partitions=6 --replication-factor=1 --topic=streams-plaintext-input"
+
+  kafka-create-topic-2:
+    container_name: kafka-create-topic-2
+    image: debezium/kafka:2.1.1.Final
+    depends_on:
+      kafka:
+        condition: service_healthy
+    entrypoint: ''
+    command: /bin/bash -c "echo creating topic streams-wordcount-output && /kafka/bin/kafka-topics.sh --bootstrap-server=kafka:9092 --create --partitions=6 --replication-factor=1 --topic=streams-wordcount-output"
+
+  cassandra:
+    container_name: cassandra
+    image: cassandra:3.11.14
+    ports:
+      - "9042:9042"
+    environment:
+      - "MAX_HEAP_SIZE=256M"
+      - "HEAP_NEWSIZE=128M"
+    restart: always
+    healthcheck:
+      test: [ "CMD", "cqlsh", "-u cassandra", "-p cassandra" ,"-e describe keyspaces" ]
+      interval: 10s
+      timeout: 10s
+      retries: 15
+
+  cassandra-load-keyspace:
+    container_name: cassandra-load-keyspace
+    image: cassandra:3.11.14
+    depends_on:
+      cassandra:
+        condition: service_healthy
+    volumes:
+      - ./src/main/resources/cassandra_schema.cql:/schema.cql
+    command: /bin/bash -c "echo loading cassandra keyspace && cqlsh cassandra -f /schema.cql"
