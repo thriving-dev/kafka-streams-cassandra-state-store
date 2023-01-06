@@ -31,16 +31,17 @@ import java.util.concurrent.CountDownLatch;
 import static org.apache.kafka.streams.StoreQueryParameters.fromNameAndType;
 
 /**
- * Demonstrates, using the high-level KStream DSL, how to implement the WordCount program
- * that computes a simple word occurrence histogram from an input text.
+ * Demonstrates, using the high-level KStream DSL, how to implement a regular KTable
+ * that keeps a simple KV state store (String, String) but persisted to CassandraStores.globalKeyValueStore -
+ * accessible via REST API (GET /keyvalue/{key}).
  * <p>
- * In this example, the input stream reads from a topic named "streams-plaintext-input", where the values of messages
- * represent lines of text; and the histogram output is written to topic "streams-wordcount-output" where each record
- * is an updated count of a single word.
+ * Inspired by: https://github.com/confluentinc/kafka-streams-examples/tree/7.1.1-post/src/main/java/io/confluent/examples/streams/interactivequeries
+ * The main difference is there's no proxy request required, since all keys are accessible from each running instance
+ * of this Demo app (backed by a cassandra table with the `key` as the sole table PK).
  * <p>
- * Before running this example you must create the input topic and the output topic (e.g. via
+ * Before running this example you must create the input topic (e.g. via
  * {@code bin/kafka-topics.sh --create ...}), and write some data to the input topic (e.g. via
- * {@code bin/kafka-console-producer.sh}). Otherwise you won't see any data arriving in the output topic.
+ * {@code bin/kafka-console-producer.sh}).
  */
 @Path("/")
 public final class KTableGlobalStoreRestApiDemo {
