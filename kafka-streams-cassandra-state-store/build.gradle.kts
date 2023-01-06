@@ -12,7 +12,7 @@ plugins {
 }
 
 version = "0.1.0"
-group = "dev.thriving"
+group = "dev.thriving.oss"
 
 repositories {
     // Use Maven Central for resolving dependencies.
