@@ -38,7 +38,7 @@ import java.util.function.Function;
  * }</pre>
  * When using the Processor API, i.e., {@link org.apache.kafka.streams.Topology Topology}, users create
  * {@link StoreBuilder}s that can be attached to {@link org.apache.kafka.streams.processor.api.Processor Processor}s.
- * For example, you can create a cassandra stringKey value store with custom key/value serdes,  logging and caching
+ * For example, you can create a cassandra stringKey value store with custom key/value serdes, logging and caching
  * disabled like:
  * <pre>{@code
  * Topology topology = new Topology();
