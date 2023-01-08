@@ -1,7 +1,7 @@
 package dev.thriving.oss.kafka.streams.cassandra.state.store.example.processor.prefixscan;
 
 import com.datastax.oss.driver.api.core.CqlSession;
-import dev.thriving.oss.kafka.streams.cassandra.state.store.store.CassandraStores;
+import dev.thriving.oss.kafka.streams.cassandra.state.store.CassandraStores;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;

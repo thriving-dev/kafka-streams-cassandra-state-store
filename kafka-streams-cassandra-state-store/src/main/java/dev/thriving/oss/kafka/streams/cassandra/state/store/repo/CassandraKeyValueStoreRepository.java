@@ -1,4 +1,4 @@
-package dev.thriving.oss.kafka.streams.cassandra.state.store.store.repo;
+package dev.thriving.oss.kafka.streams.cassandra.state.store.repo;
 
 import org.apache.kafka.common.utils.Bytes;
 import org.apache.kafka.streams.KeyValue;

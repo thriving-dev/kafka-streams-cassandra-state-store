@@ -2,7 +2,7 @@ package dev.thriving.oss.kafka.streams.cassandra.state.store.example.globalstore
 
 import com.datastax.oss.driver.api.core.CqlSession;
 import com.fasterxml.jackson.core.util.JacksonFeature;
-import dev.thriving.oss.kafka.streams.cassandra.state.store.store.CassandraStores;
+import dev.thriving.oss.kafka.streams.cassandra.state.store.CassandraStores;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import org.apache.kafka.clients.consumer.ConsumerConfig;

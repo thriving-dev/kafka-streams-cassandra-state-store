@@ -1,9 +1,9 @@
-package dev.thriving.oss.kafka.streams.cassandra.state.store.store.repo;
+package dev.thriving.oss.kafka.streams.cassandra.state.store.repo;
 
 import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.cql.*;
-import dev.thriving.oss.kafka.streams.cassandra.state.store.store.CassandraKeyValueIterator;
-import dev.thriving.oss.kafka.streams.cassandra.state.store.store.repo.serde.KeySerde;
+import dev.thriving.oss.kafka.streams.cassandra.state.store.repo.serde.KeySerde;
+import dev.thriving.oss.kafka.streams.cassandra.state.store.CassandraKeyValueIterator;
 import org.apache.kafka.common.utils.Bytes;
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.state.KeyValueIterator;

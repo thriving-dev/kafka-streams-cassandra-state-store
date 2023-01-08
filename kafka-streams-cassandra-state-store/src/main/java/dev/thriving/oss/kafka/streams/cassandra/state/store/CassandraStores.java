@@ -1,9 +1,9 @@
-package dev.thriving.oss.kafka.streams.cassandra.state.store.store;
+package dev.thriving.oss.kafka.streams.cassandra.state.store;
 
 import com.datastax.oss.driver.api.core.CqlSession;
-import dev.thriving.oss.kafka.streams.cassandra.state.store.store.repo.GlobalBlobKeyCassandraKeyValueStoreRepository;
-import dev.thriving.oss.kafka.streams.cassandra.state.store.store.repo.PartitionedBlobKeyCassandraKeyValueStoreRepository;
-import dev.thriving.oss.kafka.streams.cassandra.state.store.store.repo.PartitionedStringKeyScyllaKeyValueStoreRepository;
+import dev.thriving.oss.kafka.streams.cassandra.state.store.repo.GlobalBlobKeyCassandraKeyValueStoreRepository;
+import dev.thriving.oss.kafka.streams.cassandra.state.store.repo.PartitionedStringKeyScyllaKeyValueStoreRepository;
+import dev.thriving.oss.kafka.streams.cassandra.state.store.repo.PartitionedBlobKeyCassandraKeyValueStoreRepository;
 import org.apache.kafka.common.serialization.Serializer;
 import org.apache.kafka.common.utils.Bytes;
 import org.apache.kafka.streams.state.KeyValueBytesStoreSupplier;

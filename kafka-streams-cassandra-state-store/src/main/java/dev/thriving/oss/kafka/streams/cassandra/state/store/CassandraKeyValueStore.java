@@ -1,6 +1,6 @@
-package dev.thriving.oss.kafka.streams.cassandra.state.store.store;
+package dev.thriving.oss.kafka.streams.cassandra.state.store;
 
-import dev.thriving.oss.kafka.streams.cassandra.state.store.store.repo.CassandraKeyValueStoreRepository;
+import dev.thriving.oss.kafka.streams.cassandra.state.store.repo.CassandraKeyValueStoreRepository;
 import org.apache.kafka.common.serialization.Serializer;
 import org.apache.kafka.common.utils.Bytes;
 import org.apache.kafka.streams.KeyValue;

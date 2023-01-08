@@ -1,6 +1,7 @@
-package dev.thriving.oss.kafka.streams.cassandra.state.store.store;
+package dev.thriving.oss.kafka.streams.cassandra.state.store;
 
 import com.datastax.oss.driver.api.core.cql.Row;
+import dev.thriving.oss.kafka.streams.cassandra.state.store.repo.CassandraKeyValueStoreRepository;
 import org.apache.kafka.common.utils.Bytes;
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.state.KeyValueIterator;
@@ -21,7 +22,7 @@ public class CassandraKeyValueIterator implements KeyValueIterator<Bytes, byte[]
      * Constructor for wrapping a cassandra java client query
      * {@link com.datastax.oss.driver.api.core.cql.ResultSet} iterator {@link Iterator<Row>}.
      * <p>
-     * Since {@link CassandraKeyValueStore} / {@link dev.thriving.oss.kafka.streams.cassandra.state.store.store.repo.CassandraKeyValueStoreRepository}
+     * Since {@link CassandraKeyValueStore} / {@link CassandraKeyValueStoreRepository}
      *  * implementations exist with different CQL native types for 'key' column (BLOB|TEXT), the iterator must get the
      *  * appropriate type from the {@link Row} iterated.
      *
