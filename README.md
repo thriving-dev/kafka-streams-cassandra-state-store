@@ -53,14 +53,15 @@ TODO: describe purpose
   - [x] add CODE_OF_CONDUCT.md
   - [ ] ~~? add CONTRIBUTING.md~~
   - [x] polishing
-  - [ ] make repo public
-  - [ ] Publish to maven central (?) https://h4pehl.medium.com/publish-your-gradle-artifacts-to-maven-central-f74a0af085b1
+  - [x] make repo public
+  - [x] Publish to maven central (?) https://h4pehl.medium.com/publish-your-gradle-artifacts-to-maven-central-f74a0af085b1
     - [x] request namespace ownership
     - [x] add JavaDocs
     - [x] other -> maven central compliant https://central.sonatype.org/publish/requirements/
     - [x] gradle plugin to publish to maven central https://julien.ponge.org/blog/publishing-from-gradle-to-maven-central-with-github-actions/
-    - [ ] publish snapshot version 0.1.0-SNAPSHOT
-    - [ ] tag + publish initial version 0.1.0
+    - [x] publish snapshot version 0.1.0-SNAPSHOT
+    - [x] add gradle release plugin
+    - [x] tag + publish initial version 0.1.0
 - [ ] Ops
   - [x] github actions to build (+test)
   - [ ] ? add renovate 
