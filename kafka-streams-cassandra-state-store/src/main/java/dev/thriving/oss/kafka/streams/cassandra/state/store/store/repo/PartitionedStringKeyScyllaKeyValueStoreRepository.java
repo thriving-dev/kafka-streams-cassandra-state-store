@@ -34,16 +34,6 @@ public class PartitionedStringKeyScyllaKeyValueStoreRepository extends AbstractP
                     PRIMARY KEY ((partition), key)
                 ) %s
                 """.formatted(tableName, "WITH " + tableOptions));
-
-        // above works
-//        session.execute("""
-//                CREATE CUSTOM INDEX IF NOT EXISTS %s_query_idx ON %s (partition, key)
-//                     USING 'org.apache.cassandra.index.sasi.SASIIndex'
-//                     WITH OPTIONS = {
-//                        'mode': 'CONTAINS',
-//                        'analyzer_class': 'org.apache.cassandra.index.sasi.analyzer.StandardAnalyzer',
-//                        'case_sensitive': 'false'}
-//                """.formatted(tableName));
     }
 
     @Override
