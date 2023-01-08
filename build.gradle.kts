@@ -28,6 +28,6 @@ subprojects {
     }
 }
 
-tasks.afterReleaseBuild{
-    dependsOn(tasks.release)
+tasks.afterReleaseBuild {
+    dependsOn(project.tasks.release)
 }
