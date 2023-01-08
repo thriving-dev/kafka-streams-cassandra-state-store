@@ -3,7 +3,7 @@ package dev.thriving.oss.kafka.streams.cassandra.state.store.store.repo;
 import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.cql.*;
 import dev.thriving.oss.kafka.streams.cassandra.state.store.store.CassandraKeyValueIterator;
-import dev.thriving.oss.kafka.streams.cassandra.state.store.store.serde.KeySerde;
+import dev.thriving.oss.kafka.streams.cassandra.state.store.store.repo.serde.KeySerde;
 import org.apache.kafka.common.utils.Bytes;
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.state.KeyValueIterator;
@@ -13,7 +13,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.function.Function;
 
-abstract class AbstractPartitionedCassandraKeyValueStoreRepository<K> extends AbstractCassandraKeyValueStoreRepository<K> {
+public abstract class AbstractPartitionedCassandraKeyValueStoreRepository<K> extends AbstractCassandraKeyValueStoreRepository<K> {
 
     protected PreparedStatement insert;
     protected PreparedStatement selectByPartitionAndKey;
@@ -27,8 +27,8 @@ abstract class AbstractPartitionedCassandraKeyValueStoreRepository<K> extends Ab
     protected PreparedStatement selectByPartitionAndKeyToReversed;
     protected PreparedStatement selectByPartitionAndKeyRangeReversed;
 
-    public AbstractPartitionedCassandraKeyValueStoreRepository(CqlSession session, String tableName, String compactionStrategy, Long defaultTtlSeconds, KeySerde<K> keySerde, Function<Row, Bytes> extractKeyFn) {
-        super(session, tableName, compactionStrategy, defaultTtlSeconds, keySerde, extractKeyFn);
+    public AbstractPartitionedCassandraKeyValueStoreRepository(CqlSession session, String tableName, String tableOptions, KeySerde<K> keySerde, Function<Row, Bytes> extractKeyFn) {
+        super(session, tableName, tableOptions, keySerde, extractKeyFn);
     }
 
     protected void initPreparedStatements(String tableName) {

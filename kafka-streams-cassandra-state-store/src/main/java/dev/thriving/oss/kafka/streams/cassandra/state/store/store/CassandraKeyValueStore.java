@@ -99,6 +99,7 @@ public class CassandraKeyValueStore implements KeyValueStore<Bytes, byte[]> {
     @Override
     public long approximateNumEntries() {
         // note: SELECT COUNT(*) requires significant CPU and I/O resources and may be quite slow depending on store size...
+        // Support is considered to be added, but for now it's not supported.
         throw new UnsupportedOperationException();
     }
 

@@ -21,7 +21,7 @@ repositories {
 
 dependencies {
     // Use JUnit Jupiter for testing.
-    testImplementation("org.junit.jupiter:junit-jupiter:5.9.1")
+    // testImplementation("org.junit.jupiter:junit-jupiter:5.9.1")
 
     // This dependency is used internally, and not exposed to consumers on their own compile classpath.
     implementation("org.apache.kafka:kafka-streams:3.3.1")

@@ -11,45 +11,61 @@ TODO: describe purpose
 * kafka-streams 3.3.1
 * datastax java-driver-core 4.15.0
 
-### TODOs
+### Roadmap
 
-- [x] MVP implementation
+- [x] MVP
+  - [x] CQL Schema
+  - [x] implementation
 - [x] restructure code
   - [x] split implementation & examples
   - [x] Abstract store, introduce Repo, KeySerdes (Byte <> ByteBuffer|String)
   - [x] CassandraStores Builder, configurable
-    - [x] compaction strategy
     - [x] table name fn
-    - [x] table default ttl
+    - [x] keyspace
+    - [x] ~~table default ttl~~
+    - [x] ~~compaction strategy~~
+    - [x] ~~compression~~
+    - [x] fully customizable table options (support both Cassandra & ScyllaDB)
 - [x] examples
   - [x] WordCount Cassandra 4
   - [x] WordCount Cassandra 3 (v4 client lib)
   - [x] WordCount ScyllaDB
   - [x] WordCount Processor + all + range + prefixScan
   - [x] GlobalCassandraStore + KStream enrichment 
-- [x] Features
-  - [x] Prefix scan with `StringKeyCassandraKeyValueStore`
-  - [x] `GlobalCassandraKeyValueStore`
+- [x] additional features
+  - [x] Prefix scan with `stringKeyValueStore` (ScyllaDB only)
+  - [ ] ~~Prefix scan with `stringKeyValueStore` (Cassandra with SASIIndex? https://stackoverflow.com/questions/49247092/order-by-and-like-in-same-cassandra-query/49268543#49268543)~~
+  - [x] `globalKeyValueStore`
 - [ ] OpenSource
-  - [x] choose + add license
-  - [ ] polishing
-  - [ ] make repo public
   - [x] choose + add license
   - [x] add CHANGELOG.md
   - [x] add CODE_OF_CONDUCT.md
-  - [ ] add CONTRIBUTING.md
+  - [ ] ~~? add CONTRIBUTING.md~~
+  - [ ] polishing
+  - [ ] make repo public
   - [ ] Publish to maven central (?) https://h4pehl.medium.com/publish-your-gradle-artifacts-to-maven-central-f74a0af085b1
     - [x] request namespace ownership
-    - [ ] add JavaDocs
-    - [ ] other -> maven central compliant
-    - [ ] tag + publish initial version
+    - [x] add JavaDocs
+    - [ ] other -> maven central compliant https://central.sonatype.org/publish/requirements/
+    - [ ] gradle plugin to publish to maven central https://julien.ponge.org/blog/publishing-from-gradle-to-maven-central-with-github-actions/
+    - [ ] tag + publish initial version 0.0.1
 - [ ] Ops
   - [x] github actions to build (+test)
-  - [ ] gradle plugin to publish to maven central https://julien.ponge.org/blog/publishing-from-gradle-to-maven-central-with-github-actions/
   - [ ] ? add renovate 
     - https://github.com/renovatebot/github-action
     - https://docs.renovatebot.com/java/
   - [ ] ? add trivy https://github.com/marketplace/actions/trivy-action
+  - [ ] ? github actions to publish to maven central https://julien.ponge.org/blog/publishing-from-gradle-to-maven-central-with-github-actions/
+- [ ] Documentation
+  - [ ] summary
+  - [ ] cleanup README
+  - [ ] quick start
+  - [ ] overview store types
+  - [ ] compatibility cassandra 3.11, 4.x, ScyllaDB
+  - [ ] limitations
+  - [ ] usage, builder, config options
+  - [ ] examples
+  - [ ] (Caching options)
 - [ ] tests
   - [ ] unit tests (?)
   - [ ] WordCount integration test using testcontainers
@@ -67,16 +83,9 @@ TODO: describe purpose
       https://github.com/testcontainers/testcontainers-java/tree/main/examples/kafka-cluster
     - testcontainers-java/RedisBackedCacheTest.java at main · testcontainers/testcontainers-java
       https://github.com/testcontainers/testcontainers-java/blob/main/examples/redis-backed-cache/src/test/java/RedisBackedCacheTest.java
-- [ ] Documentation
-  - [ ] usage
-  - [ ] limitations
-  - [ ] overview store types
-  - [ ] builder / config options
-  - [ ] Caching options
-- [ ] Next Steps
+- [ ] Features Planned/Considered
   - [ ] (?) simple inMemory read cache -> Caffeine?
   - [ ] add WindowedStore functionality, example, ...
-  - [ ] cassandra 3.x (3.10/3.11) branch(es)?
 
 ### draft cql schema
 
@@ -438,4 +447,40 @@ SELECT * FROM xyz_changelog2
 WHERE key=intAsBlob(1);
 SELECT * FROM xyz_changelog2
 WHERE key>=intAsBlob(1);
+```
+
+
+
+```java
+    /**
+     * CQL compaction strategy to be used when first creating the state store cassandra table.
+     * <p>
+     * Please note this config will only apply upon initial table creation. ('ALTER TABLE' is not yet supported).
+     * <p>
+     * Default compaction strategy used is 'LeveledCompactionStrategy'
+     *
+     * @param compactionStrategy the compaction strategy for the cassandra table (cannot be {@code null} or blank)
+     * @return itself
+     */
+    public CassandraStores withCompactionStrategy(String compactionStrategy) {
+        assert compactionStrategy != null && !compactionStrategy.isBlank() : "compactionStrategy cannot be null or blank";
+        this.compactionStrategy = compactionStrategy;
+        return this;
+    }
+
+    /**
+     * The default expiration time ("TTL") in seconds for the state store cassandra table.
+     * <p>
+     * Please note this config will only apply upon initial table creation. ('ALTER TABLE' is not yet supported).
+     * <p>
+     * Default TTL: 0 (data will not expire)
+     *
+     * @param defaultTtlSeconds the default expiration time ("TTL") in seconds for the table (cannot be <0)
+     * @return itself
+     */
+    public CassandraStores withDefaultTtlSeconds(long defaultTtlSeconds) {
+        assert defaultTtlSeconds >= 0 : "defaultTtlSeconds cannot be null and must be >= 0";
+        this.defaultTtlSeconds = defaultTtlSeconds;
+        return this;
+    }
 ```

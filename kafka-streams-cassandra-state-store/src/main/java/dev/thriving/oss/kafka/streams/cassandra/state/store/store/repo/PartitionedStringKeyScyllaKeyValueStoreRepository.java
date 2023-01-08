@@ -5,27 +5,26 @@ import com.datastax.oss.driver.api.core.cql.BoundStatement;
 import com.datastax.oss.driver.api.core.cql.PreparedStatement;
 import com.datastax.oss.driver.api.core.cql.ResultSet;
 import dev.thriving.oss.kafka.streams.cassandra.state.store.store.CassandraKeyValueIterator;
-import dev.thriving.oss.kafka.streams.cassandra.state.store.store.serde.KeySerdes;
+import dev.thriving.oss.kafka.streams.cassandra.state.store.store.repo.serde.KeySerdes;
 import org.apache.kafka.common.utils.Bytes;
 import org.apache.kafka.streams.state.KeyValueIterator;
 
 import java.util.Arrays;
 
-public class PartitionedStringKeyCassandraKeyValueStoreRepository extends AbstractPartitionedCassandraKeyValueStoreRepository<String> {
+public class PartitionedStringKeyScyllaKeyValueStoreRepository extends AbstractPartitionedCassandraKeyValueStoreRepository<String> {
 
     private PreparedStatement selectByPartitionAndKeyPrefix;
 
-    public PartitionedStringKeyCassandraKeyValueStoreRepository(CqlSession session, String tableName, String compactionStrategy, Long defaultTtlSeconds) {
+    public PartitionedStringKeyScyllaKeyValueStoreRepository(CqlSession session, String tableName, String tableOptions) {
         super(session,
                 tableName,
-                compactionStrategy,
-                defaultTtlSeconds,
+                tableOptions,
                 KeySerdes.String(),
                 row -> KeySerdes.String().deserialize(row.getString(0)));
     }
 
     @Override
-    protected void createTable(String tableName, String compactionStrategy, Long defaultTtlSeconds) {
+    protected void createTable(String tableName, String tableOptions) {
         session.execute("""
                 CREATE TABLE IF NOT EXISTS %s (
                     partition int,
@@ -33,10 +32,10 @@ public class PartitionedStringKeyCassandraKeyValueStoreRepository extends Abstra
                     time timestamp,
                     value blob,
                     PRIMARY KEY ((partition), key)
-                ) WITH compaction = { 'class' : '%s' }
-                  AND  default_time_to_live = %d
-                """.formatted(tableName, compactionStrategy, defaultTtlSeconds));
+                ) %s
+                """.formatted(tableName, "WITH " + tableOptions));
 
+        // above works
 //        session.execute("""
 //                CREATE CUSTOM INDEX IF NOT EXISTS %s_query_idx ON %s (partition, key)
 //                     USING 'org.apache.cassandra.index.sasi.SASIIndex'

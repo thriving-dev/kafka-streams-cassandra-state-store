@@ -1,4 +1,4 @@
-package dev.thriving.oss.kafka.streams.cassandra.state.store.store.serde;
+package dev.thriving.oss.kafka.streams.cassandra.state.store.store.repo.serde;
 
 import org.apache.kafka.common.utils.Bytes;
 

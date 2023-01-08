@@ -8,8 +8,6 @@ import java.util.List;
 
 public interface CassandraKeyValueStoreRepository {
 
-    long NO_TTL = 0;
-
     byte[] getByKey(int partition, Bytes key);
     void save(int partition, Bytes key, byte[] value);
     void saveBatch(int partition, List<KeyValue<Bytes, byte[]>> entries);
@@ -19,4 +17,5 @@ public interface CassandraKeyValueStoreRepository {
     KeyValueIterator<Bytes, byte[]> range(int partition, Bytes from, Bytes to);
     KeyValueIterator<Bytes, byte[]> rangeDesc(int partition, Bytes from, Bytes to);
     KeyValueIterator<Bytes, byte[]> findByPartitionAndKeyPrefix(int partition, String prefix);
+
 }
