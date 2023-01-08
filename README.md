@@ -5,11 +5,22 @@
 TODO: describe purpose
 
 
-### stack
+### Stack
+
+#### compiled with
 
 * Java 17
 * kafka-streams 3.3.1
 * datastax java-driver-core 4.15.0
+
+#### supports / tested with
+
+* kafka-streams 2.7.0+ (maybe even earlier versions, but wasn't tested further back)
+* datastax java client (v4) `com.datastax.oss:java-driver-core:4.15.0`
+* ScyllaDB shard-aware datastax java client (v4) fork `com.scylladb:java-driver-core:4.14.1.0`
+* Apache Cassandra 3.11
+* Apache Cassandra 4
+* ScyllaDB (should work from 4.3+)
 
 ### Roadmap
 
@@ -41,14 +52,15 @@ TODO: describe purpose
   - [x] add CHANGELOG.md
   - [x] add CODE_OF_CONDUCT.md
   - [ ] ~~? add CONTRIBUTING.md~~
-  - [ ] polishing
+  - [x] polishing
   - [ ] make repo public
   - [ ] Publish to maven central (?) https://h4pehl.medium.com/publish-your-gradle-artifacts-to-maven-central-f74a0af085b1
     - [x] request namespace ownership
     - [x] add JavaDocs
-    - [ ] other -> maven central compliant https://central.sonatype.org/publish/requirements/
-    - [ ] gradle plugin to publish to maven central https://julien.ponge.org/blog/publishing-from-gradle-to-maven-central-with-github-actions/
-    - [ ] tag + publish initial version 0.0.1
+    - [x] other -> maven central compliant https://central.sonatype.org/publish/requirements/
+    - [x] gradle plugin to publish to maven central https://julien.ponge.org/blog/publishing-from-gradle-to-maven-central-with-github-actions/
+    - [ ] publish snapshot version 0.1.0-SNAPSHOT
+    - [ ] tag + publish initial version 0.1.0
 - [ ] Ops
   - [x] github actions to build (+test)
   - [ ] ? add renovate 
@@ -64,7 +76,7 @@ TODO: describe purpose
   - [ ] compatibility cassandra 3.11, 4.x, ScyllaDB
   - [ ] limitations
   - [ ] usage, builder, config options
-  - [ ] examples
+  - [ ] link to examples
   - [ ] (Caching options)
 - [ ] tests
   - [ ] unit tests (?)
