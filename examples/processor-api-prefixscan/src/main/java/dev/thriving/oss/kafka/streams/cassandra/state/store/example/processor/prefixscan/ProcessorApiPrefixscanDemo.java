@@ -68,8 +68,9 @@ public final class ProcessorApiPrefixscanDemo {
                         CassandraStores.builder(session, WORD_GROUPED_COUNT_STORE)
                                 .stringKeyValueStore(),
                         stringSerde,
-                        longSerde
-                )
+                        longSerde)
+                        .withLoggingDisabled()
+                        .withCachingDisabled()
         );
 
         builder.<String, String>stream(INPUT_TOPIC)
