@@ -1,4 +1,3 @@
-version = "0.1.0-SNAPSHOT"
 group = "dev.thriving.oss"
 
 object Meta {
