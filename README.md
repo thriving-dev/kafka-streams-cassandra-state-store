@@ -168,6 +168,8 @@ TODO: create table with types <> supported operations
   - [ ] usage, builder, config options
   - [ ] link to examples
   - [ ] (Caching options)
+- [ ] Security
+  - [ ] prevent + test against 'CQL injection' via `withTableOptions(..)`
 - [ ] tests
   - [ ] unit tests (?)
   - [ ] WordCount integration test using testcontainers
