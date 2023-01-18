@@ -131,6 +131,7 @@ TODO: create table with types <> supported operations
   - [x] WordCount ScyllaDB
   - [x] WordCount Processor + all + range + prefixScan
   - [x] GlobalCassandraStore + KStream enrichment 
+  - [ ] app as GraalVM native image (Micronaut || Quarkus)
 - [x] additional features
   - [x] Prefix scan with `stringKeyValueStore` (ScyllaDB only)
   - [ ] ~~Prefix scan with `stringKeyValueStore` (Cassandra with SASIIndex? https://stackoverflow.com/questions/49247092/order-by-and-like-in-same-cassandra-query/49268543#49268543)~~
@@ -157,7 +158,7 @@ TODO: create table with types <> supported operations
     - https://docs.renovatebot.com/java/
   - [ ] ? add trivy https://github.com/marketplace/actions/trivy-action
   - [ ] ? github actions to publish to maven central https://julien.ponge.org/blog/publishing-from-gradle-to-maven-central-with-github-actions/
-- [ ] Documentation
+- [ ] Write Documentation
   - [x] summary
   - [x] cleanup README
   - [x] install
@@ -189,5 +190,8 @@ TODO: create table with types <> supported operations
       https://github.com/testcontainers/testcontainers-java/blob/main/examples/redis-backed-cache/src/test/java/RedisBackedCacheTest.java
 - [ ] Features Planned/Considered
   - [ ] (?) simple inMemory read cache -> Caffeine?
-  - [ ] add WindowedStore functionality, example, ...
+  - [ ] add additional store types
+    - [ ] WindowedStore functionality, example, ...
+    - [ ] ...?
+  - [ ] Benchmark
 
