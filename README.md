@@ -224,6 +224,8 @@ Not all methods have been implemented. Please check [store types method support 
       https://github.com/testcontainers/testcontainers-java/tree/main/examples/kafka-cluster
     - testcontainers-java/RedisBackedCacheTest.java at main · testcontainers/testcontainers-java
       https://github.com/testcontainers/testcontainers-java/blob/main/examples/redis-backed-cache/src/test/java/RedisBackedCacheTest.java
+- [ ] Advanced/Optimisation/POC
+  - [ ] keyValueStore::prefixScan support via range (see InMemoryKeyValueStore implementation) 
 - [ ] Features Planned/Considered
   - [ ] (?) simple inMemory read cache -> Caffeine?
   - [ ] add additional store types
