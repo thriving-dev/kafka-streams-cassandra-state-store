@@ -10,7 +10,7 @@ For now, only KeyValueStore type is supported.
 ℹ️ [Apache Cassandra](https://cassandra.apache.org/) is a free and open-source, distributed, wide-column store, NoSQL database management system designed to handle large amounts of data across many commodity servers, providing high availability with no single point of failure.
 
 ### Project Status
-⚠️Current project status is to be considered **EXPERIMENTAL!!** ⚠️   
+⚠️ Current project status is to be considered **EXPERIMENTAL!!** ⚠️   
 Please carefully read documentation provided on [store types](#store-types) and [limitations](#known-limitations).
 
 ## Stack
@@ -57,7 +57,7 @@ implementation 'dev.thriving.oss:kafka-streams-cassandra-state-store:${version}'
 ## Usage
 ### Quick start
 
-‼️**Important:** Always disable logging + caching (by default kafka streams is buffering writes)  
+‼️**Important:** Always disable logging + caching => `withLoggingDisabled()` + `withCachingDisabled()` (by default kafka streams is buffering writes).
 
 #### High-level DSL <> StoreSupplier
 ```java
@@ -92,23 +92,58 @@ StoreBuilder<KeyValueStore<String, Long>> storeBuilder = Stores.keyValueStoreBui
 topology.addStateStore(storeBuilder, "processorName");
 ```
 
-### Builder
+### Examples
+Examples (incl. docker-compose setup) can be found in the [/examples](/tree/main/examples) folder.
 
-#### Config Options
+Instructions on how to run and work with the example apps can be found at the individual example root folder's README file.
+
+Take a look at the notorious word-count example with Cassandra 4 -> [/examples/word-count-cassandra4](/tree/main/examples/word-count-cassandra4).
+
+#### Common Requirements for running the examples
+- Docker to run
+- [kcat](https://github.com/edenhill/kcat) for interacting with Kafka (consume/produce)
 
 ### Store Types
+kafka-streams-cassandra-state-store comes with 3 different store types
+
 TODO: create table with types <> supported operations
 
 #### keyValueStore (recommended default)
 #### stringKeyValueStore
 #### globalKeyValueStore
 
-### Examples
+### Compatibility (Cassandra 3.11, 4.x; ScyllaDB)
+
+### Builder
+
+#### Config Options
 
 ## Fine Print 
 
 ### Known Limitations
+Adding additional infrastructure for data persistence external to Kafka comes with certain risks and constraints.
 
+#### Consistency
+Kafka Streams supports _at-least-once_ and _exactly-once_ processing guarantees. At-least-once semantics is enabled by default.
+
+Kafka Streams _exactly-once_ processing guarantees is using Kafka transactions. These transactions wrap the entirety of processing a message throughout your streams topology, including messages published to outbound topic(s), changelog topic(s), and consumer offsets topic(s). 
+
+This is possible through transactional interaction with a single distributed system (Apache Kafka). Bringing an external system (Cassandra) into play breaks this pattern. Once data is written to the database it can't be rolled back in the event of a subsequent error / failure to complete the current message processing. 
+
+⚠️ => If you need strong consistency, have _exactly-once_ processing enabled (streams config: `processing.guarantee="exactly_once_v2"`), and/or your processing logic is not fully idempotent then using **kafka-streams-cassandra-state-store** is discouraged! ⚠️
+
+ℹ️ Please note this is also true when using kafka-streams with the native state stores (RocksDB/InMemory) with *at-least-once* processing.guarantee (default).
+
+For more information on Kafka Streams processing guarantees, check the references provided below.
+
+##### References
+- https://medium.com/lydtech-consulting/kafka-streams-transactions-exactly-once-messaging-82194b50900a
+- https://docs.confluent.io/platform/current/streams/developer-guide/config-streams.html#processing-guarantee
+- https://docs.confluent.io/platform/current/streams/concepts.html#processing-guarantees
+
+#### Incomplete Implementation of Interfaces `StateStore` & `ReadOnlyKeyValueStore`
+
+Not all methods have been implemented. Please check [store types method support table](#store-types) above for more details. 
 
 ## Roadmap
 
@@ -153,21 +188,22 @@ TODO: create table with types <> supported operations
     - [x] tag + publish initial version 0.1.0
 - [ ] Ops
   - [x] github actions to build (+test)
-  - [ ] ? add renovate 
-    - https://github.com/renovatebot/github-action
-    - https://docs.renovatebot.com/java/
+  - [ ] ? add renovate
+- (vs. depandabot?)
+  - https://github.com/renovatebot/github-action
+  - https://docs.renovatebot.com/java/
   - [ ] ? add trivy https://github.com/marketplace/actions/trivy-action
   - [ ] ? github actions to publish to maven central https://julien.ponge.org/blog/publishing-from-gradle-to-maven-central-with-github-actions/
 - [ ] Write Documentation
   - [x] summary
   - [x] cleanup README
   - [x] install
-  - [ ] quick start
+  - [x] quick start
+  - [x] link to examples
   - [ ] overview store types
   - [ ] compatibility cassandra 3.11, 4.x, ScyllaDB
-  - [ ] limitations
   - [ ] usage, builder, config options
-  - [ ] link to examples
+  - [x] limitations
   - [ ] (Caching options)
 - [ ] Security
   - [ ] prevent + test against 'CQL injection' via `withTableOptions(..)`
