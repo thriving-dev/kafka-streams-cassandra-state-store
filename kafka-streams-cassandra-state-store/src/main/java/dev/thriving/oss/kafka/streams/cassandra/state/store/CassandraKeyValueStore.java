@@ -88,7 +88,14 @@ public class CassandraKeyValueStore implements KeyValueStore<Bytes, byte[]> {
 
     @Override
     public <R> QueryResult<R> query(Query<R> query, PositionBound positionBound, QueryConfig config) {
-        throw new UnsupportedOperationException();
+        return StoreQueryUtils.handleBasicQueries(
+                query,
+                positionBound,
+                config,
+                this,
+                position,
+                context
+        );
     }
 
     @Override
@@ -99,7 +106,7 @@ public class CassandraKeyValueStore implements KeyValueStore<Bytes, byte[]> {
     @Override
     public long approximateNumEntries() {
         // note: SELECT COUNT(*) requires significant CPU and I/O resources and may be quite slow depending on store size...
-        // Support is considered to be added, but for now it's not supported.
+        // Support is considered to be added, but for now it's not supported for the sake of accidental overloading of the database.
         throw new UnsupportedOperationException();
     }
 
