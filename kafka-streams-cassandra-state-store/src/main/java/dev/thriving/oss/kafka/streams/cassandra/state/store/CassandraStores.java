@@ -177,9 +177,9 @@ public final class CassandraStores {
      * - reverseRange
      * - all
      * - reverseAll
+     * - query
      * Not supported:
      * - approximateNumEntries
-     * - query
      * - prefixScan
      *
      * @return an instance of a {@link KeyValueBytesStoreSupplier} that can be used
@@ -231,9 +231,9 @@ public final class CassandraStores {
      * - all
      * - reverseAll
      * - prefixScan
+     * - query
      * Not supported:
      * - approximateNumEntries
-     * - query
      *
      * @return an instance of a {@link KeyValueBytesStoreSupplier} that can be used
      *      * to build a persistent key-value store
@@ -281,9 +281,9 @@ public final class CassandraStores {
      * - delete
      * - get
      * - all
+     * - query
      * Not supported:
      * - approximateNumEntries
-     * - query
      * - reverseAll
      * - range
      * - reverseRange
