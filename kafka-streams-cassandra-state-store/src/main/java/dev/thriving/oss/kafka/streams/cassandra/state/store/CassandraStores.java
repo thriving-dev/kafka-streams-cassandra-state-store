@@ -121,7 +121,11 @@ public final class CassandraStores {
     }
 
     /**
-     * The default expiration time ("TTL") in seconds for the state store cassandra table.
+     * A CQL table has a number of options that can be set at creation.
+     * <p>
+     * Please omit `WITH ` prefix.
+     * Multiple options can be added using `AND`, e.g. 'table_option1 AND table_option2'.
+     * <p>
      * Recommended compaction strategy is 'LeveledCompactionStrategy' which is applied by default.
      * -> Do not forget to add when overwriting table options.
      * <p>
@@ -138,7 +142,8 @@ public final class CassandraStores {
      */
     public CassandraStores withTableOptions(String tableOptions) {
         assert tableOptions != null : "tableOptions cannot be null";
-        this.tableOptions = tableOptions;
+        // remove 'WITH', tableOptions will be prefixed automatically if not blank
+        this.tableOptions = tableOptions.replace("WITH", "").trim();
         return this;
     }
 
