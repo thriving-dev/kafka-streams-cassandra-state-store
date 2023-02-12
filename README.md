@@ -93,20 +93,21 @@ topology.addStateStore(storeBuilder, "processorName");
 ```
 
 ### Examples
-Examples (incl. docker-compose setup) can be found in the [/examples](/tree/main/examples) folder.
+Examples (incl. docker-compose setup) can be found in the [/examples](/examples) folder.
 
 Instructions on how to run and work with the example apps can be found at the individual example root folder's README file.
 
-Take a look at the notorious word-count example with Cassandra 4 -> [/examples/word-count-cassandra4](/tree/main/examples/word-count-cassandra4).
+Take a look at the notorious word-count example with Cassandra 4 -> [/examples/word-count-cassandra4](/examples/word-count-cassandra4).
 
 #### Common Requirements for running the examples
 - Docker to run
 - [kcat](https://github.com/edenhill/kcat) for interacting with Kafka (consume/produce)
 
 ### Store Types
-kafka-streams-cassandra-state-store comes with 3 different store types
-
-TODO: create table with types <> supported operations
+kafka-streams-cassandra-state-store comes with 3 different store types:
+- keyValueStore (recommended default)
+- stringKeyValueStore
+- globalKeyValueStore
 
 #### keyValueStore (recommended default)
 A persistent `KeyValueStore<Bytes, byte[]>`.
