@@ -58,18 +58,53 @@ import java.util.function.Function;
  */
 public final class CassandraStores {
 
-    private CassandraStores(String name, CqlSession session) {
-        this.name = name;
-        this.session = session;
-    }
-
     private final String name;
     private final CqlSession session;
     private String keyspace = null;
     private String tableOptions = """
             compaction = { 'class' : 'LeveledCompactionStrategy' }
             """;
-    private Function<String, String> tableNameFn = storeName -> storeName.toLowerCase().replaceAll("[^a-z0-9_]", "_") + "_kstreams_store";
+    private Function<String, String> tableNameFn = storeName -> String.format("%s_kstreams_store", storeName.toLowerCase().replaceAll("[^a-z0-9_]", "_"));
+
+    private CassandraStores(String name, CqlSession session) {
+        this.name = name;
+        this.session = session;
+    }
+
+    /**
+     * Create a builder with cassandra @{@link CqlSession} and store name provided as mandatory parameters.
+     * <p>
+     * This builder allows customizing optional configuration via 'wither' methods:
+     * - {@link #withKeyspace(String)}
+     * - {@link #withTableOptions(String)}
+     * - {@link #withTableNameFn(Function)}
+     * <p>
+     * With the builder configured, you can create different implementation of {@link KeyValueBytesStoreSupplier} via:
+     * - {@link #keyValueStore()}
+     * - {@link #stringKeyValueStore()}
+     * - {@link #globalKeyValueStore()}
+     * <p>
+     * <b>!Important: Always disable logging + caching (by default kafka streams is buffering writes)
+     * via {@link StoreSupplier} {@link StoreBuilder}.</b>
+     * For this, always apply to the respective storeSupplier / storeBuilder:
+     * <pre>{@code
+     *   .withLoggingDisabled()
+     *   .withCachingDisabled()
+     * }</pre>
+     * See {@link CassandraStores} class level JavaDoc for full example.
+     * <p>
+     * The store supplier ultimately created via this builder can be passed into a {@link StoreBuilder}
+     * or {@link org.apache.kafka.streams.kstream.Materialized}.
+     *
+     * @param session cassandra session to be used by the store (cannot be {@code null})
+     * @param name name of the store (cannot be {@code null})
+     * @return an instance of {@link CassandraStores} that can be used to build a {@link KeyValueBytesStoreSupplier}
+     */
+    public static CassandraStores builder(final CqlSession session, final String name) {
+        Objects.requireNonNull(session, "session cannot be null");
+        Objects.requireNonNull(name, "name cannot be null");
+        return new CassandraStores(name, session);
+    }
 
     /**
      * The keyspace for the state store to operate in.
@@ -122,41 +157,6 @@ public final class CassandraStores {
         assert tableNameFn != null : "tableNameFn cannot be null";
         this.tableNameFn = tableNameFn;
         return this;
-    }
-
-    /**
-     * Create a builder with cassandra @{@link CqlSession} and store name provided as mandatory parameters.
-     * <p>
-     * This builder allows customizing optional configuration via 'wither' methods:
-     * - {@link #withKeyspace(String)}
-     * - {@link #withTableOptions(String)}
-     * - {@link #withTableNameFn(Function)}
-     * <p>
-     * With the builder configured, you can create different implementation of {@link KeyValueBytesStoreSupplier} via:
-     * - {@link #keyValueStore()}
-     * - {@link #stringKeyValueStore()}
-     * - {@link #globalKeyValueStore()}
-     * <p>
-     * <b>!Important: Always disable logging + caching (by default kafka streams is buffering writes)
-     * via {@link StoreSupplier} {@link StoreBuilder}.</b>
-     * For this, always apply to the respective storeSupplier / storeBuilder:
-     * <pre>{@code
-     *   .withLoggingDisabled()
-     *   .withCachingDisabled()
-     * }</pre>
-     * See {@link CassandraStores} class level JavaDoc for full example.
-     * <p>
-     * The store supplier ultimately created via this builder can be passed into a {@link StoreBuilder}
-     * or {@link org.apache.kafka.streams.kstream.Materialized}.
-     *
-     * @param session cassandra session to be used by the store (cannot be {@code null})
-     * @param name name of the store (cannot be {@code null})
-     * @return an instance of {@link CassandraStores} that can be used to build a {@link KeyValueBytesStoreSupplier}
-     */
-    public static CassandraStores builder(final CqlSession session, final String name) {
-        Objects.requireNonNull(session, "session cannot be null");
-        Objects.requireNonNull(name, "name cannot be null");
-        return new CassandraStores(name, session);
     }
 
     /**
@@ -214,11 +214,10 @@ public final class CassandraStores {
      * The key value store is persisted in a cassandra table, partitioned by the store context task partition.
      * Therefore, all CRUD operations against this store always are by stream task partition.
      * <p>
-     * This store supports ScyllaDB only, but not Cassandra. (ScyllaDB allows for LIKE operator query on TEXT type clustering key)
+     * This store persists the key as CQL TEXT type and supports {@link org.apache.kafka.streams.state.ReadOnlyKeyValueStore#prefixScan(Object, Serializer)} for ScyllaDB only, but not Cassandra.
+     * (ScyllaDB allows for <a href="https://docs.scylladb.com/stable/cql/dml.html#like-operator">LIKE operator</a> query on TEXT type clustering key)
      * <p>
-     * Leveraging the ScyllaDB <a href="https://docs.scylladb.com/stable/cql/dml.html#like-operator">LIKE operator</a>
-     * the {@link org.apache.kafka.streams.state.ReadOnlyKeyValueStore#prefixScan(Object, Serializer)} is allowed.
-     * Store usage is supported for String keys only.
+     * Store usage is supported for String keys only (though can't be enforced via the kafka streams interface).
      * <p>
      * Supported operations:
      * - put
@@ -266,11 +265,13 @@ public final class CassandraStores {
      * <p>
      * The key value store is persisted in a cassandra table, having the 'key' as sole PRIMARY KEY.
      * Therefore, all CRUD operations against this store always are "global", partitioned by the key itself.
-     * Due to the nature of cassandra tables this store comes with limitations
+     * Due to the nature of cassandra tables having a single PK (no clustering key), this store supports only a limited number of operations.
      * <p>
      * This global store should not be used and confused with a Kafka Streams Global Store!
-     * It has to be used as a non-global streams State Store - but read access for all keys is possible from each store
+     * It has to be used as a non-global (regular!) streams KeyValue state store - allows to read ({@link org.apache.kafka.streams.state.ReadOnlyKeyValueStore#get(Object)}) entries from any streams context (streams task/thread).
      * context (streams task).
+     * <p>
+     * Tip: This store type can be useful when exposing state store access via REST API. Each running instance of your app can serve all requests without the need to proxy the request to the right instance having the task (kafka partition) assigned for the key in question.
      * <p>
      * The store supports Cassandra 3.11, Cassandra 4, ScyllaDB.
      * <p>
