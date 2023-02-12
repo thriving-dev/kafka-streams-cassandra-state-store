@@ -191,7 +191,11 @@ Please also see [Quick start](#quick-start) for full kafka-streams example.
 The keyspace for the state store to operate in. By default, the provided `CqlSession` _session-keyspace_ is used.
 
 ##### `withTableOptions(String tableOptions)`
-The default expiration time ("TTL") in seconds for the state store cassandra table.   
+A CQL table has a number of options that can be set at creation.
+
+Please omit `WITH ` prefix.
+Multiple options can be added using `AND`, e.g. `"table_option1 AND table_option2"`.
+
 Recommended compaction strategy is 'LeveledCompactionStrategy' which is applied by default.   
 -> Do not forget to add when overwriting table options.
 
@@ -244,7 +248,46 @@ Not all methods have been implemented. Please check [store types method support 
 
 #### Underlying CQL Schema
 
+##### keyValueStore
+Using defaults, for a state store named "my-kv-store" following CQL Schema applies:
+```sql
+CREATE TABLE IF NOT EXISTS my_kv_store_kstreams_store (
+    partition int,
+    key blob,
+    time timestamp,
+    value blob,
+    PRIMARY KEY ((partition), key)
+) WITH compaction = { 'class' : 'LeveledCompactionStrategy' }
+```
+
+##### stringKeyValueStore
+Using defaults, for a state store named "string-kv-store" following CQL Schema applies:
+```sql
+CREATE TABLE IF NOT EXISTS string_kv_store_kstreams_store (
+    partition int,
+    key text,
+    time timestamp,
+    value blob,
+    PRIMARY KEY ((partition), key)
+) WITH compaction = { 'class' : 'LeveledCompactionStrategy' }
+```
+
+##### globalKeyValueStore
+Using defaults, for a state store named "global-kv-store" following CQL Schema applies:
+```sql
+CREATE TABLE IF NOT EXISTS global_kv_store_kstreams_store (
+    key blob,
+    time timestamp,
+    value blob,
+    PRIMARY KEY (key)
+) WITH compaction = { 'class' : 'LeveledCompactionStrategy' }
+```
+
 #### Feat: Cassandra table with default TTL
+
+💡 **Tip:** Cassandra has a table option `default_time_to_live` (default expiration time (“TTL”) in seconds for a table) which can be useful for certain use cases where data (state) can or should expire.
+
+Please note writes to cassandra are made with system time. The table TTL will therefore apply based on the time of write (not stream time). 
 
 ## Roadmap
 
@@ -295,7 +338,7 @@ Not all methods have been implemented. Please check [store types method support 
   - https://docs.renovatebot.com/java/
   - [ ] ? add trivy https://github.com/marketplace/actions/trivy-action
   - [ ] ? github actions to publish to maven central https://julien.ponge.org/blog/publishing-from-gradle-to-maven-central-with-github-actions/
-- [ ] Write Documentation
+- [x] Write Documentation
   - [x] summary
   - [x] compatibility cassandra 3.11, 4.x, ScyllaDB
   - [x] cleanup README
@@ -305,9 +348,9 @@ Not all methods have been implemented. Please check [store types method support 
   - [x] overview store types
   - [x] usage, builder, config options
   - [x] limitations
-  - [ ] Cassandra Specifics
-    - [ ] Underlying CQL Schema
-    - [ ] Feat: Cassandra table with default TTL
+  - [x] Cassandra Specifics
+    - [x] Underlying CQL Schema
+    - [x] Feat: Cassandra table with default TTL
   - [ ] (Caching options)
 - [ ] Security
   - [ ] prevent + test against 'CQL injection' via `withTableOptions(..)`
