@@ -109,14 +109,107 @@ kafka-streams-cassandra-state-store comes with 3 different store types
 TODO: create table with types <> supported operations
 
 #### keyValueStore (recommended default)
-#### stringKeyValueStore
-#### globalKeyValueStore
+A persistent `KeyValueStore<Bytes, byte[]>`.
+The key value store is persisted in a cassandra table, partitioned by the store context task partition.
+Therefore, all CRUD operations against this store always are by stream task partition.
 
-### Compatibility (Cassandra 3.11, 4.x; ScyllaDB)
+#### stringKeyValueStore
+Creates a persistent {@link KeyValueBytesStoreSupplier}.
+
+The key value store is persisted in a cassandra table, partitioned by the store context task partition.
+Therefore, all CRUD operations against this store always are by stream task partition.
+
+This store persists the key as CQL TEXT type and supports `org.apache.kafka.streams.state.ReadOnlyKeyValueStore#prefixScan(Object, Serializer)` for ScyllaDB only, but not Cassandra.   
+(Using ScyllaDB [LIKE operator](https://docs.scylladb.com/stable/cql/dml.html#like-operator) query on TEXT type clustering key)
+
+Store usage is supported for String keys only (though can't be enforced via the kafka streams interface).
+
+#### globalKeyValueStore
+Creates a persistent {@link KeyValueBytesStoreSupplier}.
+
+The key value store is persisted in a cassandra table, having the 'key' as sole PRIMARY KEY.
+Therefore, all CRUD operations against this store always are "global", partitioned by the key itself.
+Due to the nature of cassandra tables having a single PK (no clustering key), this store supports only a limited number of operations.
+
+This global store should not be used and confused with a Kafka Streams Global Store!
+It has to be used as a non-global (regular!) streams KeyValue state store - allows to read entries from any streams context (streams task/thread).
+
+Tip: This store type can be useful when exposing state store access via REST API. Each running instance of your app can serve all requests without the need to proxy the request to the right instance having the task (kafka partition) assigned for the key in question.
+
+#### Supported operations by store type
+
+|                         | keyValueStore | stringKeyValueStore | globalKeyValueStore |
+| ----------------------- | ------------- |---------------------| ------------------- |
+| get                     | ✅             | ✅                   | ✅                   |
+| put                     | ✅             | ✅                   | ✅                   |
+| putIfAbsent             | ✅             | ✅                   | ✅                   |
+| putAll                  | ✅             | ✅                   | ✅                   |
+| delete                  | ✅             | ✅                   | ✅                   |
+| range                   | ✅             | ✅                   | ❌                   |
+| reverseRange            | ✅             | ✅                   | ❌                   |
+| all                     | ✅             | ✅                   | ✅                   |
+| reverseAll              | ✅             | ✅                   | ❌                   |
+| prefixScan              | ❌             | ✅*                  | ❌                   |
+| approximateNumEntries   | ❌             | ❌                   | ❌                   |
+| query::RangeQuery       | ✅             | ✅                   | ❌                   |
+| query::KeyQuery         | ✅             | ✅                   | ✅                   |
+| query::WindowKeyQuery   | ❌             | ❌                   | ❌                   |
+| query::WindowRangeQuery | ❌             | ❌                   | ❌                   |
+
+* stringKeyValueStore::prefixScan is supported for stores backed by [ScyllaDB](https://www.scylladb.com/) only. Please note [LIKE](https://docs.scylladb.com/stable/cql/dml.html#like-operator) operator is used which is _case-sensitive_.
+
 
 ### Builder
+The `CassandraStores` class provides a method `public static CassandraStores builder(final CqlSession session, final String name)` that returns an instance of _CassandraStores_ which ultimately is used to build an instance of `KeyValueBytesStoreSupplier` to add to your topology.
 
-#### Config Options
+Basic usage example:
+```java
+CassandraStores.builder(session, "word-grouped-count")
+        .withKeyspace("")
+        .keyValueStore()
+```
+
+Advanced usage example:
+```java
+CassandraStores.builder(session, "word-grouped-count")
+        .withKeyspace("poc")
+        .withTableOptions("""
+                compaction = { 'class' : 'LeveledCompactionStrategy' }
+                AND default_time_to_live = 86400
+                """)
+        .withTableNameFn(storeName ->
+            String.format("%s_kstreams_store", storeName.toLowerCase().replaceAll("[^a-z0-9_]", "_")))
+        .keyValueStore()
+```
+
+Please also see [Quick start](#quick-start) for full kafka-streams example. 
+
+#### Builder options
+
+##### `withKeyspace(String keyspace)`
+The keyspace for the state store to operate in. By default, the provided `CqlSession` _session-keyspace_ is used.
+
+##### `withTableOptions(String tableOptions)`
+The default expiration time ("TTL") in seconds for the state store cassandra table.   
+Recommended compaction strategy is 'LeveledCompactionStrategy' which is applied by default.   
+-> Do not forget to add when overwriting table options.
+
+Please refer to table options of your cassandra cluster.
+- [Cassandra 4](https://cassandra.apache.org/doc/latest/cassandra/cql/ddl.html#create-table-options)
+- [ScyllaDB](https://docs.scylladb.com/stable/cql/ddl.html#table-options)
+
+Please note this config will only apply upon initial table creation. ('ALTER TABLE' is not yet supported).
+
+Default: `"compaction = { 'class' : 'LeveledCompactionStrategy' }"`
+
+##### `withTableNameFn(Function<String, String> tableNameFn)`
+Customize how the state store cassandra table is named, based on the kstreams store name.
+
+⚠️ Please note _changing_ the store name _for a pre-existing store_ will result in a **new empty table** to be created.
+
+Default: `${normalisedStoreName}_kstreams_store` - normalise := lowercase, replaces all [^a-z0-9_] with '_'   
+  e.g. ("TEXT3.word-count2") -> "text3_word_count2_kstreams_store"
+
 
 ## Fine Print 
 
@@ -144,6 +237,13 @@ For more information on Kafka Streams processing guarantees, check the reference
 #### Incomplete Implementation of Interfaces `StateStore` & `ReadOnlyKeyValueStore`
 
 Not all methods have been implemented. Please check [store types method support table](#store-types) above for more details. 
+
+
+### Cassandra Specifics
+
+#### Underlying CQL Schema
+
+#### Feat: Cassandra table with default TTL
 
 ## Roadmap
 
@@ -196,14 +296,17 @@ Not all methods have been implemented. Please check [store types method support 
   - [ ] ? github actions to publish to maven central https://julien.ponge.org/blog/publishing-from-gradle-to-maven-central-with-github-actions/
 - [ ] Write Documentation
   - [x] summary
+  - [x] compatibility cassandra 3.11, 4.x, ScyllaDB
   - [x] cleanup README
   - [x] install
   - [x] quick start
   - [x] link to examples
-  - [ ] overview store types
-  - [ ] compatibility cassandra 3.11, 4.x, ScyllaDB
-  - [ ] usage, builder, config options
+  - [x] overview store types
+  - [x] usage, builder, config options
   - [x] limitations
+  - [ ] Cassandra Specifics
+    - [ ] Underlying CQL Schema
+    - [ ] Feat: Cassandra table with default TTL
   - [ ] (Caching options)
 - [ ] Security
   - [ ] prevent + test against 'CQL injection' via `withTableOptions(..)`
@@ -224,12 +327,12 @@ Not all methods have been implemented. Please check [store types method support 
       https://github.com/testcontainers/testcontainers-java/tree/main/examples/kafka-cluster
     - testcontainers-java/RedisBackedCacheTest.java at main · testcontainers/testcontainers-java
       https://github.com/testcontainers/testcontainers-java/blob/main/examples/redis-backed-cache/src/test/java/RedisBackedCacheTest.java
-- [ ] Advanced/Optimisation/POC
+- [ ] Advanced/Features/POCs Planned/Considered
   - [ ] keyValueStore::prefixScan support via range (see InMemoryKeyValueStore implementation) 
-- [ ] Features Planned/Considered
-  - [ ] (?) simple inMemory read cache -> Caffeine?
   - [ ] add additional store types
     - [ ] WindowedStore functionality, example, ...
     - [ ] ...?
+  - [ ] (?) simple inMemory read cache -> Caffeine?
   - [ ] Benchmark
+  - [ ] add Metrics?
 
