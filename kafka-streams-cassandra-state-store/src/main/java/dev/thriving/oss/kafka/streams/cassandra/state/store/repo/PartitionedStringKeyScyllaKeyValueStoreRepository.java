@@ -33,7 +33,7 @@ public class PartitionedStringKeyScyllaKeyValueStoreRepository extends AbstractP
                     value blob,
                     PRIMARY KEY ((partition), key)
                 ) %s
-                """.formatted(tableName, "WITH " + tableOptions));
+                """.formatted(tableName, tableOptions.isBlank() ? "" : "WITH " + tableOptions));
     }
 
     @Override

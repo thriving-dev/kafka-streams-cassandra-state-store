@@ -31,7 +31,7 @@ public class GlobalBlobKeyCassandraKeyValueStoreRepository extends AbstractCassa
                value blob,
                PRIMARY KEY (key)
            ) %s
-           """.formatted(tableName, "WITH " + tableOptions));
+           """.formatted(tableName, tableOptions.isBlank() ? "" : "WITH " + tableOptions));
     }
 
     @Override

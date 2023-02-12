@@ -26,7 +26,7 @@ public class PartitionedBlobKeyCassandraKeyValueStoreRepository extends Abstract
                value blob,
                PRIMARY KEY ((partition), key)
            ) %s
-           """.formatted(tableName, "WITH " + tableOptions));
+           """.formatted(tableName, tableOptions.isBlank() ? "" : "WITH " + tableOptions));
         session.execute(prepare.bind());
     }
 }
