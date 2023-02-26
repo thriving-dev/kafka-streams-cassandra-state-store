@@ -12,10 +12,9 @@ public interface CassandraKeyValueStoreRepository {
     void save(int partition, Bytes key, byte[] value);
     void saveBatch(int partition, List<KeyValue<Bytes, byte[]>> entries);
     void delete(int partition, Bytes key);
-    KeyValueIterator<Bytes, byte[]> getAll(int partition);
-    KeyValueIterator<Bytes, byte[]> getAllDesc(int partition);
-    KeyValueIterator<Bytes, byte[]> range(int partition, Bytes from, Bytes to);
-    KeyValueIterator<Bytes, byte[]> rangeDesc(int partition, Bytes from, Bytes to);
-    KeyValueIterator<Bytes, byte[]> findByPartitionAndKeyPrefix(int partition, String prefix);
+    KeyValueIterator<Bytes, byte[]> getAll(int partition, boolean forward);
+    KeyValueIterator<Bytes, byte[]> getForRange(int partition, Bytes from, Bytes to, boolean forward, boolean toInclusive);
+
+    long getCount(int partition);
 
 }

@@ -2,9 +2,7 @@ package dev.thriving.oss.kafka.streams.cassandra.state.store;
 
 import com.datastax.oss.driver.api.core.CqlSession;
 import dev.thriving.oss.kafka.streams.cassandra.state.store.repo.GlobalBlobKeyCassandraKeyValueStoreRepository;
-import dev.thriving.oss.kafka.streams.cassandra.state.store.repo.PartitionedStringKeyScyllaKeyValueStoreRepository;
-import dev.thriving.oss.kafka.streams.cassandra.state.store.repo.PartitionedBlobKeyCassandraKeyValueStoreRepository;
-import org.apache.kafka.common.serialization.Serializer;
+import dev.thriving.oss.kafka.streams.cassandra.state.store.repo.PartitionedCassandraKeyValueStoreRepository;
 import org.apache.kafka.common.utils.Bytes;
 import org.apache.kafka.streams.state.KeyValueBytesStoreSupplier;
 import org.apache.kafka.streams.state.KeyValueStore;
@@ -42,18 +40,16 @@ import java.util.function.Function;
  * disabled like:
  * <pre>{@code
  * Topology topology = new Topology();
- * topology.addProcessor("processorName", ...);
  *
- * Map<String,String> topicConfig = new HashMap<>();
  * StoreBuilder<KeyValueStore<String, Long>> storeBuilder = Stores.keyValueStoreBuilder(
- *                 CassandraStores.builder(session, WORD_GROUPED_COUNT_STORE)
- *                         .stringKeyValueStore(),
+ *                 CassandraStores.builder(session, "store-name")
+ *                         .keyValueStore(),
  *                 Serdes.String(),
  *                 Serdes.Long())
  *         .withLoggingDisabled()
  *         .withCachingDisabled();
  *
- * topology.addStateStore(storeBuilder, "processorName");
+ * topology.addStateStore(storeBuilder);
  * }</pre>
  */
 public final class CassandraStores {
@@ -81,7 +77,6 @@ public final class CassandraStores {
      * <p>
      * With the builder configured, you can create different implementation of {@link KeyValueBytesStoreSupplier} via:
      * - {@link #keyValueStore()}
-     * - {@link #stringKeyValueStore()}
      * - {@link #globalKeyValueStore()}
      * <p>
      * <b>!Important: Always disable logging + caching (by default kafka streams is buffering writes)
@@ -200,59 +195,7 @@ public final class CassandraStores {
             @Override
             public KeyValueStore<Bytes, byte[]> get() {
                 return new CassandraKeyValueStore(name,
-                        new PartitionedBlobKeyCassandraKeyValueStoreRepository(
-                                session,
-                                resolveTableName(),
-                                tableOptions));
-            }
-
-            @Override
-            public String metricsScope() {
-                return "cassandra";
-            }
-        };
-    }
-
-    /**
-     * Creates a persistent {@link KeyValueBytesStoreSupplier}.
-     * <p>
-     * The key value store is persisted in a cassandra table, partitioned by the store context task partition.
-     * Therefore, all CRUD operations against this store always are by stream task partition.
-     * <p>
-     * This store persists the key as CQL TEXT type and supports {@link org.apache.kafka.streams.state.ReadOnlyKeyValueStore#prefixScan(Object, Serializer)} for ScyllaDB only, but not Cassandra.
-     * (ScyllaDB allows for <a href="https://docs.scylladb.com/stable/cql/dml.html#like-operator">LIKE operator</a> query on TEXT type clustering key)
-     * <p>
-     * Store usage is supported for String keys only (though can't be enforced via the kafka streams interface).
-     * <p>
-     * Supported operations:
-     * - put
-     * - putIfAbsent
-     * - putAll
-     * - delete
-     * - get
-     * - range
-     * - reverseRange
-     * - all
-     * - reverseAll
-     * - prefixScan
-     * - query
-     * Not supported:
-     * - approximateNumEntries
-     *
-     * @return an instance of a {@link KeyValueBytesStoreSupplier} that can be used
-     *      * to build a persistent key-value store
-     */
-    public KeyValueBytesStoreSupplier stringKeyValueStore() {
-        return new KeyValueBytesStoreSupplier() {
-            @Override
-            public String name() {
-                return name;
-            }
-
-            @Override
-            public KeyValueStore<Bytes, byte[]> get() {
-                return new CassandraKeyValueStore(name,
-                        new PartitionedStringKeyScyllaKeyValueStoreRepository(
+                        new PartitionedCassandraKeyValueStoreRepository(
                                 session,
                                 resolveTableName(),
                                 tableOptions));
