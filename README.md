@@ -326,8 +326,9 @@ Please note writes to cassandra are made with system time. The table TTL will th
     - [x] Underlying CQL Schema
     - [x] Feat: Cassandra table with default TTL
   - [ ] (Caching options)
-- [ ] Security
-  - [ ] (?) prevent + test against 'CQL injection' via `withTableOptions(..)`
+- [x] Security
+  - [x] test against 'CQL injection' via `withTableOptions(..)` 
+        => tried to add `compaction = { 'class' : 'LeveledCompactionStrategy' };DROP TABLE xyz` which fails due to wrong syntax in Cassandra 3.11/4.1 & ScyllaDB 5.1  
 - [ ] tests
   - [ ] unit tests (?)
   - [ ] WordCount integration test using testcontainers
