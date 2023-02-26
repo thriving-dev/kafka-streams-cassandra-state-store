@@ -78,18 +78,16 @@ KTable<Long,String> table = builder.table(
 #### Processor API <> StoreBuilder
 ```java
 Topology topology = new Topology();
-topology.addProcessor("processorName", ...);
 
-Map<String,String> topicConfig = new HashMap<>();
 StoreBuilder<KeyValueStore<String, Long>> storeBuilder = Stores.keyValueStoreBuilder(
-                CassandraStores.builder(session, WORD_GROUPED_COUNT_STORE)
-                        .stringKeyValueStore(),
+                CassandraStores.builder(session, "store-name")
+                        .keyValueStore(),
                 Serdes.String(),
                 Serdes.Long())
         .withLoggingDisabled()
         .withCachingDisabled();
 
-topology.addStateStore(storeBuilder, "processorName");
+topology.addStateStore(storeBuilder);
 ```
 
 ### Examples
@@ -105,25 +103,13 @@ Take a look at the notorious word-count example with Cassandra 4 -> [/examples/w
 
 ### Store Types
 kafka-streams-cassandra-state-store comes with 3 different store types:
-- keyValueStore (recommended default)
-- stringKeyValueStore
+- keyValueStore
 - globalKeyValueStore
 
 #### keyValueStore (recommended default)
 A persistent `KeyValueStore<Bytes, byte[]>`.
 The key value store is persisted in a cassandra table, partitioned by the store context task partition.
 Therefore, all CRUD operations against this store always are by stream task partition.
-
-#### stringKeyValueStore
-Creates a persistent {@link KeyValueBytesStoreSupplier}.
-
-The key value store is persisted in a cassandra table, partitioned by the store context task partition.
-Therefore, all CRUD operations against this store always are by stream task partition.
-
-This store persists the key as CQL TEXT type and supports `org.apache.kafka.streams.state.ReadOnlyKeyValueStore#prefixScan(Object, Serializer)` for ScyllaDB only, but not Cassandra.   
-(Using ScyllaDB [LIKE operator](https://docs.scylladb.com/stable/cql/dml.html#like-operator) query on TEXT type clustering key)
-
-Store usage is supported for String keys only (though can't be enforced via the kafka streams interface).
 
 #### globalKeyValueStore
 Creates a persistent {@link KeyValueBytesStoreSupplier}.
@@ -139,25 +125,23 @@ Tip: This store type can be useful when exposing state store access via REST API
 
 #### Supported operations by store type
 
-|                         | keyValueStore | stringKeyValueStore | globalKeyValueStore |
-| ----------------------- | ------------- |---------------------| ------------------- |
-| get                     | ✅             | ✅                   | ✅                   |
-| put                     | ✅             | ✅                   | ✅                   |
-| putIfAbsent             | ✅             | ✅                   | ✅                   |
-| putAll                  | ✅             | ✅                   | ✅                   |
-| delete                  | ✅             | ✅                   | ✅                   |
-| range                   | ✅             | ✅                   | ❌                   |
-| reverseRange            | ✅             | ✅                   | ❌                   |
-| all                     | ✅             | ✅                   | ✅                   |
-| reverseAll              | ✅             | ✅                   | ❌                   |
-| prefixScan              | ❌             | ✅*                  | ❌                   |
-| approximateNumEntries   | ❌             | ❌                   | ❌                   |
-| query::RangeQuery       | ✅             | ✅                   | ❌                   |
-| query::KeyQuery         | ✅             | ✅                   | ✅                   |
-| query::WindowKeyQuery   | ❌             | ❌                   | ❌                   |
-| query::WindowRangeQuery | ❌             | ❌                   | ❌                   |
-
-* stringKeyValueStore::prefixScan is supported for stores backed by [ScyllaDB](https://www.scylladb.com/) only. Please note [LIKE](https://docs.scylladb.com/stable/cql/dml.html#like-operator) operator is used which is _case-sensitive_.
+|                         | keyValueStore | globalKeyValueStore |
+| ----------------------- | ------------- | ------------------- |
+| get                     | ✅             | ✅                   |
+| put                     | ✅             | ✅                   |
+| putIfAbsent             | ✅             | ✅                   |
+| putAll                  | ✅             | ✅                   |
+| delete                  | ✅             | ✅                   |
+| range                   | ✅             | ❌                   |
+| reverseRange            | ✅             | ❌                   |
+| all                     | ✅             | ✅                   |
+| reverseAll              | ✅             | ❌                   |
+| prefixScan              | ✅             | ❌                   |
+| approximateNumEntries   | ✅             | ✅                   |
+| query::RangeQuery       | ✅             | ❌                   |
+| query::KeyQuery         | ✅             | ✅                   |
+| query::WindowKeyQuery   | ❌             | ❌                   |
+| query::WindowRangeQuery | ❌             | ❌                   |
 
 
 ### Builder
@@ -260,18 +244,6 @@ CREATE TABLE IF NOT EXISTS my_kv_store_kstreams_store (
 ) WITH compaction = { 'class' : 'LeveledCompactionStrategy' }
 ```
 
-##### stringKeyValueStore
-Using defaults, for a state store named "string-kv-store" following CQL Schema applies:
-```sql
-CREATE TABLE IF NOT EXISTS string_kv_store_kstreams_store (
-    partition int,
-    key text,
-    time timestamp,
-    value blob,
-    PRIMARY KEY ((partition), key)
-) WITH compaction = { 'class' : 'LeveledCompactionStrategy' }
-```
-
 ##### globalKeyValueStore
 Using defaults, for a state store named "global-kv-store" following CQL Schema applies:
 ```sql
@@ -308,13 +280,15 @@ Please note writes to cassandra are made with system time. The table TTL will th
   - [x] WordCount Cassandra 4
   - [x] WordCount Cassandra 3 (v4 client lib)
   - [x] WordCount ScyllaDB
-  - [x] WordCount Processor + all + range + prefixScan
+  - [x] WordCount Processor + all + range + prefixScan + approximateNumEntries
   - [x] GlobalCassandraStore + KStream enrichment 
-  - [ ] app as GraalVM native image (Micronaut || Quarkus)
+  - [ ] app as GraalVM native image (Micronaut or Quarkus or examples with both)
 - [x] additional features
-  - [x] Prefix scan with `stringKeyValueStore` (ScyllaDB only)
+  - [x] ~~Prefix scan with `stringKeyValueStore` (ScyllaDB only)~~ (removed with v0.3)
   - [ ] ~~Prefix scan with `stringKeyValueStore` (Cassandra with SASIIndex? https://stackoverflow.com/questions/49247092/order-by-and-like-in-same-cassandra-query/49268543#49268543)~~
-  - [x] `globalKeyValueStore`
+  - [x] `ReadOnlyKeyValueStore.prefixScan` implementation using range (see InMemoryKeyValueStore implementation)
+  - [x] Implement `globalKeyValueStore`
+  - [x] 
 - [x] OpenSource
   - [x] choose + add license
   - [x] add CHANGELOG.md
@@ -333,9 +307,9 @@ Please note writes to cassandra are made with system time. The table TTL will th
 - [ ] Ops
   - [x] github actions to build (+test)
   - [ ] ? add renovate
-- (vs. depandabot?)
-  - https://github.com/renovatebot/github-action
-  - https://docs.renovatebot.com/java/
+    - (vs. depandabot?)
+      - https://github.com/renovatebot/github-action
+      - https://docs.renovatebot.com/java/
   - [ ] ? add trivy https://github.com/marketplace/actions/trivy-action
   - [ ] ? github actions to publish to maven central https://julien.ponge.org/blog/publishing-from-gradle-to-maven-central-with-github-actions/
 - [x] Write Documentation
@@ -353,7 +327,7 @@ Please note writes to cassandra are made with system time. The table TTL will th
     - [x] Feat: Cassandra table with default TTL
   - [ ] (Caching options)
 - [ ] Security
-  - [ ] prevent + test against 'CQL injection' via `withTableOptions(..)`
+  - [ ] (?) prevent + test against 'CQL injection' via `withTableOptions(..)`
 - [ ] tests
   - [ ] unit tests (?)
   - [ ] WordCount integration test using testcontainers
@@ -372,11 +346,11 @@ Please note writes to cassandra are made with system time. The table TTL will th
     - testcontainers-java/RedisBackedCacheTest.java at main · testcontainers/testcontainers-java
       https://github.com/testcontainers/testcontainers-java/blob/main/examples/redis-backed-cache/src/test/java/RedisBackedCacheTest.java
 - [ ] Advanced/Features/POCs Planned/Considered
-  - [ ] keyValueStore::prefixScan support via range (see InMemoryKeyValueStore implementation) 
   - [ ] add additional store types
     - [ ] WindowedStore functionality, example, ...
     - [ ] ...?
   - [ ] (?) simple inMemory read cache -> Caffeine?
   - [ ] Benchmark
   - [ ] add Metrics?
+    - [ ] (?) Metrics also for Caches?
 

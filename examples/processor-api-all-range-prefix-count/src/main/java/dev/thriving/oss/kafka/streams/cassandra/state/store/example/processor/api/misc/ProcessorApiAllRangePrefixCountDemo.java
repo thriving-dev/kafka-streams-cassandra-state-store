@@ -60,7 +60,7 @@ public final class ProcessorApiAllRangePrefixCountDemo {
         props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
         props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
 
-        // setting offset reset to earliest so that we can re-run the demo code with the same pre-loaded data
+        // setting offset reset to 'earliest' so that we can re-run the demo code with the same preloaded data
         // Note: To re-run the demo, you need to use the offset reset tool:
         // https://cwiki.apache.org/confluence/display/KAFKA/Kafka+Streams+Application+Reset+Tool
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");

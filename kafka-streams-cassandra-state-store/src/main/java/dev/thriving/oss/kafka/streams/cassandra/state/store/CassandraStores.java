@@ -40,18 +40,16 @@ import java.util.function.Function;
  * disabled like:
  * <pre>{@code
  * Topology topology = new Topology();
- * topology.addProcessor("processorName", ...);
  *
- * Map<String,String> topicConfig = new HashMap<>();
  * StoreBuilder<KeyValueStore<String, Long>> storeBuilder = Stores.keyValueStoreBuilder(
- *                 CassandraStores.builder(session, WORD_GROUPED_COUNT_STORE)
- *                         .stringKeyValueStore(),
+ *                 CassandraStores.builder(session, "store-name")
+ *                         .keyValueStore(),
  *                 Serdes.String(),
  *                 Serdes.Long())
  *         .withLoggingDisabled()
  *         .withCachingDisabled();
  *
- * topology.addStateStore(storeBuilder, "processorName");
+ * topology.addStateStore(storeBuilder);
  * }</pre>
  */
 public final class CassandraStores {
