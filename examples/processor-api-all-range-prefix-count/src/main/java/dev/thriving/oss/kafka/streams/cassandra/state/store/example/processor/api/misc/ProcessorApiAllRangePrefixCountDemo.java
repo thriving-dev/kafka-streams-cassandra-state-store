@@ -1,16 +1,18 @@
-package dev.thriving.oss.kafka.streams.cassandra.state.store.example.processor.prefixscan;
+package dev.thriving.oss.kafka.streams.cassandra.state.store.example.processor.api.misc;
 
 import com.datastax.oss.driver.api.core.CqlSession;
 import dev.thriving.oss.kafka.streams.cassandra.state.store.CassandraStores;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
+import org.apache.kafka.common.serialization.Serializer;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.kstream.Named;
 import org.apache.kafka.streams.kstream.Produced;
+import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
 import org.apache.kafka.streams.state.Stores;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +27,12 @@ import java.util.stream.Stream;
  * Demonstrates, using the low-level Processor API, how to implement the WordCount program
  * that computes a simple word occurrence histogram from an input text.
  * <p>
+ * In addition, following ReadOnlyKeyValueStore methods are used (via scheduled Punctuator):
+ * - {@link ReadOnlyKeyValueStore#all()}
+ * - {@link ReadOnlyKeyValueStore#range(Object, Object)}
+ * - {@link ReadOnlyKeyValueStore#prefixScan(Object, Serializer)}
+ * - {@link ReadOnlyKeyValueStore#approximateNumEntries()}
+ * <p>
  * In this example, the input stream reads from a topic named "streams-plaintext-input", where the values of messages
  * represent lines of text; and the histogram output is written to topic "streams-wordcount-output" where each record
  * is an updated count of a single word.
@@ -33,9 +41,9 @@ import java.util.stream.Stream;
  * {@code bin/kafka-topics.sh --create ...}), and write some data to the input topic (e.g. via
  * {@code bin/kafka-console-producer.sh}). Otherwise you won't see any data arriving in the output topic.
  */
-public final class ProcessorApiPrefixscanDemo {
+public final class ProcessorApiAllRangePrefixCountDemo {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ProcessorApiPrefixscanDemo.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ProcessorApiAllRangePrefixCountDemo.class);
 
     public static final String INPUT_TOPIC = "streams-plaintext-input";
     public static final String OUTPUT_TOPIC = "streams-wordcount-output";
@@ -66,7 +74,7 @@ public final class ProcessorApiPrefixscanDemo {
         builder.addStateStore(
                 Stores.keyValueStoreBuilder(
                         CassandraStores.builder(session, WORD_GROUPED_COUNT_STORE)
-                                .stringKeyValueStore(),
+                                .keyValueStore(),
                         stringSerde,
                         longSerde)
                         .withLoggingDisabled()
@@ -77,7 +85,9 @@ public final class ProcessorApiPrefixscanDemo {
                 .peek((k, v) -> LOG.debug("in => {}::{}", k, v))
                 .flatMap((key, value) -> {
                     String[] words = value.toLowerCase(Locale.getDefault()).split(" ");
-                    return Stream.of(words).map(it -> KeyValue.pair(it, it)).toList();
+                    return Stream.of(words)
+                            .filter(it -> !it.isBlank())
+                            .map(it -> KeyValue.pair(it, it)).toList();
                 })
                 .repartition()
                 .process(WordCountProcessor::new, Named.as("wordCountProcessor"), WORD_GROUPED_COUNT_STORE)

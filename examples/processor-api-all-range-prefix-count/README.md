@@ -1,5 +1,15 @@
 # kafka-streams-cassandra-state-store/examples 
-## processor-api-prefixscan
+## processor-api-all-range-prefix-count
+
+Demonstrates, using the low-level Processor API, how to implement the WordCount program that computes a simple word occurrence histogram from an input text.
+
+In addition, following `ReadOnlyKeyValueStore` methods are used (via _scheduled Punctuator_):
+- `ReadOnlyKeyValueStore#all()`
+- `ReadOnlyKeyValueStore#range(Object, Object)`
+- `ReadOnlyKeyValueStore#prefixScan(Object, Serializer)`
+- `ReadOnlyKeyValueStore#approximateNumEntries()`
+
+In this example, the input stream reads from a topic named "streams-plaintext-input", where the values of messages represent lines of text; and the histogram output is written to topic "streams-wordcount-output" where each record is an updated count of a single word.
 
 ### run example
 

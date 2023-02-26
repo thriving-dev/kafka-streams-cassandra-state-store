@@ -1,4 +1,4 @@
-package dev.thriving.oss.kafka.streams.cassandra.state.store.example.processor.prefixscan;
+package dev.thriving.oss.kafka.streams.cassandra.state.store.example.processor.api.misc;
 
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.processor.PunctuationType;
@@ -12,8 +12,6 @@ import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
 
-import static dev.thriving.oss.kafka.streams.cassandra.state.store.example.processor.prefixscan.ProcessorApiPrefixscanDemo.WORD_GROUPED_COUNT_STORE;
-
 public class WordCountProcessor implements Processor<String, String, String, Long> {
 
     private static final Logger LOG = LoggerFactory.getLogger(WordCountProcessor.class);
@@ -24,11 +22,12 @@ public class WordCountProcessor implements Processor<String, String, String, Lon
     @Override
     public void init(ProcessorContext<String, Long> context) {
         this.context = context;
-        this.store = context.getStateStore(WORD_GROUPED_COUNT_STORE);
+        this.store = context.getStateStore(ProcessorApiAllRangePrefixCountDemo.WORD_GROUPED_COUNT_STORE);
 
-        context.schedule(Duration.ofSeconds(6), PunctuationType.WALL_CLOCK_TIME, this::prefixScan);
+        context.schedule(Duration.ofSeconds(5), PunctuationType.WALL_CLOCK_TIME, this::prefixScan);
         context.schedule(Duration.ofSeconds(12), PunctuationType.WALL_CLOCK_TIME, this::rangeFrom);
-        context.schedule(Duration.ofSeconds(60), PunctuationType.WALL_CLOCK_TIME, this::all);
+        context.schedule(Duration.ofSeconds(17), PunctuationType.WALL_CLOCK_TIME, this::approximateNumEntries);
+        context.schedule(Duration.ofSeconds(21), PunctuationType.WALL_CLOCK_TIME, this::all);
     }
 
     @Override
@@ -47,23 +46,25 @@ public class WordCountProcessor implements Processor<String, String, String, Lon
     }
 
     private void prefixScan(long timestamp) {
-        // note: 2nd arg (serializer) of prefixScan is never used
-        try (KeyValueIterator<String, Long> iter = store.prefixScan("b", Serdes.String().serializer())) {
-            iter.forEachRemaining(kv -> LOG.info("prefixScan('b') -> {}::{}", kv.key, kv.value));
+        try (KeyValueIterator<String, Long> iter = store.prefixScan("bel", Serdes.String().serializer())) {
+            iter.forEachRemaining(kv -> LOG.info("prefixScan('bel') -> {}::{}", kv.key, kv.value));
+        }
+    }
+
+    private void approximateNumEntries(long timestamp) {
+        long count = store.approximateNumEntries();
+        LOG.info("approximateNumEntries() -> {}", count);
+    }
+
+    private void rangeFrom(long timestamp) {
+        try (KeyValueIterator<String, Long> iter = store.range("netherlands", "romania")) {
+            iter.forEachRemaining(kv -> LOG.info("range('netherlands', 'romania') -> {}::{}", kv.key, kv.value));
         }
     }
 
     private void all(long timestamp) {
-        // note: 2nd arg (serializer) of prefixScan is never used
         try (KeyValueIterator<String, Long> iter = store.all()) {
             iter.forEachRemaining(kv -> LOG.info("all() -> {}::{}", kv.key, kv.value));
-        }
-    }
-
-    private void rangeFrom(long timestamp) {
-        // note: 2nd arg (serializer) of prefixScan is never used
-        try (KeyValueIterator<String, Long> iter = store.range("netherlands", "romania")) {
-            iter.forEachRemaining(kv -> LOG.info("range('netherlands', 'romania') -> {}::{}", kv.key, kv.value));
         }
     }
 

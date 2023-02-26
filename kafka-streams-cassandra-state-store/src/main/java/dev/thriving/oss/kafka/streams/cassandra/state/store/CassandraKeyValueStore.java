@@ -25,6 +25,7 @@ public class CassandraKeyValueStore implements KeyValueStore<Bytes, byte[]> {
     protected final String name;
     private final CassandraKeyValueStoreRepository repo;
     protected StateStoreContext context;
+    protected int partition;
     protected Position position = Position.emptyPosition();
     private volatile boolean open = false;
 
@@ -49,6 +50,7 @@ public class CassandraKeyValueStore implements KeyValueStore<Bytes, byte[]> {
     @Override
     public void init(StateStoreContext context, StateStore root) {
         this.context = context;
+        this.partition = context.taskId().partition();
 
         if (root != null) {
             // register the store
@@ -105,9 +107,8 @@ public class CassandraKeyValueStore implements KeyValueStore<Bytes, byte[]> {
 
     @Override
     public long approximateNumEntries() {
-        // note: SELECT COUNT(*) requires significant CPU and I/O resources and may be quite slow depending on store size...
-        // Support is considered to be added, but for now it's not supported for the sake of accidental overloading of the database.
-        throw new UnsupportedOperationException();
+        LOG.warn("Cassandra/CQL does not support getting approximate counts. SELECT COUNT(*) requires significant CPU and I/O resources and may be quite slow depending on store size... use with care!!!");
+        return repo.getCount(partition);
     }
 
 
@@ -124,7 +125,7 @@ public class CassandraKeyValueStore implements KeyValueStore<Bytes, byte[]> {
 
     private void putInternal(Bytes key, byte[] value) {
         LOG.trace("putInternal {}::{}", key, value);
-        repo.save(context.taskId().partition(), key, value);
+        repo.save(partition, key, value);
         StoreQueryUtils.updatePosition(position, context);
     }
 
@@ -142,7 +143,7 @@ public class CassandraKeyValueStore implements KeyValueStore<Bytes, byte[]> {
     @Override
     public void putAll(List<KeyValue<Bytes, byte[]>> entries) {
         LOG.trace("putAll {}", entries);
-        repo.saveBatch(context.taskId().partition(), entries);
+        repo.saveBatch(partition, entries);
     }
 
     @Override
@@ -156,38 +157,41 @@ public class CassandraKeyValueStore implements KeyValueStore<Bytes, byte[]> {
 
     private void deleteInternal(Bytes key) {
         LOG.trace("deleteInternal {}", key);
-        repo.delete(context.taskId().partition(), key);
+        repo.delete(partition, key);
     }
 
     @Override
     public byte[] get(Bytes key) {
         LOG.trace("get {}", key);
         Objects.requireNonNull(key, "key cannot be null");
-        return repo.getByKey(context.taskId().partition(), key);
+        return repo.getByKey(partition, key);
     }
 
     @Override
     public KeyValueIterator<Bytes, byte[]> range(Bytes from, Bytes to) {
-        return repo.range(context.taskId().partition(), from, to);
+        return repo.getForRange(partition, from, to, true, true);
     }
 
     @Override
     public KeyValueIterator<Bytes, byte[]> reverseRange(Bytes from, Bytes to) {
-        return repo.rangeDesc(context.taskId().partition(), from, to);
+        return repo.getForRange(partition, from, to, false, true);
     }
 
     @Override
     public KeyValueIterator<Bytes, byte[]> all() {
-        return repo.getAll(context.taskId().partition());
+        return repo.getAll(partition, true);
     }
 
     @Override
     public KeyValueIterator<Bytes, byte[]> reverseAll() {
-        return repo.getAllDesc(context.taskId().partition());
+        return repo.getAll(partition, false);
     }
 
     @Override
     public <PS extends Serializer<P>, P> KeyValueIterator<Bytes, byte[]> prefixScan(P prefix, PS prefixKeySerializer) {
-        return repo.findByPartitionAndKeyPrefix(context.taskId().partition(), prefix.toString());
+        final Bytes from = Bytes.wrap(prefixKeySerializer.serialize(null, prefix));
+        final Bytes to = Bytes.increment(from);
+
+        return repo.getForRange(partition, from, to, true, false);
     }
 }
