@@ -27,16 +27,16 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import static org.apache.kafka.common.utils.Utils.mkEntry;
-import static org.apache.kafka.common.utils.Utils.mkMap;
+import static org.apache.kafka.common.utils.Utils.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class WordCountCassandraStoreTest extends AbstractIntegrationTest {
+class WordCountTest extends AbstractIntegrationTest {
 
-    private static final Logger LOG = LoggerFactory.getLogger(WordCountCassandraStoreTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(WordCountTest.class);
 
     private static final String INPUT_TOPIC = "inputTopic";
     private static final String OUTPUT_TOPIC = "outputTopic";
+    private static final String STORE_NAME = "word-grouped-count";
 
     @Test
     public void shouldCountWords() throws ExecutionException, InterruptedException, TimeoutException {
@@ -89,7 +89,7 @@ class WordCountCassandraStoreTest extends AbstractIntegrationTest {
             // start streams.
             streams.start();
 
-            // Step 4: Produce some input data to the input topic.
+            // produce some input data to the input topic.
             inputValues.forEach(it -> {
                 try {
                     producer.send(new ProducerRecord<>(INPUT_TOPIC, "testcontainers", it)).get();
@@ -97,6 +97,8 @@ class WordCountCassandraStoreTest extends AbstractIntegrationTest {
                     throw new RuntimeException(e);
                 }
             });
+
+            sleep(500);
 
             // consume and collect streams output
             final Map<String, Long> results = new HashMap<>();
@@ -130,7 +132,7 @@ class WordCountCassandraStoreTest extends AbstractIntegrationTest {
                 .flatMapValues(value -> Arrays.asList(value.toLowerCase(Locale.getDefault()).split(" ")))
                 .groupBy((key, value) -> value)
                 .count(Materialized.<String, Long>as(
-                                CassandraStores.builder(session, "word-grouped-count")
+                                CassandraStores.builder(session, STORE_NAME)
                                         .withKeyspace(CASSANDRA_KEYSPACE)
                                         .keyValueStore()
                         )
