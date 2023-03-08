@@ -17,7 +17,7 @@ Please carefully read documentation provided on [store types](#store-types) and 
 
 ### Implemented/compiled with
 * Java 17
-* kafka-streams 3.3.1
+* kafka-streams 3.4
 * datastax java-driver-core 4.15.0
 
 ### Supported client-libs
@@ -29,6 +29,10 @@ Please carefully read documentation provided on [store types](#store-types) and 
 * Apache Cassandra 3.11
 * Apache Cassandra 4
 * ScyllaDB (should work from 4.3+)
+
+#### Integration Tests
+* JUnit 5, AssertJ
+* [testcontainers](https://www.testcontainers.org/)
 
 ## Get it!
 
@@ -281,6 +285,31 @@ CREATE TABLE IF NOT EXISTS global_kv_store_kstreams_store (
 💡 **Tip:** Cassandra has a table option `default_time_to_live` (default expiration time (“TTL”) in seconds for a table) which can be useful for certain use cases where data (state) can or should expire.
 
 Please note writes to cassandra are made with system time. The table TTL will therefore apply based on the time of write (not stream time). 
+
+
+## Development
+
+### Requirements
+
+- Java 17
+- Docker (integration tests with testcontainers)
+
+### Build
+
+This library is bundled with Gradle. Please note The build task also depends on task testInt which runs integration tests using testcontainers (build <- check <- intTest).
+
+```shell
+./gradlew clean build
+```
+
+### Integration test
+
+Integration tests can be run separately via
+
+```shell
+./gradlew :kafka-streams-cassandra-state-store:intTest
+```
+
 
 ## Roadmap
 
