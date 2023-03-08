@@ -27,7 +27,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import static org.apache.kafka.common.utils.Utils.*;
+import static org.apache.kafka.common.utils.Utils.mkEntry;
+import static org.apache.kafka.common.utils.Utils.mkMap;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class WordCountTest extends AbstractIntegrationTest {
@@ -98,19 +99,13 @@ class WordCountTest extends AbstractIntegrationTest {
                 }
             });
 
-            sleep(500);
-
             // consume and collect streams output
             final Map<String, Long> results = new HashMap<>();
             Unreliables.retryUntilTrue(10, TimeUnit.SECONDS, () -> {
-                        ConsumerRecords<String, Long> records = consumer.poll(Duration.ofMillis(100));
-
-                        if (records.isEmpty()) {
-                            return false;
-                        }
-
+                        ConsumerRecords<String, Long> records = consumer.poll(Duration.ofMillis(500));
                         records.iterator().forEachRemaining(record -> results.put(record.key(), record.value()));
-                        return true;
+
+                        return results.size() >= expectedWordCounts.size();
                     }
             );
 

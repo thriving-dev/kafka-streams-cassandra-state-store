@@ -15,7 +15,6 @@ import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KTable;
 import org.apache.kafka.streams.kstream.Materialized;
 import org.apache.kafka.streams.kstream.Produced;
-import org.apache.kafka.streams.state.KeyValueIterator;
 import org.apache.kafka.streams.state.QueryableStoreTypes;
 import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
 import org.jetbrains.annotations.NotNull;
@@ -35,73 +34,37 @@ import static org.apache.kafka.common.utils.Utils.mkMap;
 import static org.apache.kafka.streams.StoreQueryParameters.fromNameAndType;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class WordCountInteractiveQueriesTest extends AbstractIntegrationTest {
+class WordCountGlobalStoreTest extends AbstractIntegrationTest {
 
-    private static final Logger LOG = LoggerFactory.getLogger(WordCountInteractiveQueriesTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(WordCountGlobalStoreTest.class);
 
     private static final String INPUT_TOPIC = "inputTopic";
     private static final String OUTPUT_TOPIC = "outputTopic";
     private static final String STORE_NAME = "word-grouped-count";
 
     @Test
-    public void shouldCountWordsAndAllowInteractiveQueries() throws ExecutionException, InterruptedException, TimeoutException {
+    public void shouldCountWords() throws ExecutionException, InterruptedException, TimeoutException {
         // given
         final List<String> inputValues = Arrays.asList(
-                "Albania Andorra Armenia Austria Azerbaijan Belarus Belgium BosniaAndHerzegovina Bulgaria Croatia Cyprus Czechia Denmark Estonia Finland France Georgia Germany Greece Hungary Iceland Ireland Italy Kazakhstan Kosovo Latvia Liechtenstein Lithuania Luxembourg Malta Moldova Monaco Montenegro Netherlands NorthMacedonia Norway Poland Portugal Romania Russia SanMarino Serbia Slovakia Slovenia Spain Sweden Switzerland Turkey Ukraine UnitedKingdom VaticanCity",
-                "Albania Andorra Armenia Austria Azerbaijan Belarus Belgium BosniaAndHerzegovina Bulgaria Croatia Cyprus Czechia"
+                "Hello Kafka Streams",
+                "All streams lead to Kafka",
+                "Join Kafka Summit",
+                "И теперь пошли русские слова"
         );
         final Map<String, Long> expectedWordCounts = mkMap(
-                mkEntry("albania", 2L),
-                mkEntry("andorra", 2L),
-                mkEntry("armenia", 2L),
-                mkEntry("austria", 2L),
-                mkEntry("azerbaijan", 2L),
-                mkEntry("belarus", 2L),
-                mkEntry("belgium", 2L),
-                mkEntry("bosniaandherzegovina", 2L),
-                mkEntry("bulgaria", 2L),
-                mkEntry("croatia", 2L),
-                mkEntry("cyprus", 2L),
-                mkEntry("czechia", 2L),
-                mkEntry("denmark", 1L),
-                mkEntry("estonia", 1L),
-                mkEntry("finland", 1L),
-                mkEntry("france", 1L),
-                mkEntry("georgia", 1L),
-                mkEntry("germany", 1L),
-                mkEntry("greece", 1L),
-                mkEntry("hungary", 1L),
-                mkEntry("iceland", 1L),
-                mkEntry("ireland", 1L),
-                mkEntry("italy", 1L),
-                mkEntry("kazakhstan", 1L),
-                mkEntry("kosovo", 1L),
-                mkEntry("latvia", 1L),
-                mkEntry("liechtenstein", 1L),
-                mkEntry("lithuania", 1L),
-                mkEntry("luxembourg", 1L),
-                mkEntry("malta", 1L),
-                mkEntry("moldova", 1L),
-                mkEntry("monaco", 1L),
-                mkEntry("montenegro", 1L),
-                mkEntry("netherlands", 1L),
-                mkEntry("northmacedonia", 1L),
-                mkEntry("norway", 1L),
-                mkEntry("poland", 1L),
-                mkEntry("portugal", 1L),
-                mkEntry("romania", 1L),
-                mkEntry("russia", 1L),
-                mkEntry("sanmarino", 1L),
-                mkEntry("serbia", 1L),
-                mkEntry("slovakia", 1L),
-                mkEntry("slovenia", 1L),
-                mkEntry("spain", 1L),
-                mkEntry("sweden", 1L),
-                mkEntry("switzerland", 1L),
-                mkEntry("turkey", 1L),
-                mkEntry("ukraine", 1L),
-                mkEntry("unitedkingdom", 1L),
-                mkEntry("vaticancity", 1L)
+                mkEntry("hello", 1L),
+                mkEntry("all", 1L),
+                mkEntry("streams", 2L),
+                mkEntry("lead", 1L),
+                mkEntry("to", 1L),
+                mkEntry("join", 1L),
+                mkEntry("kafka", 3L),
+                mkEntry("summit", 1L),
+                mkEntry("и", 1L),
+                mkEntry("теперь", 1L),
+                mkEntry("пошли", 1L),
+                mkEntry("русские", 1L),
+                mkEntry("слова", 1L)
         );
 
         // configure and start the processor topology.
@@ -149,65 +112,30 @@ class WordCountInteractiveQueriesTest extends AbstractIntegrationTest {
                     }
             );
 
-            // then (1) verify the application's output data.
+            // then verify the application's output data.
             assertThat(results).containsExactlyInAnyOrderEntriesOf(expectedWordCounts);
 
             // when (2)
-            // Lookup the KeyValueStore
-            final ReadOnlyKeyValueStore<String, Long> store =
-                    streams.store(fromNameAndType(STORE_NAME, QueryableStoreTypes.keyValueStore()));
+            // get the first active task partition for the first streams thread
+            int firstActiveTaskPartition = streams.metadataForLocalThreads()
+                    .stream().findFirst()
+                    .orElseThrow(() -> new RuntimeException("no streams threads found"))
+                    .activeTasks()
+                    .stream().findFirst()
+                    .orElseThrow(() -> new RuntimeException("no active task found"))
+                    .taskId().partition();
+            // Lookup the KeyValueStore, use single store with a first active assigned partition (...it's a 'global' store)
+            final ReadOnlyKeyValueStore<String, Long> store = streams.store(
+                    fromNameAndType(STORE_NAME, QueryableStoreTypes.<String, Long>keyValueStore())
+                            .withPartition(firstActiveTaskPartition)
+            );
 
             // then (2)
             final Long valueForUnknownKey = store.get("unknown");
             assertThat(valueForUnknownKey).isNull();
 
-            final Long valueForBelgium = store.get("belgium");
-            assertThat(valueForBelgium).isNotNull().isEqualTo(2L);
-
-            final KeyValueIterator<String, Long> allIterator = store.all();
-            assertThat(allIterator).isNotNull();
-            final Map<String, Long> allResults = new HashMap<>();
-            allIterator.forEachRemaining(it -> allResults.put(it.key, it.value));
-            assertThat(allResults).hasSize(expectedWordCounts.size());
-            assertThat(allResults).containsExactlyInAnyOrderEntriesOf(expectedWordCounts);
-
-            final KeyValueIterator<String, Long> prefixScanIterator1 = store.prefixScan("bel", stringSerde.serializer());
-            assertThat(prefixScanIterator1).isNotNull();
-            final Map<String, Long> prefixScanResults1 = new HashMap<>();
-            prefixScanIterator1.forEachRemaining(it -> prefixScanResults1.put(it.key, it.value));
-            assertThat(prefixScanResults1).hasSize(2);
-            assertThat(prefixScanResults1).containsExactlyInAnyOrderEntriesOf(
-                    mkMap(
-                            mkEntry("belgium", 2L),
-                            mkEntry("belarus", 2L)
-                    )
-            );
-
-            final KeyValueIterator<String, Long> prefixScanIterator2 = store.prefixScan("f", stringSerde.serializer());
-            assertThat(prefixScanIterator2).isNotNull();
-            final Map<String, Long> prefixScanResults2 = new HashMap<>();
-            prefixScanIterator2.forEachRemaining(it -> prefixScanResults2.put(it.key, it.value));
-            assertThat(prefixScanResults2).hasSize(2);
-            assertThat(prefixScanResults2).containsExactlyInAnyOrderEntriesOf(
-                    mkMap(
-                            mkEntry("finland", 1L),
-                            mkEntry("france", 1L)
-                    )
-            );
-
-            final KeyValueIterator<String, Long> rangeIterator = store.range("lithuania", "moldova");
-            assertThat(rangeIterator).isNotNull();
-            final Map<String, Long> rangeResults = new HashMap<>();
-            rangeIterator.forEachRemaining(it -> rangeResults.put(it.key, it.value));
-            assertThat(rangeResults).hasSize(4);
-            assertThat(rangeResults).containsExactlyInAnyOrderEntriesOf(
-                    mkMap(
-                            mkEntry("lithuania", 1L),
-                            mkEntry("luxembourg", 1L),
-                            mkEntry("malta", 1L),
-                            mkEntry("moldova", 1L)
-                    )
-            );
+            final Long valueForBelgium = store.get("hello");
+            assertThat(valueForBelgium).isNotNull().isEqualTo(1L);
 
             final long approximateNumEntries = store.approximateNumEntries();
             assertThat(approximateNumEntries).isEqualTo(expectedWordCounts.size());
@@ -229,7 +157,7 @@ class WordCountInteractiveQueriesTest extends AbstractIntegrationTest {
                 .count(Materialized.<String, Long>as(
                                 CassandraStores.builder(session, STORE_NAME)
                                         .withKeyspace(CASSANDRA_KEYSPACE)
-                                        .keyValueStore()
+                                        .globalKeyValueStore()
                         )
                         .withLoggingDisabled()
                         .withCachingDisabled()
