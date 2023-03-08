@@ -19,14 +19,55 @@ repositories {
     mavenCentral()
 }
 
+sourceSets {
+    create("intTest") {
+        compileClasspath += sourceSets.main.get().output
+        runtimeClasspath += sourceSets.main.get().output
+    }
+}
+
+val intTestImplementation by configurations.getting {
+    extendsFrom(configurations.implementation.get())
+}
+
+configurations["intTestRuntimeOnly"].extendsFrom(configurations.runtimeOnly.get())
+
 dependencies {
+    // This dependency is used internally, and not exposed to consumers on their own compile classpath.
+    compileOnly("org.apache.kafka:kafka-streams:3.4.0")
+    compileOnly("com.datastax.oss:java-driver-core:4.15.0")
+
     // Use JUnit Jupiter for testing.
     // testImplementation("org.junit.jupiter:junit-jupiter:5.9.1")
 
-    // This dependency is used internally, and not exposed to consumers on their own compile classpath.
-    compileOnly("org.apache.kafka:kafka-streams:3.3.1")
-    compileOnly("com.datastax.oss:java-driver-core:4.15.0")
+    intTestImplementation("org.junit.jupiter:junit-jupiter:5.8.1")
+    intTestImplementation("org.testcontainers:testcontainers:1.17.6")
+    intTestImplementation("org.testcontainers:junit-jupiter:1.17.6")
+    intTestImplementation("org.testcontainers:redpanda:1.17.6")
+    intTestImplementation("org.testcontainers:cassandra:1.17.6")
+    intTestImplementation("ch.qos.logback:logback-classic:1.3.5")
+    intTestImplementation("org.apache.kafka:kafka-streams:3.4.0")
+    intTestImplementation("com.datastax.oss:java-driver-core:4.15.0")
+    intTestImplementation("org.assertj:assertj-core:3.24.2")
+    intTestImplementation("com.google.guava:guava:31.1-jre")
 }
+
+val intTest = task<Test>("intTest") {
+    description = "Runs integration tests."
+    group = "verification"
+
+    testClassesDirs = sourceSets["intTest"].output.classesDirs
+    classpath = sourceSets["intTest"].runtimeClasspath
+    shouldRunAfter("test")
+
+    useJUnitPlatform()
+
+    testLogging {
+        events("passed")
+    }
+}
+
+tasks.check { dependsOn(intTest) }
 
 tasks.named<Test>("test") {
     // Use JUnit Platform for unit tests.

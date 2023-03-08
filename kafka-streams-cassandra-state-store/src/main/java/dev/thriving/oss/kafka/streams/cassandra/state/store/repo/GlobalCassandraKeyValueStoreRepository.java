@@ -6,16 +6,12 @@ import dev.thriving.oss.kafka.streams.cassandra.state.store.CassandraKeyValueIte
 import org.apache.kafka.common.utils.Bytes;
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.state.KeyValueIterator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
 import java.time.Instant;
 import java.util.List;
 
-public class GlobalBlobKeyCassandraKeyValueStoreRepository extends AbstractCassandraKeyValueStoreRepository<ByteBuffer> {
-
-    private static final Logger LOG = LoggerFactory.getLogger(GlobalBlobKeyCassandraKeyValueStoreRepository.class);
+public class GlobalCassandraKeyValueStoreRepository extends AbstractCassandraKeyValueStoreRepository<ByteBuffer> {
 
     private PreparedStatement insert;
     private PreparedStatement deleteByKey;
@@ -23,7 +19,7 @@ public class GlobalBlobKeyCassandraKeyValueStoreRepository extends AbstractCassa
     private PreparedStatement selectAll;
     private PreparedStatement selectCountAll;
 
-    public GlobalBlobKeyCassandraKeyValueStoreRepository(CqlSession session, String tableName, String tableOptions) {
+    public GlobalCassandraKeyValueStoreRepository(CqlSession session, String tableName, String tableOptions) {
         super(session, tableName, tableOptions);
     }
 

@@ -1,7 +1,7 @@
 package dev.thriving.oss.kafka.streams.cassandra.state.store;
 
 import com.datastax.oss.driver.api.core.CqlSession;
-import dev.thriving.oss.kafka.streams.cassandra.state.store.repo.GlobalBlobKeyCassandraKeyValueStoreRepository;
+import dev.thriving.oss.kafka.streams.cassandra.state.store.repo.GlobalCassandraKeyValueStoreRepository;
 import dev.thriving.oss.kafka.streams.cassandra.state.store.repo.PartitionedCassandraKeyValueStoreRepository;
 import org.apache.kafka.common.utils.Bytes;
 import org.apache.kafka.streams.state.KeyValueBytesStoreSupplier;
@@ -251,7 +251,7 @@ public final class CassandraStores {
             @Override
             public KeyValueStore<Bytes, byte[]> get() {
                 return new CassandraKeyValueStore(name,
-                        new GlobalBlobKeyCassandraKeyValueStoreRepository(
+                        new GlobalCassandraKeyValueStoreRepository(
                                 session,
                                 resolveTableName(),
                                 tableOptions));

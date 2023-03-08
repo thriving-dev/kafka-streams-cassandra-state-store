@@ -17,7 +17,7 @@ Please carefully read documentation provided on [store types](#store-types) and 
 
 ### Implemented/compiled with
 * Java 17
-* kafka-streams 3.3.1
+* kafka-streams 3.4
 * datastax java-driver-core 4.15.0
 
 ### Supported client-libs
@@ -29,6 +29,10 @@ Please carefully read documentation provided on [store types](#store-types) and 
 * Apache Cassandra 3.11
 * Apache Cassandra 4
 * ScyllaDB (should work from 4.3+)
+
+#### Integration Tests
+* JUnit 5, AssertJ
+* [testcontainers](https://www.testcontainers.org/)
 
 ## Get it!
 
@@ -122,6 +126,27 @@ This global store should not be used and confused with a Kafka Streams Global St
 It has to be used as a non-global (regular!) streams KeyValue state store - allows to read entries from any streams context (streams task/thread).
 
 Tip: This store type can be useful when exposing state store access via REST API. Each running instance of your app can serve all requests without the need to proxy the request to the right instance having the task (kafka partition) assigned for the key in question.
+
+⚠️ For **querying** this **global CassandraKeyValueStore**, make sure to restrict the `WrappingStoreProvider` to a single (assigned) partition.
+Otherwise streams will return a `CompositeReadOnlyKeyValueStore` wrapping all assigned tasks' stores which will run the same query for all assigned partitions and combine multiple identical results.
+
+```java
+// get the first active task partition for the first streams thread
+int firstActiveTaskPartition = streams.metadataForLocalThreads()
+        .stream().findFirst()
+        .orElseThrow(() -> new RuntimeException("no streams threads found"))
+        .activeTasks()
+        .stream().findFirst()
+        .orElseThrow(() -> new RuntimeException("no active task found"))
+        .taskId().partition();
+// Lookup the KeyValueStore, use single store with a first active assigned partition (...it's a 'global' store)
+final ReadOnlyKeyValueStore<String, Long> store = streams.store(
+        fromNameAndType(STORE_NAME, QueryableStoreTypes.<String, Long>keyValueStore())
+        .withPartition(firstActiveTaskPartition)
+        );
+```
+
+(It might alternatively be easier to query the underlying CQL table manually & deserialize the data accordingly.)
 
 #### Supported operations by store type
 
@@ -261,6 +286,31 @@ CREATE TABLE IF NOT EXISTS global_kv_store_kstreams_store (
 
 Please note writes to cassandra are made with system time. The table TTL will therefore apply based on the time of write (not stream time). 
 
+
+## Development
+
+### Requirements
+
+- Java 17
+- Docker (integration tests with testcontainers)
+
+### Build
+
+This library is bundled with Gradle. Please note The build task also depends on task testInt which runs integration tests using testcontainers (build <- check <- intTest).
+
+```shell
+./gradlew clean build
+```
+
+### Integration test
+
+Integration tests can be run separately via
+
+```shell
+./gradlew :kafka-streams-cassandra-state-store:intTest
+```
+
+
 ## Roadmap
 
 - [x] MVP
@@ -331,21 +381,10 @@ Please note writes to cassandra are made with system time. The table TTL will th
         => tried to add `compaction = { 'class' : 'LeveledCompactionStrategy' };DROP TABLE xyz` which fails due to wrong syntax in Cassandra 3.11/4.1 & ScyllaDB 5.1  
 - [ ] tests
   - [ ] unit tests (?)
-  - [ ] WordCount integration test using testcontainers
-    - Testcontainers for Java
-      https://www.testcontainers.org/
-    - Cassandra Module - Testcontainers for Java
-      https://www.testcontainers.org/modules/databases/cassandra/
-    - Cassandra 4 mit Testcontainers in Spring Boot
-      https://www.trion.de/news/2022/02/01/cassandra-4-testcontainers.html
-    - Kafka Containers - Testcontainers for Java
-      https://www.testcontainers.org/modules/kafka/
-    - testcontainers-java/settings.gradle at main · testcontainers/testcontainers-java
-      https://github.com/testcontainers/testcontainers-java/blob/main/settings.gradle
-    - testcontainers-java/examples/kafka-cluster at main · testcontainers/testcontainers-java
-      https://github.com/testcontainers/testcontainers-java/tree/main/examples/kafka-cluster
-    - testcontainers-java/RedisBackedCacheTest.java at main · testcontainers/testcontainers-java
-      https://github.com/testcontainers/testcontainers-java/blob/main/examples/redis-backed-cache/src/test/java/RedisBackedCacheTest.java
+  - [x] integration test using testcontainers
+    - [x] WordCountTest
+    - [x] WordCountInteractiveQueriesTest
+    - [x] WordCountGlobalStoreTest
 - [ ] Advanced/Features/POCs Planned/Considered
   - [ ] add additional store types
     - [ ] WindowedStore functionality, example, ...
