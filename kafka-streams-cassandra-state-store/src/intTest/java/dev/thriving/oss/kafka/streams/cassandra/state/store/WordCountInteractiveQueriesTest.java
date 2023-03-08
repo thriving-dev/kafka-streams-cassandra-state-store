@@ -47,8 +47,8 @@ class WordCountInteractiveQueriesTest extends AbstractIntegrationTest {
     public void shouldCountWordsAndAllowInteractiveQueries() throws ExecutionException, InterruptedException, TimeoutException {
         // given
         final List<String> inputValues = Arrays.asList(
-                "Albania Andorra Armenia Austria Azerbaijan Belarus Belgium BosniaAndHerzegovina Bulgaria Croatia Cyprus Czechia Denmark Estonia Finland France Georgia Germany Greece Hungary Iceland Ireland Italy Kazakhstan Kosovo Latvia Liechtenstein Lithuania Luxembourg Malta Moldova Monaco Montenegro Netherlands NorthMacedonia Norway Poland Portugal Romania Russia SanMarino Serbia Slovakia Slovenia Spain Sweden Switzerland Turkey Ukraine UnitedKingdom VaticanCity",
-                "Albania Andorra Armenia Austria Azerbaijan Belarus Belgium BosniaAndHerzegovina Bulgaria Croatia Cyprus Czechia"
+                "Albania Andorra Armenia Austria Azerbaijan Belarus Belgium BosniaAndHerzegovina Bulgaria Croatia Cyprus Czechia",
+                "Albania Andorra Armenia Austria Azerbaijan Belarus Belgium BosniaAndHerzegovina Bulgaria Croatia Cyprus Czechia Denmark Estonia Finland France Georgia Germany Greece Hungary Iceland Ireland Italy Kazakhstan Kosovo Latvia Liechtenstein Lithuania Luxembourg Malta Moldova Monaco Montenegro Netherlands NorthMacedonia Norway Poland Portugal Romania Russia SanMarino Serbia Slovakia Slovenia Spain Sweden Switzerland Turkey Ukraine UnitedKingdom VaticanCity"
         );
         final Map<String, Long> expectedWordCounts = mkMap(
                 mkEntry("albania", 2L),
