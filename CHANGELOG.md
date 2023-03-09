@@ -5,6 +5,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [0.3.1](https://github.com/thriving-dev/kafka-streams-cassandra-state-store/releases/tag/0.3.1) (2023-03-09)
+[0.3.0...0.3.1](https://github.com/thriving-dev/kafka-streams-cassandra-state-store/compare/0.3.0...0.3.1)
+
+### (Added)
+- Adds a first set of **integration tests** with _testcontainers_
+  - Covering
+    - **WordCountTest** testing the kafka streams 'Hello world!' app to work with CassandraKeyValueStore
+    - **WordCountInteractiveQueriesTest** testing interactive queries incl. methods `all`, `range`, `prefixScan`, `approximateNumEntries` 
+    - **WordCountGlobalStoreTest** testing `CassandraStores.globalKeyValueStore()` and store access via interactive queries 
+  - Using
+    - Cassandra 4.1
+    - Redpanda
+
+### Changed / Removed
+- Simplified overly complex class name to `GlobalCassandraKeyValueStoreRepository`.  
+
+
 ## [0.3.0](https://github.com/thriving-dev/kafka-streams-cassandra-state-store/releases/tag/0.3.0) (2023-02-26)
 [0.2.0...0.3.0](https://github.com/thriving-dev/kafka-streams-cassandra-state-store/compare/0.2.0...0.3.0)
 
