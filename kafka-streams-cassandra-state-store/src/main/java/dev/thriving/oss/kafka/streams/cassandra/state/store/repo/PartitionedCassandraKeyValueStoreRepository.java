@@ -13,7 +13,7 @@ import java.nio.ByteBuffer;
 import java.time.Instant;
 import java.util.List;
 
-public class PartitionedCassandraKeyValueStoreRepository<K> extends AbstractCassandraKeyValueStoreRepository<K> {
+public class PartitionedCassandraKeyValueStoreRepository<K> extends AbstractCassandraKeyValueStoreRepository<K> implements CassandraKeyValueStoreRepository {
 
     private static final Logger LOG = LoggerFactory.getLogger(PartitionedCassandraKeyValueStoreRepository.class);
 
@@ -41,14 +41,14 @@ public class PartitionedCassandraKeyValueStoreRepository<K> extends AbstractCass
     @Override
     protected void createTable(String tableName, String tableOptions) {
         PreparedStatement prepare = session.prepare("""
-           CREATE TABLE IF NOT EXISTS %s (
-               partition int,
-               key blob,
-               time timestamp,
-               value blob,
-               PRIMARY KEY ((partition), key)
-           ) %s
-           """.formatted(tableName, tableOptions.isBlank() ? "" : "WITH " + tableOptions));
+                CREATE TABLE IF NOT EXISTS %s (
+                    partition int,
+                    key blob,
+                    time timestamp,
+                    value blob,
+                    PRIMARY KEY ((partition), key)
+                ) %s
+                """.formatted(tableName, tableOptions.isBlank() ? "" : "WITH " + tableOptions));
         session.execute(prepare.bind());
     }
 
@@ -127,7 +127,7 @@ public class PartitionedCassandraKeyValueStoreRepository<K> extends AbstractCass
             PreparedStatement statement = forward ?
                     (toInclusive ? selectByPartitionAndKeyToInclusive : selectByPartitionAndKeyTo) :
                     (toInclusive ? selectByPartitionAndKeyToInclusiveReversed : selectByPartitionAndKeyToReversed);
-                bound = statement.bind(partition, ByteBuffer.wrap(to.get()));
+            bound = statement.bind(partition, ByteBuffer.wrap(to.get()));
         } else if (from.compareTo(to) > 0) {
             LOG.warn("Returning empty iterator for fetch with invalid key range: from > to. " +
                     "This may be due to range arguments set in the wrong order, " +
@@ -146,8 +146,7 @@ public class PartitionedCassandraKeyValueStoreRepository<K> extends AbstractCass
 
     @Override
     public long getCount(int partition) {
-        BoundStatement prepared = selectCountByPartition.bind(partition);
-        return executeSelectCount(prepared, session.execute(prepared));
+        return executeSelectCount(selectCountByPartition.bind(partition));
     }
 
 }

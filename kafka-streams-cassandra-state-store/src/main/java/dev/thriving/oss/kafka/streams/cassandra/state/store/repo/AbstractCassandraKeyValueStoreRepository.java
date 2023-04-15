@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
 
-public abstract class AbstractCassandraKeyValueStoreRepository<K> implements CassandraKeyValueStoreRepository {
+public abstract class AbstractCassandraKeyValueStoreRepository<K> {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractCassandraKeyValueStoreRepository.class);
 
@@ -31,10 +31,10 @@ public abstract class AbstractCassandraKeyValueStoreRepository<K> implements Cas
 
     protected abstract void initPreparedStatements(String tableName);
 
-    protected long executeSelectCount(BoundStatement prepared, ResultSet execute) {
+    protected long executeSelectCount(BoundStatement prepared) {
         try {
             prepared = prepared.setTimeout(Duration.ofSeconds(5)); // TODO: should this be configurable? higher/lower?
-            ResultSet rs = execute;
+            ResultSet rs = session.execute(prepared);
             Row result = rs.one();
             if (result == null) {
                 LOG.error("`SELECT COUNT(*)` did not return any results, this should never happen.");
