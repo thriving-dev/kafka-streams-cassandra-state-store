@@ -11,7 +11,7 @@ import java.nio.ByteBuffer;
 import java.time.Instant;
 import java.util.List;
 
-public class GlobalCassandraKeyValueStoreRepository extends AbstractCassandraKeyValueStoreRepository<ByteBuffer> {
+public class GlobalCassandraKeyValueStoreRepository extends AbstractCassandraKeyValueStoreRepository<ByteBuffer> implements CassandraKeyValueStoreRepository {
 
     private PreparedStatement insert;
     private PreparedStatement deleteByKey;
@@ -93,8 +93,7 @@ public class GlobalCassandraKeyValueStoreRepository extends AbstractCassandraKey
 
     @Override
     public long getCount(int partition) {
-        BoundStatement prepared = selectCountAll.bind();
-        return executeSelectCount(prepared, session.execute(prepared));
+        return executeSelectCount(selectCountAll.bind());
     }
 
 }
