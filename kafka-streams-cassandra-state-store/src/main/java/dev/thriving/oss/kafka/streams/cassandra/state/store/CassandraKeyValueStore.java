@@ -26,10 +26,11 @@ public class CassandraKeyValueStore implements KeyValueStore<Bytes, byte[]> {
     private final CassandraKeyValueStoreRepository repo;
     protected StateStoreContext context;
     protected int partition;
-    protected Position position = Position.emptyPosition();
+    protected final Position position = Position.emptyPosition();
     private volatile boolean open = false;
 
-    public CassandraKeyValueStore(String name, CassandraKeyValueStoreRepository repo) {
+    public CassandraKeyValueStore(final String name,
+                                  final CassandraKeyValueStoreRepository repo) {
         this.name = name;
         this.repo = repo;
     }

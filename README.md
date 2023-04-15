@@ -267,7 +267,7 @@ Not all methods have been implemented. Please check [store types method support 
 ##### keyValueStore
 Using defaults, for a state store named "my-kv-store" following CQL Schema applies:
 ```sql
-CREATE TABLE IF NOT EXISTS my_kv_store_kstreams_store (
+CREATE TABLE IF NOT EXISTS my_kv_kstreams_store (
     partition int,
     key blob,
     time timestamp,
@@ -279,11 +279,25 @@ CREATE TABLE IF NOT EXISTS my_kv_store_kstreams_store (
 ##### globalKeyValueStore
 Using defaults, for a state store named "global-kv-store" following CQL Schema applies:
 ```sql
-CREATE TABLE IF NOT EXISTS global_kv_store_kstreams_store (
+CREATE TABLE IF NOT EXISTS global_kv_kstreams_store (
     key blob,
     time timestamp,
     value blob,
     PRIMARY KEY (key)
+) WITH compaction = { 'class' : 'LeveledCompactionStrategy' }
+```
+
+##### windowStore
+Using defaults, for a state store named "global-kv-store" following CQL Schema applies:
+```sql
+CREATE TABLE IF NOT EXISTS some_window_kstreams_store (
+    partition int,
+    start_time bigint,
+    end_time bigint,
+    key blob,
+    time timestamp,
+    value blob,
+    PRIMARY KEY ((partition, start_time), end_time, key)
 ) WITH compaction = { 'class' : 'LeveledCompactionStrategy' }
 ```
 
