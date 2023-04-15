@@ -3,11 +3,9 @@ package dev.thriving.oss.kafka.streams.cassandra.state.store;
 import com.datastax.oss.driver.api.core.CqlSession;
 import dev.thriving.oss.kafka.streams.cassandra.state.store.repo.GlobalCassandraKeyValueStoreRepository;
 import dev.thriving.oss.kafka.streams.cassandra.state.store.repo.PartitionedCassandraKeyValueStoreRepository;
+import dev.thriving.oss.kafka.streams.cassandra.state.store.repo.PartitionedCassandraWindowStoreRepository;
 import org.apache.kafka.common.utils.Bytes;
-import org.apache.kafka.streams.state.KeyValueBytesStoreSupplier;
-import org.apache.kafka.streams.state.KeyValueStore;
-import org.apache.kafka.streams.state.StoreBuilder;
-import org.apache.kafka.streams.state.StoreSupplier;
+import org.apache.kafka.streams.state.*;
 
 import java.util.Objects;
 import java.util.function.Function;
@@ -269,4 +267,59 @@ public final class CassandraStores {
         return keyspace != null ? keyspace + "." + resolvedTableName : resolvedTableName;
     }
 
+    public WindowBytesStoreSupplier windowBytesStore(
+            final long retentionPeriod,
+            final long segmentIntervalMs,
+            final long windowSize,
+            final boolean retainDuplicates
+    ) {
+        return new WindowBytesStoreSupplier() {
+
+//            // TODO: would this be useful?
+//            final long defaultSegmentInterval = Math.max(retentionPeriod / 2, 60_000L);
+
+            @Override
+            public long segmentIntervalMs() {
+                return segmentIntervalMs;
+            }
+
+            @Override
+            public long windowSize() {
+                return windowSize;
+            }
+
+            @Override
+            public boolean retainDuplicates() {
+                return retainDuplicates;
+            }
+
+            @Override
+            public long retentionPeriod() {
+                return retentionPeriod;
+            }
+
+            @Override
+            public String name() {
+                return name;
+            }
+
+            @Override
+            public WindowStore<Bytes, byte[]> get() {
+                return new CassandraWindowStore(name,
+                        retentionPeriod,
+                        windowSize,
+                        retainDuplicates,
+                        new PartitionedCassandraWindowStoreRepository(
+                                session,
+                                resolveTableName(),
+                                tableOptions
+                        ));
+            }
+
+            @Override
+            public String metricsScope() {
+                return "cassandra-window";
+            }
+        };
+    }
 }
