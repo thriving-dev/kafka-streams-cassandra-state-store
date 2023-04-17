@@ -63,12 +63,12 @@ implementation 'dev.thriving.oss:kafka-streams-cassandra-state-store:${version}'
 
 #### ‼️**Important:** notes upfront
 
-1. Disable logging => `withLoggingDisabled()`
-  - Enabled by default, kafka streams is 'logging' the events making up the store's state against a _changelog topic_ to be able to restore state following a rebalance or application restart. Since cassandra is a permanent external store, state does not need to be _restored_ but is always available.   
-1. Disable caching => `withCachingDisabled()`
-  - Enabled by default, kafka streams is buffering writes - which is not what we want when working with cassandra state store  
-1. Do not use [standby replicas](https://docs.confluent.io/platform/current/streams/developer-guide/config-streams.html#streams-developer-guide-standby-replicas) => `num.standby.replicas=0`
-  - Standby replicas are used to minimize the latency of task failover by keeping shadow copies of local state stores as a hot standby. The state store backed by cassandra does not need to be restored or re-balanced since all streams instances can directly access any partitions state.
+1. Disable logging => `withLoggingDisabled()`    
+   ...enabled by default, kafka streams is 'logging' the events making up the store's state against a _changelog topic_ to be able to restore state following a rebalance or application restart. Since cassandra is a permanent external store, state does not need to be _restored_ but is always available.   
+1. Disable caching => `withCachingDisabled()`    
+   ...enabled by default, kafka streams is buffering writes - which is not what we want when working with cassandra state store  
+1. Do not use [standby replicas](https://docs.confluent.io/platform/current/streams/developer-guide/config-streams.html#streams-developer-guide-standby-replicas) => `num.standby.replicas=0`    
+   ...standby replicas are used to minimize the latency of task failover by keeping shadow copies of local state stores as a hot standby. The state store backed by cassandra does not need to be restored or re-balanced since all streams instances can directly access any partitions state.
 
 #### High-level DSL <> StoreSupplier
 ```java
@@ -304,8 +304,7 @@ The reason is that searching becomes too slow as search within partition is slow
 
 For the current implementation, the cassandra table created for the 'default' key-value store is partitioned by the kafka _partition key_ ("wide partition pattern").
 Please keep these issues in mind when working with relevant data volumes.    
-In case you don't need to query your store / only lookup by key ('range', 'prefixScan') it's recommended to use `globalKeyValueStore` rather than `keyValueStore` since it is partitioned by the _event key_ (:= primary key).
-[Supported operations by store type](#supported-operations-by-store-type)
+In case you don't need to query your store / only lookup by key ('range', 'prefixScan'; ref [Supported operations by store type](#supported-operations-by-store-type)) it's recommended to use `globalKeyValueStore` rather than `keyValueStore` since it is partitioned by the _event key_ (:= primary key).
 
 ℹ️ References:
 - blog post on [Wide Partitions in Apache Cassandra 3.11](https://thelastpickle.com/blog/2019/01/11/wide-partitions-cassandra-3-11.html)    
