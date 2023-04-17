@@ -5,6 +5,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [0.3.2](https://github.com/thriving-dev/kafka-streams-cassandra-state-store/releases/tag/x.y.z) (2023-04-17)
+[0.3.1...0.3.2](https://github.com/thriving-dev/kafka-streams-cassandra-state-store/compare/0.3.1...0.3.2)
+
+### Changed (documentation only)
+- feat: improve documentation for recommended kafka streams config
+- feat: add documentation on 'Cassandra table partitioning' (avoiding large partitions)
+
+
 ## [0.3.1](https://github.com/thriving-dev/kafka-streams-cassandra-state-store/releases/tag/0.3.1) (2023-03-09)
 [0.3.0...0.3.1](https://github.com/thriving-dev/kafka-streams-cassandra-state-store/compare/0.3.0...0.3.1)
 
