@@ -61,7 +61,14 @@ implementation 'dev.thriving.oss:kafka-streams-cassandra-state-store:${version}'
 ## Usage
 ### Quick start
 
-‼️**Important:** Always disable logging + caching => `withLoggingDisabled()` + `withCachingDisabled()` (by default kafka streams is buffering writes).
+#### ‼️**Important:** notes upfront
+
+1. Disable logging => `withLoggingDisabled()`    
+   ...enabled by default, kafka streams is 'logging' the events making up the store's state against a _changelog topic_ to be able to restore state following a rebalance or application restart. Since cassandra is a permanent external store, state does not need to be _restored_ but is always available.   
+1. Disable caching => `withCachingDisabled()`    
+   ...enabled by default, kafka streams is buffering writes - which is not what we want when working with cassandra state store  
+1. Do not use [standby replicas](https://docs.confluent.io/platform/current/streams/developer-guide/config-streams.html#streams-developer-guide-standby-replicas) => `num.standby.replicas=0`    
+   ...standby replicas are used to minimize the latency of task failover by keeping shadow copies of local state stores as a hot standby. The state store backed by cassandra does not need to be restored or re-balanced since all streams instances can directly access any partitions state.
 
 #### High-level DSL <> StoreSupplier
 ```java
@@ -299,6 +306,24 @@ CREATE TABLE IF NOT EXISTS some_window_kstreams_store (
 💡 **Tip:** Cassandra has a table option `default_time_to_live` (default expiration time (“TTL”) in seconds for a table) which can be useful for certain use cases where data (state) can or should expire.
 
 Please note writes to cassandra are made with system time. The table TTL will therefore apply based on the time of write (not stream time). 
+
+#### Cassandra table partitioning (avoiding large partitions)
+
+Kafka is persisting data in segments and is built for sequential r/w. As long as there's sufficient disk storage space available to brokers, a high number of messages for a single topic partition is not a problem.
+
+Apache Cassandra on the other hand can get inefficient (up to severe failures such as load shedding, dropped messages, and to crashed and downed nodes) when partition size grows too large.
+The reason is that searching becomes too slow as search within partition is slow. Also, it puts a lot of pressure on (JVM) heap.
+
+⚠️ The community has offered a standard recommendation for Cassandra users to keep Partitions under 400MB, and preferably under 100MB.
+
+For the current implementation, the cassandra table created for the 'default' key-value store is partitioned by the kafka _partition key_ ("wide partition pattern").
+Please keep these issues in mind when working with relevant data volumes.    
+In case you don't need to query your store / only lookup by key ('range', 'prefixScan'; ref [Supported operations by store type](#supported-operations-by-store-type)) it's recommended to use `globalKeyValueStore` rather than `keyValueStore` since it is partitioned by the _event key_ (:= primary key).
+
+ℹ️ References:
+- blog post on [Wide Partitions in Apache Cassandra 3.11](https://thelastpickle.com/blog/2019/01/11/wide-partitions-cassandra-3-11.html)    
+  Note: in case anyone has funded knowledge if/how this has changed with Cassandra 4, please share!
+- [stackoverflow question](https://stackoverflow.com/questions/68237371/wide-partition-pattern-in-cassandra)
 
 
 ## Development
