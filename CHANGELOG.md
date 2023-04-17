@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.3.2](https://github.com/thriving-dev/kafka-streams-cassandra-state-store/releases/tag/x.y.z) (2023-04-17)
 [0.3.1...0.3.2](https://github.com/thriving-dev/kafka-streams-cassandra-state-store/compare/0.3.1...0.3.2)
 
+### Changed
+- fix: small refactoring to allow better reuse of `AbstractCassandraKeyValueStoreRepository`
+
 ### Changed (documentation only)
 - feat: improve documentation for recommended kafka streams config
 - feat: add documentation on 'Cassandra table partitioning' (avoiding large partitions)
