@@ -38,8 +38,8 @@ public class CassandraKeyValueIterator implements KeyValueIterator<Bytes, byte[]
     @Override
     public KeyValue<Bytes, byte[]> next() {
         Row row = iter.next();
-        Bytes key = Bytes.wrap(row.getByteBuffer(0).array());
-        ByteBuffer byteBuffer = row.getByteBuffer(1);
+        Bytes key = Bytes.wrap(row.getByteBuffer("key").array());
+        ByteBuffer byteBuffer = row.getByteBuffer("value");
         byte[] value = byteBuffer == null ? null : byteBuffer.array();
         return KeyValue.pair(key, value);
     }
