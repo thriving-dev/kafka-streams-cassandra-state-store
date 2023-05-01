@@ -414,8 +414,9 @@ Integration tests can be run separately via
   - [ ] add additional store types
     - [ ] WindowedStore functionality, example, ...
     - [ ] ...?
-  - [ ] (?) simple inMemory read cache -> Caffeine?
+  - [ ] (?) simple inMemory read cache -> Caffeine? (separate lib?)
   - [ ] Benchmark
+  - [ ] Explore buffered writes ('caching') -> parallel writes to Cassandra to boost performance?
   - [ ] add Metrics?
     - [ ] (?) Metrics also for Caches?
 
