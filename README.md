@@ -363,7 +363,7 @@ Integration tests can be run separately via
   - [ ] ~~Prefix scan with `stringKeyValueStore` (Cassandra with SASIIndex? https://stackoverflow.com/questions/49247092/order-by-and-like-in-same-cassandra-query/49268543#49268543)~~
   - [x] `ReadOnlyKeyValueStore.prefixScan` implementation using range (see InMemoryKeyValueStore implementation)
   - [x] Implement `globalKeyValueStore`
-  - [x] 
+  - [ ] Support KIP-889: Versioned State Stores (to be delivered with kafka 3.5.0)
 - [x] OpenSource
   - [x] choose + add license
   - [x] add CHANGELOG.md
