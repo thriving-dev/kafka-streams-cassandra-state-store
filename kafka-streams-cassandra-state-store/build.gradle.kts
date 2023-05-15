@@ -37,15 +37,12 @@ dependencies {
     compileOnly("org.apache.kafka:kafka-streams:3.4.0")
     compileOnly("com.datastax.oss:java-driver-core:4.15.0")
 
-    // Use JUnit Jupiter for testing.
-    // testImplementation("org.junit.jupiter:junit-jupiter:5.9.1")
-
-    intTestImplementation("org.junit.jupiter:junit-jupiter:5.8.1")
-    intTestImplementation("org.testcontainers:testcontainers:1.17.6")
-    intTestImplementation("org.testcontainers:junit-jupiter:1.17.6")
-    intTestImplementation("org.testcontainers:redpanda:1.17.6")
-    intTestImplementation("org.testcontainers:cassandra:1.17.6")
-    intTestImplementation("ch.qos.logback:logback-classic:1.3.5")
+    intTestImplementation("org.junit.jupiter:junit-jupiter:5.9.3")
+    intTestImplementation("org.testcontainers:testcontainers:1.18.1")
+    intTestImplementation("org.testcontainers:junit-jupiter:1.18.1")
+    intTestImplementation("org.testcontainers:redpanda:1.18.1")
+    intTestImplementation("org.testcontainers:cassandra:1.18.1")
+    intTestImplementation("ch.qos.logback:logback-classic:1.4.7")
     intTestImplementation("org.apache.kafka:kafka-streams:3.4.0")
     intTestImplementation("com.datastax.oss:java-driver-core:4.15.0")
     intTestImplementation("org.assertj:assertj-core:3.24.2")
