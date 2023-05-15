@@ -374,7 +374,7 @@ Integration tests can be run separately via
   - [x] choose + add license
   - [x] add CHANGELOG.md
   - [x] add CODE_OF_CONDUCT.md
-  - [ ] ~~? add CONTRIBUTING.md~~
+  - [x] add CONTRIBUTING.md
   - [x] polishing
   - [x] make repo public
   - [x] Publish to maven central (?) https://h4pehl.medium.com/publish-your-gradle-artifacts-to-maven-central-f74a0af085b1
@@ -391,8 +391,7 @@ Integration tests can be run separately via
     - (vs. depandabot?)
       - https://github.com/renovatebot/github-action
       - https://docs.renovatebot.com/java/
-  - [ ] ? add trivy https://github.com/marketplace/actions/trivy-action
-  - [ ] ? github actions to publish to maven central https://julien.ponge.org/blog/publishing-from-gradle-to-maven-central-with-github-actions/
+  - [ ] github actions to publish to maven central (snapshot, releases) https://julien.ponge.org/blog/publishing-from-gradle-to-maven-central-with-github-actions/
 - [x] Write Documentation
   - [x] summary
   - [x] compatibility cassandra 3.11, 4.x, ScyllaDB
