@@ -223,7 +223,7 @@ class WordCountInteractiveQueriesTest extends AbstractIntegrationTest {
         final Serde<Long> longSerde = Serdes.Long();
 
         final KTable<String, Long> counts = source
-                .peek((k, v) -> LOG.debug("in => {}::{}", k, v))
+                .peek((k, v) -> LOG.info("in => {}::{}", k, v))
                 .flatMapValues(value -> Arrays.asList(value.toLowerCase(Locale.getDefault()).split(" ")))
                 .groupBy((key, value) -> value)
                 .count(Materialized.<String, Long>as(
@@ -238,7 +238,7 @@ class WordCountInteractiveQueriesTest extends AbstractIntegrationTest {
 
         // need to override value serde to Long type
         counts.toStream()
-                .peek((k, v) -> LOG.debug("out => {}::{}", k, v))
+                .peek((k, v) -> LOG.info("out => {}::{}", k, v))
                 .to(OUTPUT_TOPIC, Produced.with(Serdes.String(), Serdes.Long()));
 
         return new KafkaStreams(builder.build(), streamsConfiguration);
