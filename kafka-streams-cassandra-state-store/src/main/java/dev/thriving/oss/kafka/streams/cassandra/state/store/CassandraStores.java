@@ -22,7 +22,6 @@ import java.util.function.Function;
  * cassandra k/v store with custom key/value serdes, with logging and caching disabled:
  * <pre>{@code
  * StreamsBuilder builder = new StreamsBuilder();
- * KeyValueBytesStoreSupplier storeSupplier = Stores.inMemoryKeyValueStore("queryable-store-name");
  * KTable<Long,String> table = builder.table(
  *   "topicName",
  *   Materialized.<Long,String>as(

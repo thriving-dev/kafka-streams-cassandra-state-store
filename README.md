@@ -6,7 +6,7 @@
 Kafka Streams State Store implementation that persists data to Apache Cassandra.
 For now, only KeyValueStore type is supported.
 
-ℹ️ [Kafka Streams](https://kafka.apache.org/documentation/streams/) is a client library for building applications and microservices, where the input and output data are stored in Kafka clusters.   
+ℹ️ [Kafka Streams](https://kafka.apache.org/documentation/streams/) is a Java client library for building stream-processing applications and microservices, where the input and output data are stored in Kafka clusters.   
 ℹ️ [Apache Cassandra](https://cassandra.apache.org/) is a free and open-source, distributed, wide-column store, NoSQL database management system designed to handle large amounts of data across many commodity servers, providing high availability with no single point of failure.
 
 ### Project Status
@@ -27,7 +27,8 @@ Please carefully read documentation provided on [store types](#store-types) and 
 
 ### Supported databases
 * Apache Cassandra 3.11
-* Apache Cassandra 4
+* Apache Cassandra 4.0
+* Apache Cassandra 4.1
 * ScyllaDB (should work from 4.3+)
 
 #### Integration Tests
@@ -36,13 +37,11 @@ Please carefully read documentation provided on [store types](#store-types) and 
 
 ## Get it!
 
-### Maven
+Classes of this package are in the package `dev.thriving.oss.kafka.streams.cassandra.state.store`.
 
-Functionality of this package is contained in
-Java package `dev.thriving.oss.kafka.streams.cassandra.state.store`.
+To use the package, you need to use following dependency:
 
-To use the package, you need to use following Maven dependency:
-
+#### Maven
 ```xml
 <dependency>
     <groupId>dev.thriving.oss</groupId>
@@ -51,9 +50,7 @@ To use the package, you need to use following Maven dependency:
 </dependency>
 ```
 
-### Gradle
-
-#### Groovy DSL
+#### Gradle (Groovy DSL)
 ```groovy
 implementation 'dev.thriving.oss:kafka-streams-cassandra-state-store:${version}'
 ```
@@ -71,9 +68,13 @@ implementation 'dev.thriving.oss:kafka-streams-cassandra-state-store:${version}'
    ...standby replicas are used to minimize the latency of task failover by keeping shadow copies of local state stores as a hot standby. The state store backed by cassandra does not need to be restored or re-balanced since all streams instances can directly access any partitions state.
 
 #### High-level DSL <> StoreSupplier
+
+When using the high-level DSL, i.e., `StreamsBuilder`, users create `StoreSupplier`s that can be further customized via `Materialized`.
+
+For example, a topic read as `KTable` can be materialized into a cassandra k/v store with custom key/value serdes, with logging and caching disabled:
+
 ```java
 StreamsBuilder builder = new StreamsBuilder();
-KeyValueBytesStoreSupplier storeSupplier = Stores.inMemoryKeyValueStore("queryable-store-name");
 KTable<Long,String> table = builder.table(
   "topicName",
   Materialized.<Long,String>as(
@@ -87,6 +88,11 @@ KTable<Long,String> table = builder.table(
 ```
 
 #### Processor API <> StoreBuilder
+
+When using the Processor API, i.e., `Topology`, users create `StoreBuilder`s that can be attached to `Processor`s.
+
+For example, you can create a cassandra stringKey value store with custom key/value serdes, logging and caching disabled like:
+
 ```java
 Topology topology = new Topology();
 
@@ -265,9 +271,9 @@ Not all methods have been implemented. Please check [store types method support 
 #### Underlying CQL Schema
 
 ##### keyValueStore
-Using defaults, for a state store named "my-kv-store" following CQL Schema applies:
+Using defaults, for a state store named "word-count" following CQL Schema applies:
 ```sql
-CREATE TABLE IF NOT EXISTS my_kv_store_kstreams_store (
+CREATE TABLE IF NOT EXISTS word_count_kstreams_store (
     partition int,
     key blob,
     time timestamp,
@@ -277,9 +283,9 @@ CREATE TABLE IF NOT EXISTS my_kv_store_kstreams_store (
 ```
 
 ##### globalKeyValueStore
-Using defaults, for a state store named "global-kv-store" following CQL Schema applies:
+Using defaults, for a state store named "clicks-global" following CQL Schema applies:
 ```sql
-CREATE TABLE IF NOT EXISTS global_kv_store_kstreams_store (
+CREATE TABLE IF NOT EXISTS clicks_global_kstreams_store (
     key blob,
     time timestamp,
     value blob,
