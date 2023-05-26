@@ -366,7 +366,7 @@ Integration tests can be run separately via
   - [x] WordCount ScyllaDB
   - [x] WordCount Processor + all + range + prefixScan + approximateNumEntries
   - [x] GlobalCassandraStore + KStream enrichment 
-  - [ ] Quarkus examples app as GraalVM native image
+  - [x] Quarkus examples app as GraalVM native image
 - [x] additional features
   - [x] ~~Prefix scan with `stringKeyValueStore` (ScyllaDB only)~~ (removed with v0.3)
   - [ ] ~~Prefix scan with `stringKeyValueStore` (Cassandra with SASIIndex? https://stackoverflow.com/questions/49247092/order-by-and-like-in-same-cassandra-query/49268543#49268543)~~
