@@ -3,6 +3,10 @@
 
 Features the notorious 'word-count example', written as a quarkus application, fully fledged localstack demo with docker-compose.
 
+ℹ️The Quarkus app is build with the extensions
+- [quarkus-kafka-streams](https://quarkus.io/extensions/io.quarkus/quarkus-kafka-streams)
+- [cassandra-quarkus-client](https://quarkus.io/extensions/com.datastax.oss.quarkus/cassandra-quarkus-client)
+
 The docker-compose stack features
 - 3 node KRaft Kafka cluster
 - 3 node ScyllaDB cluster

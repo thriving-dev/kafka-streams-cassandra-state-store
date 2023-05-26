@@ -12,7 +12,6 @@ val quarkusPlatformArtifactId: String by project
 val quarkusPlatformVersion: String by project
 
 dependencies {
-    implementation("com.datastax.oss.quarkus:cassandra-quarkus-client")
     implementation(enforcedPlatform("$quarkusPlatformGroupId:quarkus-cassandra-bom:$quarkusPlatformVersion"))
     implementation(enforcedPlatform("$quarkusPlatformGroupId:$quarkusPlatformArtifactId:$quarkusPlatformVersion"))
 
@@ -22,8 +21,9 @@ dependencies {
     implementation("io.quarkus:quarkus-kafka-streams")
     implementation("io.quarkus:quarkus-arc")
     implementation("io.quarkus:quarkus-resteasy-reactive-jackson")
+    implementation("com.datastax.oss.quarkus:cassandra-quarkus-client")
     implementation("com.scylladb:java-driver-core:4.14.1.0")
-//    implementation("org.jboss.slf4j:slf4j-jboss-logmanager")
+
     testImplementation("io.quarkus:quarkus-junit5")
 }
 
