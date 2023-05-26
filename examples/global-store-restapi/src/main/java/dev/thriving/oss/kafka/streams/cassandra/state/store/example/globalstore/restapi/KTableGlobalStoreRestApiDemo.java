@@ -94,22 +94,35 @@ public final class KTableGlobalStoreRestApiDemo {
      * Get a key-value pair from a KeyValue Store
      *
      * @param key the key to get
-     * @return {@link KeyValueBean} representing the key-value pair
+     * @return {@link KeyValue} representing the key-value pair
      */
     @GET
     @Path("/keyvalue/{key}")
     @Produces(MediaType.APPLICATION_JSON)
-    public KeyValueBean byKey(@PathParam("key") final String key) {
-        // Lookup the KeyValueStore with the provided storeName
-        final ReadOnlyKeyValueStore<String, String> store =
-                streams.store(fromNameAndType(STORE_NAME, QueryableStoreTypes.keyValueStore()));
+    public KeyValue byKey(@PathParam("key") final String key) {
+        // get the first active task partition for the first streams thread
+        final int firstActiveTaskPartition = streams.metadataForLocalThreads()
+                .stream().findFirst()
+                .orElseThrow(() -> new RuntimeException("no streams threads found"))
+                .activeTasks()
+                .stream().findFirst()
+                .orElseThrow(() -> new RuntimeException("no active task found"))
+                .taskId().partition();
+
+        // Lookup the KeyValueStore, use single store with a first active assigned partition (...it's a 'global' store)
+        final ReadOnlyKeyValueStore<String, String> store = streams.store(
+                fromNameAndType(STORE_NAME, QueryableStoreTypes.<String, String>keyValueStore())
+                        .withPartition(firstActiveTaskPartition)
+        );
 
         // Get the value from the store
         final String value = store.get(key);
+
         if (value == null) {
-            throw new NotFoundException();
+            throw new NotFoundException(); // responds with 404
         }
-        return new KeyValueBean(key, value);
+
+        return new KeyValue(key, value);
     }
 
     protected void startJetty() throws Exception {
@@ -188,4 +201,6 @@ public final class KTableGlobalStoreRestApiDemo {
         }
         System.exit(0);
     }
+
+    public record KeyValue(String key, String value) {}
 }
