@@ -418,7 +418,7 @@ Integration tests can be run separately via
   - [x] test against 'CQL injection' via `withTableOptions(..)` 
         => tried to add `compaction = { 'class' : 'LeveledCompactionStrategy' };DROP TABLE xyz` which fails due to wrong syntax in Cassandra 3.11/4.1 & ScyllaDB 5.1  
 - [ ] bugs
-  - [ ] cassandra schema change (tables are created by each task in parallel which can cause conflict)
+  - [ ] cassandra concurrent schema updates (concurrent table auto-creation) lead to schema collisions (tables are created by each task-thread in parallel on first application start)
   - [ ] exception handling
 - [ ] tests
   - [ ] unit tests (?)
@@ -427,21 +427,22 @@ Integration tests can be run separately via
     - [x] WordCountInteractiveQueriesTest
     - [x] WordCountGlobalStoreTest
 - [ ] Advanced/Features/POCs Planned/Considered
-  - [ ] correctness
-    - [ ] wrap stores with MeteredKeyValueStore
-    - [ ] provide `timestamptedKeyValueStore`
+  - [ ] correctness / completeness
+    - [ ] wrap stores with MeteredKeyValueStore ?
+    - [ ] provide `timestampedKeyValueStore`
     - [ ] ? (TBC) logging / caching is always disabled (because it's not implemented to wrap store by CassandraStores...) 
       - [ ] always disable logging + caching?
   - [ ] add additional store types
     - [ ] WindowedStore functionality, example, ...
     - [ ] ...?
-  - [ ] Add builder config option
+  - [ ] Add builder config options
     - [ ] opt-out to avoid tables to be auto-created
-    - [ ] opt-in to allow count using `SELECT COUNT(*)` for `approximateNumEntries`
-    - [ ] allow setting cassandra profiles to be used for queries, separate for DDL|DML
+    - [ ] allow setting execution profiles to be used for queries, separate for DDL|DML
+    - [ ] opt-in to enable count using `SELECT COUNT(*)` for `approximateNumEntries`
   - [ ] (?) simple inMemory read cache -> Caffeine? (separate lib?)
   - [ ] Benchmark
   - [ ] Explore buffered writes ('caching') -> parallel writes to Cassandra to boost performance?
   - [ ] add Metrics?
     - [ ] (?) Metrics also for Caches?
+  - [ ] move (parts of) documentation to separate pages/wiki? 
 
