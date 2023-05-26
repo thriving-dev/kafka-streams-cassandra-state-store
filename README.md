@@ -366,7 +366,7 @@ Integration tests can be run separately via
   - [x] WordCount ScyllaDB
   - [x] WordCount Processor + all + range + prefixScan + approximateNumEntries
   - [x] GlobalCassandraStore + KStream enrichment 
-  - [ ] app as GraalVM native image (Micronaut or Quarkus or examples with both)
+  - [ ] Quarkus examples app as GraalVM native image
 - [x] additional features
   - [x] ~~Prefix scan with `stringKeyValueStore` (ScyllaDB only)~~ (removed with v0.3)
   - [ ] ~~Prefix scan with `stringKeyValueStore` (Cassandra with SASIIndex? https://stackoverflow.com/questions/49247092/order-by-and-like-in-same-cassandra-query/49268543#49268543)~~
@@ -408,10 +408,18 @@ Integration tests can be run separately via
   - [x] Cassandra Specifics
     - [x] Underlying CQL Schema
     - [x] Feat: Cassandra table with default TTL
+    - [ ] r/w consistency
+    - [ ] profiles for DDL/DML
+    - [ ] retry-policy https://docs.datastax.com/en/developer/java-driver/4.15/manual/core/retries/
+    - [ ] ? request throttling, e.g. rate-based to avoid overloading the db? https://docs.datastax.com/en/developer/java-driver/4.15/manual/core/throttling/
   - [ ] (Caching options)
+  - [ ] Exception/error handling
 - [x] Security
   - [x] test against 'CQL injection' via `withTableOptions(..)` 
         => tried to add `compaction = { 'class' : 'LeveledCompactionStrategy' };DROP TABLE xyz` which fails due to wrong syntax in Cassandra 3.11/4.1 & ScyllaDB 5.1  
+- [ ] bugs
+  - [ ] cassandra schema change (tables are created by each task in parallel which can cause conflict)
+  - [ ] exception handling
 - [ ] tests
   - [ ] unit tests (?)
   - [x] integration test using testcontainers
@@ -419,9 +427,18 @@ Integration tests can be run separately via
     - [x] WordCountInteractiveQueriesTest
     - [x] WordCountGlobalStoreTest
 - [ ] Advanced/Features/POCs Planned/Considered
+  - [ ] correctness
+    - [ ] wrap stores with MeteredKeyValueStore
+    - [ ] provide `timestamptedKeyValueStore`
+    - [ ] ? (TBC) logging / caching is always disabled (because it's not implemented to wrap store by CassandraStores...) 
+      - [ ] always disable logging + caching?
   - [ ] add additional store types
     - [ ] WindowedStore functionality, example, ...
     - [ ] ...?
+  - [ ] Add builder config option
+    - [ ] opt-out to avoid tables to be auto-created
+    - [ ] opt-in to allow count using `SELECT COUNT(*)` for `approximateNumEntries`
+    - [ ] allow setting cassandra profiles to be used for queries, separate for DDL|DML
   - [ ] (?) simple inMemory read cache -> Caffeine? (separate lib?)
   - [ ] Benchmark
   - [ ] Explore buffered writes ('caching') -> parallel writes to Cassandra to boost performance?
