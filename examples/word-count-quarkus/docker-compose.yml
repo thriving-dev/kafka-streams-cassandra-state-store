@@ -1,0 +1,140 @@
+---
+version: '3'
+
+services:
+  kafka-1:
+    container_name: kafka-1
+    image: debezium/kafka:2.2.0.Final
+    ports:
+      - 19092:19092
+      - 19093:9093
+    environment:
+      - CLUSTER_ID=5Yr1SIgYQz-b-dgRabWx4g
+      - NODE_ID=1
+      - KAFKA_GROUP_MIN_SESSION_TIMEOUT_MS=250
+      - KAFKA_CONTROLLER_QUORUM_VOTERS=1@kafka-1:9093,2@kafka-2:9093,3@kafka-3:9093
+      - CREATE_TOPICS=streams-plaintext-input:12:3,streams-wordcount-output:12:3
+      - KAFKA_AUTO_CREATE_TOPICS_ENABLE=true
+      - KAFKA_LISTENERS=CONTROLLER://0.0.0.0:9093,INSIDE://0.0.0.0:9092,OUTSIDE://0.0.0.0:19092
+      - KAFKA_ADVERTISED_LISTENERS=INSIDE://kafka-1:9092,OUTSIDE://localhost:19092
+      - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
+      - KAFKA_INTER_BROKER_LISTENER_NAME=INSIDE
+      - KAFKA_CONTROLLER_LISTENER_NAMES=CONTROLLER
+    healthcheck:
+      test: [ "CMD", "/kafka/bin/kafka-topics.sh", "--bootstrap-server=localhost:9092", "--list" ]
+      interval: 2s
+      timeout: 2s
+      retries: 10
+
+  kafka-2:
+    container_name: kafka-2
+    image: debezium/kafka:2.2.0.Final
+    ports:
+      - 29092:29092
+      - 29093:9093
+    environment:
+      - CLUSTER_ID=5Yr1SIgYQz-b-dgRabWx4g
+      - NODE_ID=2
+      - KAFKA_GROUP_MIN_SESSION_TIMEOUT_MS=250
+      - KAFKA_CONTROLLER_QUORUM_VOTERS=1@kafka-1:9093,2@kafka-2:9093,3@kafka-3:9093
+      - CREATE_TOPICS=streams-plaintext-input:12:3,streams-wordcount-output:12:3
+      - KAFKA_AUTO_CREATE_TOPICS_ENABLE=true
+      - KAFKA_LISTENERS=CONTROLLER://0.0.0.0:9093,INSIDE://0.0.0.0:9092,OUTSIDE://0.0.0.0:29092
+      - KAFKA_ADVERTISED_LISTENERS=INSIDE://kafka-2:9092,OUTSIDE://localhost:29092
+      - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
+      - KAFKA_INTER_BROKER_LISTENER_NAME=INSIDE
+      - KAFKA_CONTROLLER_LISTENER_NAMES=CONTROLLER
+    healthcheck:
+      test: [ "CMD", "/kafka/bin/kafka-topics.sh", "--bootstrap-server=localhost:9092", "--list" ]
+      interval: 2s
+      timeout: 2s
+      retries: 10
+
+  kafka-3:
+    container_name: kafka-3
+    image: debezium/kafka:2.2.0.Final
+    ports:
+      - 39092:39092
+      - 39093:9093
+    environment:
+      - CLUSTER_ID=5Yr1SIgYQz-b-dgRabWx4g
+      - NODE_ID=3
+      - KAFKA_GROUP_MIN_SESSION_TIMEOUT_MS=250
+      - KAFKA_CONTROLLER_QUORUM_VOTERS=1@kafka-1:9093,2@kafka-2:9093,3@kafka-3:9093
+      - CREATE_TOPICS=streams-plaintext-input:12:3,streams-wordcount-output:12:3
+      - KAFKA_AUTO_CREATE_TOPICS_ENABLE=true
+      - KAFKA_LISTENERS=CONTROLLER://0.0.0.0:9093,INSIDE://0.0.0.0:9092,OUTSIDE://0.0.0.0:39092
+      - KAFKA_ADVERTISED_LISTENERS=INSIDE://kafka-3:9092,OUTSIDE://localhost:39092
+      - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
+      - KAFKA_INTER_BROKER_LISTENER_NAME=INSIDE
+      - KAFKA_CONTROLLER_LISTENER_NAMES=CONTROLLER
+    healthcheck:
+      test: [ "CMD", "/kafka/bin/kafka-topics.sh", "--bootstrap-server=localhost:9092", "--list" ]
+      interval: 2s
+      timeout: 2s
+      retries: 10
+
+  scylla-1:
+    container_name: scylla-1
+    image: scylladb/scylla:5.2
+    command: --smp 1 --memory 750M --overprovisioned 1 --experimental 1 --api-address 0.0.0.0
+    ports:
+      - 19042:9042
+    restart: always
+    healthcheck:
+      test: [ "CMD", "cqlsh", "-e describe keyspaces" ]
+      interval: 10s
+      timeout: 10s
+      retries: 15
+
+  scylla-2:
+    container_name: scylla-2
+    image: scylladb/scylla:5.2
+    command: --seeds=scylla-1 --smp 1 --memory 750M --overprovisioned 1 --experimental 1 --api-address 0.0.0.0
+    ports:
+      - 29042:9042
+    restart: always
+    healthcheck:
+      test: [ "CMD", "cqlsh", "-e describe keyspaces" ]
+      interval: 10s
+      timeout: 10s
+      retries: 15
+
+  scylla-3:
+    container_name: scylla-3
+    image: scylladb/scylla:5.2
+    command: --seeds=scylla-1 --smp 1 --memory 750M --overprovisioned 1 --experimental 1 --api-address 0.0.0.0
+    ports:
+      - 39042:9042
+    restart: always
+    healthcheck:
+      test: [ "CMD", "cqlsh", "-e describe keyspaces" ]
+      interval: 10s
+      timeout: 10s
+      retries: 15
+
+  scylla-load-keyspace:
+    container_name: scylla-load-keyspace
+    image: scylladb/scylla:5.2
+    depends_on:
+      scylla-1:
+        condition: service_healthy
+    volumes:
+      - ./docker-compose/schema.cql:/schema.cql
+    entrypoint: ''
+    command: /bin/bash -c "echo loading scylladb keyspace && cqlsh scylla-1 -f /schema.cql"
+
+  app:
+    image: thriving-dev/word-count-quarkus:1.0
+    deploy:
+      replicas: 3
+    depends_on:
+      scylla-1:
+        condition: service_healthy
+      kafka-1:
+        condition: service_healthy
+    build:
+      dockerfile: src/main/docker/Dockerfile.${QUARKUS_MODE:-jvm}
+    environment:
+      QUARKUS_KAFKA_STREAMS_BOOTSTRAP_SERVERS: kafka-1:9092,kafka-2:9092,kafka-3:9092
+      QUARKUS_CASSANDRA_CONTACT_POINTS: scylla-1:9042,scylla-2:9042,scylla-3:9042
