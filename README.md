@@ -119,26 +119,25 @@ Take a look at the notorious word-count example with Cassandra 4 -> [/examples/w
 - [kcat](https://github.com/edenhill/kcat) for interacting with Kafka (consume/produce)
 
 ### Store Types
-kafka-streams-cassandra-state-store comes with 3 different store types:
+kafka-streams-cassandra-state-store comes with 2 different store types:
 - keyValueStore
 - globalKeyValueStore
 
 #### keyValueStore (recommended default)
 A persistent `KeyValueStore<Bytes, byte[]>`.
-The key value store is persisted in a cassandra table, partitioned by the store context task partition.
-Therefore, all CRUD operations against this store always are by stream task partition.
+The underlying cassandra table is **partitioned by** the store context **task partition**.
+Therefore, all CRUD operations against this store always query by and return results for a single stream task.
 
 #### globalKeyValueStore
-Creates a persistent {@link KeyValueBytesStoreSupplier}.
-
-The key value store is persisted in a cassandra table, having the 'key' as sole PRIMARY KEY.
-Therefore, all CRUD operations against this store always are "global", partitioned by the key itself.
+A persistent `KeyValueStore<Bytes, byte[]>`.
+The underlying cassandra table uses the **record key as sole /PRIMARY KEY/**.
+Therefore, all CRUD operations against this store work from any streams task and therefore always are “global”.
 Due to the nature of cassandra tables having a single PK (no clustering key), this store supports only a limited number of operations.
 
-This global store should not be used and confused with a Kafka Streams Global Store!
-It has to be used as a non-global (regular!) streams KeyValue state store - allows to read entries from any streams context (streams task/thread).
+This global store should not be confused with a Kafka Streams Global Store!
+It has to be used as a non-global (regular!) streams KeyValue state store - though it allows to read entries from any streams context (streams task/thread).
 
-Tip: This store type can be useful when exposing state store access via REST API. Each running instance of your app can serve all requests without the need to proxy the request to the right instance having the task (kafka partition) assigned for the key in question.
+Tip: This store type can be useful when exposing state store access via REST API. Each running instance of your app can serve all requests without the need to proxy the request to the right instance having the streams task assigned for the key in question.
 
 ⚠️ For **querying** this **global CassandraKeyValueStore**, make sure to restrict the `WrappingStoreProvider` to a single (assigned) partition.
 Otherwise streams will return a `CompositeReadOnlyKeyValueStore` wrapping all assigned tasks' stores which will run the same query for all assigned partitions and combine multiple identical results.
@@ -146,17 +145,21 @@ Otherwise streams will return a `CompositeReadOnlyKeyValueStore` wrapping all as
 ```java
 // get the first active task partition for the first streams thread
 int firstActiveTaskPartition = streams.metadataForLocalThreads()
-        .stream().findFirst()
-        .orElseThrow(() -> new RuntimeException("no streams threads found"))
-        .activeTasks()
-        .stream().findFirst()
-        .orElseThrow(() -> new RuntimeException("no active task found"))
-        .taskId().partition();
+    .stream().findFirst()
+    .orElseThrow(() -> new RuntimeException("no streams threads found"))
+    .activeTasks()
+    .stream().findFirst()
+    .orElseThrow(() -> new RuntimeException("no active task found"))
+    .taskId().partition();
+
 // Lookup the KeyValueStore, use single store with a first active assigned partition (...it's a 'global' store)
-final ReadOnlyKeyValueStore<String, Long> store = streams.store(
-        fromNameAndType(STORE_NAME, QueryableStoreTypes.<String, Long>keyValueStore())
-        .withPartition(firstActiveTaskPartition)
-        );
+ReadOnlyKeyValueStore<String, Long> store = streams.store(
+    fromNameAndType(STORE_NAME, QueryableStoreTypes.<String, Long>keyValueStore())
+    .withPartition(firstActiveTaskPartition)
+    );
+
+// Get the value from the store
+Long value = store.get(key);
 ```
 
 (It might alternatively be easier to query the underlying CQL table manually & deserialize the data accordingly.)
@@ -254,7 +257,7 @@ This is possible through transactional interaction with a single distributed sys
 
 ℹ️ Please note this is also true when using kafka-streams with the native state stores (RocksDB/InMemory) with *at-least-once* processing.guarantee (default).
 
-For more information on Kafka Streams processing guarantees, check the references provided below.
+For more information on Kafka Streams processing guarantees, check the sources referenced below.
 
 ##### References
 - https://medium.com/lydtech-consulting/kafka-streams-transactions-exactly-once-messaging-82194b50900a
