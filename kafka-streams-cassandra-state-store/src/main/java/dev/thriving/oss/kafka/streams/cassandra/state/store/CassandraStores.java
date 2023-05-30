@@ -165,18 +165,17 @@ public final class CassandraStores {
      * Enable/disable the CassandraKeyValueStore to use `SELECT COUNT(*)` when
      * {@link ReadOnlyKeyValueStore#approximateNumEntries() approximateNumEntries} is invoked.
      * <p>
-     * Cassandra/CQL does not support getting approximate counts. SELECT COUNT(*) requires
-     * significant CPU and I/O resources and may be quite slow depending on store size...
-     * Use with care!!!
+     * Cassandra/CQL does not support getting approximate counts. Exact row count using `SELECT COUNT(*)` requires significant
+     * CPU and I/O resources and may be quite slow depending on store size... use with care!!!
      * <p>
      * Default: false
      *
-     * @param isCountAllEnabled enable/disable using cql count for `approximateNumEntries`
+     * @param enabled enable/disable using cql count for `approximateNumEntries`
      * @return itself
      */
-    public CassandraStores withCountAllEnabled(boolean isCountAllEnabled) {
+    public CassandraStores withCountAllEnabled(boolean enabled) {
         LOG.warn("Cassandra/CQL does not support getting approximate counts. SELECT COUNT(*) requires significant CPU and I/O resources and may be quite slow depending on store size... use with care!!!");
-        this.isCountAllEnabled = isCountAllEnabled;
+        this.isCountAllEnabled = enabled;
         return this;
     }
 
