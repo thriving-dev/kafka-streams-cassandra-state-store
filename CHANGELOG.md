@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - bug: cassandra concurrent schema updates (initial concurrent table auto-creation) [#12](https://github.com/thriving-dev/kafka-streams-cassandra-state-store/issues/12)
+- small fix: example 'processor-api-all-range-prefix-count' not runnable
 
 ### Other
 - smaller improvements to  
