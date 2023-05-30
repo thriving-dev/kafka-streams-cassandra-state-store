@@ -17,22 +17,22 @@ public class PartitionedCassandraKeyValueStoreRepository<K> extends AbstractCass
 
     private static final Logger LOG = LoggerFactory.getLogger(PartitionedCassandraKeyValueStoreRepository.class);
 
-    protected PreparedStatement insert;
-    protected PreparedStatement selectByPartitionAndKey;
-    protected PreparedStatement deleteByPartitionAndKey;
-    protected PreparedStatement selectByPartition;
-    protected PreparedStatement selectByPartitionReversed;
-    protected PreparedStatement selectCountByPartition;
-    protected PreparedStatement selectByPartitionAndKeyFrom;
-    protected PreparedStatement selectByPartitionAndKeyTo;
-    protected PreparedStatement selectByPartitionAndKeyToInclusive;
-    protected PreparedStatement selectByPartitionAndKeyRange;
-    protected PreparedStatement selectByPartitionAndKeyRangeToInclusive;
-    protected PreparedStatement selectByPartitionAndKeyFromReversed;
-    protected PreparedStatement selectByPartitionAndKeyToReversed;
-    protected PreparedStatement selectByPartitionAndKeyToInclusiveReversed;
-    protected PreparedStatement selectByPartitionAndKeyRangeReversed;
-    protected PreparedStatement selectByPartitionAndKeyRangeToInclusiveReversed;
+    private PreparedStatement insert;
+    private PreparedStatement selectByPartitionAndKey;
+    private PreparedStatement deleteByPartitionAndKey;
+    private PreparedStatement selectByPartition;
+    private PreparedStatement selectByPartitionReversed;
+    private PreparedStatement selectCountByPartition;
+    private PreparedStatement selectByPartitionAndKeyFrom;
+    private PreparedStatement selectByPartitionAndKeyTo;
+    private PreparedStatement selectByPartitionAndKeyToInclusive;
+    private PreparedStatement selectByPartitionAndKeyRange;
+    private PreparedStatement selectByPartitionAndKeyRangeToInclusive;
+    private PreparedStatement selectByPartitionAndKeyFromReversed;
+    private PreparedStatement selectByPartitionAndKeyToReversed;
+    private PreparedStatement selectByPartitionAndKeyToInclusiveReversed;
+    private PreparedStatement selectByPartitionAndKeyRangeReversed;
+    private PreparedStatement selectByPartitionAndKeyRangeToInclusiveReversed;
 
     public PartitionedCassandraKeyValueStoreRepository(CqlSession session, String tableName, String tableOptions) {
         super(session, tableName, tableOptions);
