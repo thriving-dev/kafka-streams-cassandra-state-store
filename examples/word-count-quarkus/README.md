@@ -1,9 +1,9 @@
 # kafka-streams-cassandra-state-store/examples
 ## word-count-quarkus
 
-Features the notorious 'word-count example', written as a quarkus application, fully fledged localstack demo with docker-compose.
+Features the notorious **'word-count example'**, written as a **quarkus application**, running in a fully **clustered docker-compose localstack**.
 
-ℹ️The Quarkus app is build with the extensions
+ℹ️ The Quarkus app is build with the extensions
 - [quarkus-kafka-streams](https://quarkus.io/extensions/io.quarkus/quarkus-kafka-streams)
 - [cassandra-quarkus-client](https://quarkus.io/extensions/com.datastax.oss.quarkus/cassandra-quarkus-client)
 
