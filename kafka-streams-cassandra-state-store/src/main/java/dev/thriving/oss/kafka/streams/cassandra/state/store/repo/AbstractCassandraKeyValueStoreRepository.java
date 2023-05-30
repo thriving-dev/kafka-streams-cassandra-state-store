@@ -4,7 +4,6 @@ import com.datastax.oss.driver.api.core.ConsistencyLevel;
 import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.DriverTimeoutException;
 import com.datastax.oss.driver.api.core.cql.BoundStatement;
-import com.datastax.oss.driver.api.core.cql.PreparedStatement;
 import com.datastax.oss.driver.api.core.cql.ResultSet;
 import com.datastax.oss.driver.api.core.cql.Row;
 import org.slf4j.Logger;
@@ -41,9 +40,7 @@ public abstract class AbstractCassandraKeyValueStoreRepository<K> {
     private void createTable(String tableName, String tableOptions, boolean createTable) {
         String query = buildCreateTableQuery(tableName, tableOptions);
         if (createTable) {
-            PreparedStatement prepare = session.prepare(query);
-            BoundStatement boundStatement = prepare.bind();
-
+            BoundStatement boundStatement = session.prepare(query).bind();
             if (ddlExecutionProfile != null) {
                 boundStatement = boundStatement.setExecutionProfileName(ddlExecutionProfile);
             } else {

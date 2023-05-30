@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 
 public class GlobalCassandraKeyValueStoreRepository extends AbstractCassandraKeyValueStoreRepository<ByteBuffer> implements CassandraKeyValueStoreRepository {
@@ -55,8 +56,9 @@ public class GlobalCassandraKeyValueStoreRepository extends AbstractCassandraKey
 
     @Override
     public byte[] getByKey(int partition, Bytes key) {
-        BoundStatement prepared = selectByKey.bind(ByteBuffer.wrap(key.get()));
-        ResultSet rs = session.execute(prepared);
+        BoundStatement stmt = selectByKey.bind(ByteBuffer.wrap(key.get()));
+        stmt = stmt.setExecutionProfileName(ddlExecutionProfile);
+        ResultSet rs = session.execute(stmt);
         Row result = rs.one();
         if (result == null) {
             return null;
@@ -67,21 +69,30 @@ public class GlobalCassandraKeyValueStoreRepository extends AbstractCassandraKey
 
     @Override
     public void save(int partition, Bytes key, byte[] value) {
-        BoundStatement prepared = insert.bind(ByteBuffer.wrap(key.get()), Instant.now(), ByteBuffer.wrap(value));
-        session.execute(prepared);
+        BoundStatement stmt = insert.bind(ByteBuffer.wrap(key.get()), Instant.now(), ByteBuffer.wrap(value));
+        stmt = stmt.setExecutionProfileName(ddlExecutionProfile);
+        session.execute(stmt);
     }
 
     @Override
     public void saveBatch(int partition, List<KeyValue<Bytes, byte[]>> entries) {
+        List<BatchableStatement<?>> inserts = new ArrayList<>();
+        entries.forEach(it -> {
+            inserts.add(insert.bind(ByteBuffer.wrap(it.key.get()), Instant.now(), ByteBuffer.wrap(it.value)));
+        });
         BatchStatement batch = BatchStatement.newInstance(DefaultBatchType.LOGGED);
-        entries.forEach(it -> batch.add(insert.bind(ByteBuffer.wrap(it.key.get()), Instant.now(), ByteBuffer.wrap(it.value))));
+        batch.addAll(inserts);
+        if (dmlExecutionProfile != null) {
+            batch = batch.setExecutionProfileName(ddlExecutionProfile);
+        }
         session.execute(batch);
     }
 
     @Override
     public void delete(int partition, Bytes key) {
-        BoundStatement prepared = deleteByKey.bind(ByteBuffer.wrap(key.get()));
-        session.execute(prepared);
+        BoundStatement stmt = deleteByKey.bind(ByteBuffer.wrap(key.get()));
+        stmt = stmt.setExecutionProfileName(ddlExecutionProfile);
+        session.execute(stmt);
     }
 
     @Override
@@ -90,8 +101,9 @@ public class GlobalCassandraKeyValueStoreRepository extends AbstractCassandraKey
             // Table uses `PRIMARY KEY (key)` and thus there's no clustering key to order by
             throw new UnsupportedOperationException("Getting all events in reverse order is not supported by globalKeyValueStore");
         }
-        BoundStatement prepared = selectAll.bind();
-        ResultSet rs = session.execute(prepared);
+        BoundStatement stmt = selectAll.bind();
+        stmt = stmt.setExecutionProfileName(ddlExecutionProfile);
+        ResultSet rs = session.execute(stmt);
         return new CassandraKeyValueIterator(rs.iterator());
     }
 
@@ -102,7 +114,9 @@ public class GlobalCassandraKeyValueStoreRepository extends AbstractCassandraKey
 
     @Override
     public long getCount(int partition) {
-        return executeSelectCount(selectCountAll.bind());
+        BoundStatement stmt = selectCountAll.bind();
+        stmt = stmt.setExecutionProfileName(ddlExecutionProfile);
+        return executeSelectCount(stmt);
     }
 
 }
