@@ -167,7 +167,7 @@ Long value = store.get(key);
 #### Supported operations by store type
 
 |                         | keyValueStore | globalKeyValueStore |
-| ----------------------- | ------------- | ------------------- |
+| ----------------------- |---------------|---------------------|
 | get                     | ✅             | ✅                   |
 | put                     | ✅             | ✅                   |
 | putIfAbsent             | ✅             | ✅                   |
@@ -178,12 +178,13 @@ Long value = store.get(key);
 | all                     | ✅             | ✅                   |
 | reverseAll              | ✅             | ❌                   |
 | prefixScan              | ✅             | ❌                   |
-| approximateNumEntries   | ✅             | ✅                   |
+| approximateNumEntries   | ✅*            | ✅*                  |
 | query::RangeQuery       | ✅             | ❌                   |
 | query::KeyQuery         | ✅             | ✅                   |
 | query::WindowKeyQuery   | ❌             | ❌                   |
 | query::WindowRangeQuery | ❌             | ❌                   |
 
+*opt-in required
 
 ### Builder
 The `CassandraStores` class provides a method `public static CassandraStores builder(final CqlSession session, final String name)` that returns an instance of _CassandraStores_ which ultimately is used to build an instance of `KeyValueBytesStoreSupplier` to add to your topology.
@@ -199,6 +200,7 @@ Advanced usage example:
 ```java
 CassandraStores.builder(session, "word-grouped-count")
         .withKeyspace("poc")
+        .withKeyspace(true)
         .withTableOptions("""
                 compaction = { 'class' : 'LeveledCompactionStrategy' }
                 AND default_time_to_live = 86400
@@ -240,6 +242,12 @@ Customize how the state store cassandra table is named, based on the kstreams st
 Default: `${normalisedStoreName}_kstreams_store` - normalise := lowercase, replaces all [^a-z0-9_] with '_'   
   e.g. ("TEXT3.word-count2") -> "text3_word_count2_kstreams_store"
 
+##### `withCountAllEnabled(boolean enabled)`
+Enable/disable the CassandraKeyValueStore to use `SELECT COUNT(*)` when [ReadOnlyKeyValueStore#approximateNumEntries()](https://kafka.apache.org/34/javadoc/org/apache/kafka/streams/state/ReadOnlyKeyValueStore.html#approximateNumEntries()) is invoked.
+
+Cassandra/CQL does not support getting approximate counts. Exact row count using `SELECT COUNT(*)` requires significant CPU and I/O resources and may be quite slow depending on store size... use with care!
+
+Default: `false`
 
 ## Fine Print 
 
@@ -438,7 +446,7 @@ Integration tests can be run separately via
   - [ ] Add builder config options
     - [ ] opt-out to avoid tables to be auto-created
     - [ ] allow setting execution profiles to be used for queries, separate for DDL|DML
-    - [ ] opt-in to enable count using `SELECT COUNT(*)` for `approximateNumEntries`
+    - [x] opt-in to enable count using `SELECT COUNT(*)` for `approximateNumEntries`
   - [ ] (?) simple inMemory read cache -> Caffeine? (separate lib?)
   - [ ] Benchmark
   - [ ] Explore buffered writes ('caching') -> parallel writes to Cassandra to boost performance?
