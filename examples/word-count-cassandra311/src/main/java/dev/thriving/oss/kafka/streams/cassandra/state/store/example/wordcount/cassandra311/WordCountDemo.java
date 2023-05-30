@@ -1,4 +1,4 @@
-package dev.thriving.oss.kafka.streams.cassandra.state.store.example.wordcount.scylladb;
+package dev.thriving.oss.kafka.streams.cassandra.state.store.example.wordcount.cassandra311;
 
 import com.datastax.oss.driver.api.core.CqlSession;
 import dev.thriving.oss.kafka.streams.cassandra.state.store.CassandraStores;

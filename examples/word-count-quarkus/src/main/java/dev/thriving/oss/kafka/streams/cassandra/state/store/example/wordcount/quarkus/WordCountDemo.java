@@ -43,6 +43,9 @@ public class WordCountDemo {
                 .groupBy((key, value) -> value)
                 .count(Materialized.<String, Long>as(
                                 CassandraStores.builder(quarkusCqlSession, "word-grouped-count")
+                                        .withKeyspace("test")
+                                        .withDdlExecutionProfile("ddl")
+                                        .withDmlExecutionProfile("dml")
                                         .keyValueStore()
                         )
                         .withLoggingDisabled()

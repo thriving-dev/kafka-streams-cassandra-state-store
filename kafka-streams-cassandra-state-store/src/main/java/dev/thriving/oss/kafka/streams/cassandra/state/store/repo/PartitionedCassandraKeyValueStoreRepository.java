@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 
 public class PartitionedCassandraKeyValueStoreRepository<K> extends AbstractCassandraKeyValueStoreRepository<K> implements CassandraKeyValueStoreRepository {
@@ -34,13 +35,18 @@ public class PartitionedCassandraKeyValueStoreRepository<K> extends AbstractCass
     private PreparedStatement selectByPartitionAndKeyRangeReversed;
     private PreparedStatement selectByPartitionAndKeyRangeToInclusiveReversed;
 
-    public PartitionedCassandraKeyValueStoreRepository(CqlSession session, String tableName, String tableOptions) {
-        super(session, tableName, tableOptions);
+    public PartitionedCassandraKeyValueStoreRepository(CqlSession session,
+                                                       String tableName,
+                                                       boolean createTable,
+                                                       String tableOptions,
+                                                       String ddlExecutionProfile,
+                                                       String dmlExecutionProfile) {
+        super(session, tableName, createTable, tableOptions, ddlExecutionProfile, dmlExecutionProfile);
     }
 
     @Override
-    protected void createTable(String tableName, String tableOptions) {
-        PreparedStatement prepare = session.prepare("""
+    protected String buildCreateTableQuery(String tableName, String tableOptions) {
+        return """
                 CREATE TABLE IF NOT EXISTS %s (
                     partition int,
                     key blob,
@@ -48,8 +54,7 @@ public class PartitionedCassandraKeyValueStoreRepository<K> extends AbstractCass
                     value blob,
                     PRIMARY KEY ((partition), key)
                 ) %s
-                """.formatted(tableName, tableOptions.isBlank() ? "" : "WITH " + tableOptions));
-        session.execute(prepare.bind());
+                """.formatted(tableName, tableOptions.isBlank() ? "" : "WITH " + tableOptions);
     }
 
     protected void initPreparedStatements(String tableName) {
@@ -77,8 +82,9 @@ public class PartitionedCassandraKeyValueStoreRepository<K> extends AbstractCass
 
     @Override
     public byte[] getByKey(int partition, Bytes key) {
-        BoundStatement prepared = selectByPartitionAndKey.bind(partition, ByteBuffer.wrap(key.get()));
-        ResultSet rs = session.execute(prepared);
+        BoundStatement stmt = selectByPartitionAndKey.bind(partition, ByteBuffer.wrap(key.get()));
+        stmt = stmt.setExecutionProfileName(ddlExecutionProfile);
+        ResultSet rs = session.execute(stmt);
         Row result = rs.one();
         if (result == null) {
             return null;
@@ -90,44 +96,54 @@ public class PartitionedCassandraKeyValueStoreRepository<K> extends AbstractCass
 
     @Override
     public void save(int partition, Bytes key, byte[] value) {
-        BoundStatement prepared = insert.bind(partition, ByteBuffer.wrap(key.get()), Instant.now(), ByteBuffer.wrap(value));
-        session.execute(prepared);
+        BoundStatement stmt = insert.bind(partition, ByteBuffer.wrap(key.get()), Instant.now(), ByteBuffer.wrap(value));
+        stmt = stmt.setExecutionProfileName(ddlExecutionProfile);
+        session.execute(stmt);
     }
 
     @Override
     public void saveBatch(int partition, List<KeyValue<Bytes, byte[]>> entries) {
+        List<BatchableStatement<?>> inserts = new ArrayList<>();
+        entries.forEach(it -> {
+            inserts.add(insert.bind(ByteBuffer.wrap(it.key.get()), Instant.now(), ByteBuffer.wrap(it.value)));
+        });
         BatchStatement batch = BatchStatement.newInstance(DefaultBatchType.LOGGED);
-        entries.forEach(it -> batch.add(insert.bind(partition, ByteBuffer.wrap(it.key.get()), Instant.now(), ByteBuffer.wrap(it.value))));
+        batch.addAll(inserts);
+        if (dmlExecutionProfile != null) {
+            batch = batch.setExecutionProfileName(ddlExecutionProfile);
+        }
         session.execute(batch);
     }
 
     @Override
     public void delete(int partition, Bytes key) {
-        BoundStatement prepared = deleteByPartitionAndKey.bind(partition, ByteBuffer.wrap(key.get()));
-        session.execute(prepared);
+        BoundStatement stmt = deleteByPartitionAndKey.bind(partition, ByteBuffer.wrap(key.get()));
+        stmt = stmt.setExecutionProfileName(ddlExecutionProfile);
+        session.execute(stmt);
     }
 
     @Override
     public KeyValueIterator<Bytes, byte[]> getAll(int partition, boolean forward) {
         PreparedStatement statement = forward ? selectByPartition : selectByPartitionReversed;
-        BoundStatement prepared = statement.bind(partition);
-        ResultSet rs = session.execute(prepared);
+        BoundStatement stmt = statement.bind(partition);
+        stmt = stmt.setExecutionProfileName(ddlExecutionProfile);
+        ResultSet rs = session.execute(stmt);
         return new CassandraKeyValueIterator(rs.iterator());
     }
 
     @Override
     public KeyValueIterator<Bytes, byte[]> getForRange(int partition, Bytes from, Bytes to, boolean forward, boolean toInclusive) {
-        BoundStatement bound;
+        BoundStatement stmt;
         if (from == null && to == null) {
             return getAll(partition, forward);
         } else if (to == null) {
             PreparedStatement statement = forward ? selectByPartitionAndKeyFrom : selectByPartitionAndKeyFromReversed;
-            bound = statement.bind(partition, ByteBuffer.wrap(from.get()));
+            stmt = statement.bind(partition, ByteBuffer.wrap(from.get()));
         } else if (from == null) {
             PreparedStatement statement = forward ?
                     (toInclusive ? selectByPartitionAndKeyToInclusive : selectByPartitionAndKeyTo) :
                     (toInclusive ? selectByPartitionAndKeyToInclusiveReversed : selectByPartitionAndKeyToReversed);
-            bound = statement.bind(partition, ByteBuffer.wrap(to.get()));
+            stmt = statement.bind(partition, ByteBuffer.wrap(to.get()));
         } else if (from.compareTo(to) > 0) {
             LOG.warn("Returning empty iterator for fetch with invalid key range: from > to. " +
                     "This may be due to range arguments set in the wrong order, " +
@@ -138,15 +154,18 @@ public class PartitionedCassandraKeyValueStoreRepository<K> extends AbstractCass
             PreparedStatement statement = forward ?
                     (toInclusive ? selectByPartitionAndKeyRangeToInclusive : selectByPartitionAndKeyRange) :
                     (toInclusive ? selectByPartitionAndKeyRangeToInclusiveReversed : selectByPartitionAndKeyRangeReversed);
-            bound = statement.bind(partition, ByteBuffer.wrap(from.get()), ByteBuffer.wrap(to.get()));
+            stmt = statement.bind(partition, ByteBuffer.wrap(from.get()), ByteBuffer.wrap(to.get()));
         }
-        ResultSet rs = session.execute(bound);
+        stmt = stmt.setExecutionProfileName(ddlExecutionProfile);
+        ResultSet rs = session.execute(stmt);
         return new CassandraKeyValueIterator(rs.iterator());
     }
 
     @Override
     public long getCount(int partition) {
-        return executeSelectCount(selectCountByPartition.bind(partition));
+        BoundStatement stmt = selectCountByPartition.bind(partition);
+        stmt = stmt.setExecutionProfileName(ddlExecutionProfile);
+        return executeSelectCount(stmt);
     }
 
 }
