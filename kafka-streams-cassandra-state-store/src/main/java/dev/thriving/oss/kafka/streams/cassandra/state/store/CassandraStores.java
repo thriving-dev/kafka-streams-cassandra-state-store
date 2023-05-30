@@ -63,6 +63,9 @@ public final class CassandraStores {
 
     private Function<String, String> tableNameFn = storeName -> String.format("%s_kstreams_store", storeName.toLowerCase().replaceAll("[^a-z0-9_]", "_"));
     private boolean isCountAllEnabled = false;
+    private boolean createTable = true;
+    private String ddlExecutionProfile = null;
+    private String dmlExecutionProfile = null;
 
     private CassandraStores(String name, CqlSession session) {
         this.name = name;
@@ -162,22 +165,77 @@ public final class CassandraStores {
     }
 
     /**
-     * Enable/disable the CassandraKeyValueStore to use `SELECT COUNT(*)` when
+     * Enable (opt-in) the CassandraKeyValueStore to use `SELECT COUNT(*)` when
      * {@link ReadOnlyKeyValueStore#approximateNumEntries() approximateNumEntries} is invoked.
      * <p>
      * Cassandra/CQL does not support getting approximate counts. Exact row count using `SELECT COUNT(*)` requires significant
      * CPU and I/O resources and may be quite slow depending on store size... use with care!!!
      * <p>
-     * Default: false
+     * Disabled by default.
      *
-     * @param enabled enable/disable using cql count for `approximateNumEntries`
      * @return itself
      */
-    public CassandraStores withCountAllEnabled(boolean enabled) {
+    public CassandraStores withCountAllEnabled() {
         LOG.warn("Cassandra/CQL does not support getting approximate counts. SELECT COUNT(*) requires significant CPU and I/O resources and may be quite slow depending on store size... use with care!!!");
-        this.isCountAllEnabled = enabled;
+        this.isCountAllEnabled = true;
         return this;
     }
+
+    /**
+     * Disable (opt-out) automatic table creation during store initialization.
+     * <p>
+     * Enabled by default.
+     *
+     * @return itself
+     */
+    public CassandraStores withCreateTableDisabled() {
+        this.createTable = false;
+        return this;
+    }
+
+    /**
+     * Set the execution profile to be used by the driver for all DDL (Data Definition Language) queries.
+     * <p>
+     * Note: Only applies if table creation ({@link CassandraStores#withCreateTableDisabled()}) is enabled (default).
+     *       If no profile is set - DDL queries are executed with consistency `ALL`.
+     *       When using a custom profile, it is recommended to also set consistency=ALL
+     *       (reason: avoid issues with concurrent schema updates)
+     * <p>
+     * Reference: <a href="https://docs.datastax.com/en/developer/java-driver/4.15/manual/core/configuration/#execution-profiles">...</a>
+     * <p>
+     * Must be a non-blank String.
+     * Set to `null` to disable (basic applies).
+     * <p>
+     * Default: `null`
+     *
+     * @param ddlExecutionProfile the driver execution profile to use for DDL queries
+     * @return itself
+     */
+    public CassandraStores withDdlExecutionProfile(String ddlExecutionProfile) {
+        assert ddlExecutionProfile == null || !ddlExecutionProfile.isBlank() : "ddlExecutionProfile cannot be blank";
+        this.ddlExecutionProfile = ddlExecutionProfile;
+        return this;
+    }
+
+    /**
+     * Set the execution profile to be used by the driver for all DML (Data Manipulation Language) queries.
+     * <p>
+     * Reference: <a href="https://docs.datastax.com/en/developer/java-driver/4.15/manual/core/configuration/#execution-profiles">...</a>
+     * <p>
+     * Must be a non-blank String.
+     * Set to `null` to disable (basic applies).
+     * <p>
+     * Default: `null`
+     *
+     * @param dmlExecutionProfile the driver execution profile to use for DML queries
+     * @return itself
+     */
+    public CassandraStores withDmlExecutionProfile(String dmlExecutionProfile) {
+        assert dmlExecutionProfile == null || !dmlExecutionProfile.isBlank() : "dmlExecutionProfile cannot be blank";
+        this.dmlExecutionProfile = dmlExecutionProfile;
+        return this;
+    }
+
 
     /**
      * Creates a persistent {@link KeyValueBytesStoreSupplier}.
@@ -216,10 +274,13 @@ public final class CassandraStores {
             @Override
             public KeyValueStore<Bytes, byte[]> get() {
                 return new CassandraKeyValueStore(name,
-                        new PartitionedCassandraKeyValueStoreRepository(
+                        new PartitionedCassandraKeyValueStoreRepository<>(
                                 session,
                                 resolveTableName(),
-                                tableOptions),
+                                createTable,
+                                tableOptions,
+                                ddlExecutionProfile,
+                                dmlExecutionProfile),
                         isCountAllEnabled);
             }
 
@@ -277,7 +338,10 @@ public final class CassandraStores {
                         new GlobalCassandraKeyValueStoreRepository(
                                 session,
                                 resolveTableName(),
-                                tableOptions),
+                                createTable,
+                                tableOptions,
+                                ddlExecutionProfile,
+                                dmlExecutionProfile),
                         isCountAllEnabled);
             }
 

@@ -34,13 +34,18 @@ public class PartitionedCassandraKeyValueStoreRepository<K> extends AbstractCass
     private PreparedStatement selectByPartitionAndKeyRangeReversed;
     private PreparedStatement selectByPartitionAndKeyRangeToInclusiveReversed;
 
-    public PartitionedCassandraKeyValueStoreRepository(CqlSession session, String tableName, String tableOptions) {
-        super(session, tableName, tableOptions);
+    public PartitionedCassandraKeyValueStoreRepository(CqlSession session,
+                                                       String tableName,
+                                                       boolean createTable,
+                                                       String tableOptions,
+                                                       String ddlExecutionProfile,
+                                                       String dmlExecutionProfile) {
+        super(session, tableName, createTable, tableOptions, ddlExecutionProfile, dmlExecutionProfile);
     }
 
     @Override
-    protected void createTable(String tableName, String tableOptions) {
-        PreparedStatement prepare = session.prepare("""
+    protected String buildCreateTableQuery(String tableName, String tableOptions) {
+        return """
                 CREATE TABLE IF NOT EXISTS %s (
                     partition int,
                     key blob,
@@ -48,8 +53,7 @@ public class PartitionedCassandraKeyValueStoreRepository<K> extends AbstractCass
                     value blob,
                     PRIMARY KEY ((partition), key)
                 ) %s
-                """.formatted(tableName, tableOptions.isBlank() ? "" : "WITH " + tableOptions));
-        session.execute(prepare.bind());
+                """.formatted(tableName, tableOptions.isBlank() ? "" : "WITH " + tableOptions);
     }
 
     protected void initPreparedStatements(String tableName) {

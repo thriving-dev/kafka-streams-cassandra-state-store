@@ -6,6 +6,8 @@ import dev.thriving.oss.kafka.streams.cassandra.state.store.CassandraKeyValueIte
 import org.apache.kafka.common.utils.Bytes;
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.state.KeyValueIterator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
 import java.time.Instant;
@@ -13,26 +15,33 @@ import java.util.List;
 
 public class GlobalCassandraKeyValueStoreRepository extends AbstractCassandraKeyValueStoreRepository<ByteBuffer> implements CassandraKeyValueStoreRepository {
 
+    private static final Logger LOG = LoggerFactory.getLogger(GlobalCassandraKeyValueStoreRepository.class);
+
     private PreparedStatement insert;
     private PreparedStatement deleteByKey;
     private PreparedStatement selectByKey;
     private PreparedStatement selectAll;
     private PreparedStatement selectCountAll;
 
-    public GlobalCassandraKeyValueStoreRepository(CqlSession session, String tableName, String tableOptions) {
-        super(session, tableName, tableOptions);
+    public GlobalCassandraKeyValueStoreRepository(CqlSession session,
+                                                  String tableName,
+                                                  boolean createTable,
+                                                  String tableOptions,
+                                                  String ddlExecutionProfile,
+                                                  String dmlExecutionProfile) {
+        super(session, tableName, createTable, tableOptions, ddlExecutionProfile, dmlExecutionProfile);
     }
 
     @Override
-    protected void createTable(String tableName, String tableOptions) {
-        session.execute("""
-           CREATE TABLE IF NOT EXISTS %s (
-               key blob,
-               time timestamp,
-               value blob,
-               PRIMARY KEY (key)
-           ) %s
-           """.formatted(tableName, tableOptions.isBlank() ? "" : "WITH " + tableOptions));
+    protected String buildCreateTableQuery(String tableName, String tableOptions) {
+        return """
+                CREATE TABLE IF NOT EXISTS %s (
+                    key blob,
+                    time timestamp,
+                    value blob,
+                    PRIMARY KEY (key)
+                ) %s
+                """.formatted(tableName, tableOptions.isBlank() ? "" : "WITH " + tableOptions);
     }
 
     @Override
