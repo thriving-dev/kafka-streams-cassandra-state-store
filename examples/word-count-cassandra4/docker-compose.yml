@@ -4,7 +4,7 @@ version: '3'
 services:
   kafka-1:
     container_name: kafka-1
-    image: debezium/kafka:2.1.1.Final
+    image: debezium/kafka:2.2.0.Final
     ports:
       - 19092:9092
       - 19093:9093
@@ -18,7 +18,7 @@ services:
 
   kafka-2:
     container_name: kafka-2
-    image: debezium/kafka:2.1.1.Final
+    image: debezium/kafka:2.2.0.Final
     ports:
       - 29092:9092
       - 29093:9093
@@ -32,7 +32,7 @@ services:
 
   kafka-3:
     container_name: kafka-3
-    image: debezium/kafka:2.1.1.Final
+    image: debezium/kafka:2.2.0.Final
     ports:
       - 39092:9092
       - 39093:9093

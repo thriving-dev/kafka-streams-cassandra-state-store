@@ -4,7 +4,7 @@ version: '3'
 services:
   kafka:
     container_name: kafka
-    image: debezium/kafka:2.1.1.Final
+    image: debezium/kafka:2.2.0.Final
     ports:
       - 19092:19092
     restart: always
@@ -26,7 +26,7 @@ services:
 
   kafka-create-topic-1:
     container_name: kafka-create-topic-1
-    image: debezium/kafka:2.1.1.Final
+    image: debezium/kafka:2.2.0.Final
     depends_on:
       kafka:
         condition: service_healthy
@@ -35,7 +35,7 @@ services:
 
   kafka-create-topic-2:
     container_name: kafka-create-topic-2
-    image: debezium/kafka:2.1.1.Final
+    image: debezium/kafka:2.2.0.Final
     depends_on:
       kafka:
         condition: service_healthy
@@ -44,7 +44,7 @@ services:
 
 #  kafka-1:
 #    container_name: kafka-1
-#    image: debezium/kafka:2.1.1.Final
+#    image: debezium/kafka:2.2.0.Final
 #    restart: always
 #    ports:
 #      - 19092:19092
@@ -62,7 +62,7 @@ services:
 #
 #  kafka-2:
 #    container_name: kafka-2
-#    image: debezium/kafka:2.1.1.Final
+#    image: debezium/kafka:2.2.0.Final
 #    restart: always
 #    ports:
 #      - 29092:29092
@@ -79,7 +79,7 @@ services:
 #
 #  kafka-3:
 #    container_name: kafka-3
-#    image: debezium/kafka:2.1.1.Final
+#    image: debezium/kafka:2.2.0.Final
 #    restart: always
 #    ports:
 #      - 39092:39092
