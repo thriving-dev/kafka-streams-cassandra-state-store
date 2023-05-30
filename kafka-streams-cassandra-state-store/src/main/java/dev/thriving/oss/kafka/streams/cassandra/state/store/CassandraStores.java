@@ -4,10 +4,9 @@ import com.datastax.oss.driver.api.core.CqlSession;
 import dev.thriving.oss.kafka.streams.cassandra.state.store.repo.GlobalCassandraKeyValueStoreRepository;
 import dev.thriving.oss.kafka.streams.cassandra.state.store.repo.PartitionedCassandraKeyValueStoreRepository;
 import org.apache.kafka.common.utils.Bytes;
-import org.apache.kafka.streams.state.KeyValueBytesStoreSupplier;
-import org.apache.kafka.streams.state.KeyValueStore;
-import org.apache.kafka.streams.state.StoreBuilder;
-import org.apache.kafka.streams.state.StoreSupplier;
+import org.apache.kafka.streams.state.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Objects;
 import java.util.function.Function;
@@ -53,13 +52,17 @@ import java.util.function.Function;
  */
 public final class CassandraStores {
 
+    private static final Logger LOG = LoggerFactory.getLogger(CassandraStores.class);
+
     private final String name;
     private final CqlSession session;
     private String keyspace = null;
     private String tableOptions = """
             compaction = { 'class' : 'LeveledCompactionStrategy' }
             """;
+
     private Function<String, String> tableNameFn = storeName -> String.format("%s_kstreams_store", storeName.toLowerCase().replaceAll("[^a-z0-9_]", "_"));
+    private boolean isCountAllEnabled = false;
 
     private CassandraStores(String name, CqlSession session) {
         this.name = name;
@@ -159,6 +162,25 @@ public final class CassandraStores {
     }
 
     /**
+     * Enable/disable the CassandraKeyValueStore to use `SELECT COUNT(*)` when
+     * {@link ReadOnlyKeyValueStore#approximateNumEntries() approximateNumEntries} is invoked.
+     * <p>
+     * Cassandra/CQL does not support getting approximate counts. SELECT COUNT(*) requires
+     * significant CPU and I/O resources and may be quite slow depending on store size...
+     * Use with care!!!
+     * <p>
+     * Default: false
+     *
+     * @param isCountAllEnabled enable/disable using cql count for `approximateNumEntries`
+     * @return itself
+     */
+    public CassandraStores withCountAllEnabled(boolean isCountAllEnabled) {
+        LOG.warn("Cassandra/CQL does not support getting approximate counts. SELECT COUNT(*) requires significant CPU and I/O resources and may be quite slow depending on store size... use with care!!!");
+        this.isCountAllEnabled = isCountAllEnabled;
+        return this;
+    }
+
+    /**
      * Creates a persistent {@link KeyValueBytesStoreSupplier}.
      * <p>
      * The key value store is persisted in a cassandra table, partitioned by the store context task partition.
@@ -177,8 +199,9 @@ public final class CassandraStores {
      * - all
      * - reverseAll
      * - query
-     * Not supported:
+     * Supported with opt-in:
      * - approximateNumEntries
+     * Not supported:
      * - prefixScan
      *
      * @return an instance of a {@link KeyValueBytesStoreSupplier} that can be used
@@ -197,7 +220,8 @@ public final class CassandraStores {
                         new PartitionedCassandraKeyValueStoreRepository(
                                 session,
                                 resolveTableName(),
-                                tableOptions));
+                                tableOptions),
+                        isCountAllEnabled);
             }
 
             @Override
@@ -230,8 +254,9 @@ public final class CassandraStores {
      * - get
      * - all
      * - query
-     * Not supported:
+     * Supported with opt-in:
      * - approximateNumEntries
+     * Not supported:
      * - reverseAll
      * - range
      * - reverseRange
@@ -253,7 +278,8 @@ public final class CassandraStores {
                         new GlobalCassandraKeyValueStoreRepository(
                                 session,
                                 resolveTableName(),
-                                tableOptions));
+                                tableOptions),
+                        isCountAllEnabled);
             }
 
             @Override

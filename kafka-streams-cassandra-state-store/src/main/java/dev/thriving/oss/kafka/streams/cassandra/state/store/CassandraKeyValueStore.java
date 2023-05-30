@@ -24,14 +24,16 @@ public class CassandraKeyValueStore implements KeyValueStore<Bytes, byte[]> {
 
     protected final String name;
     private final CassandraKeyValueStoreRepository repo;
+    private final boolean isCountAllEnabled;
     protected StateStoreContext context;
     protected int partition;
     protected Position position = Position.emptyPosition();
     private volatile boolean open = false;
 
-    public CassandraKeyValueStore(String name, CassandraKeyValueStoreRepository repo) {
+    public CassandraKeyValueStore(String name, CassandraKeyValueStoreRepository repo, boolean isCountAllEnabled) {
         this.name = name;
         this.repo = repo;
+        this.isCountAllEnabled = isCountAllEnabled;
     }
 
     @Deprecated
@@ -107,10 +109,13 @@ public class CassandraKeyValueStore implements KeyValueStore<Bytes, byte[]> {
 
     @Override
     public long approximateNumEntries() {
-        LOG.warn("Cassandra/CQL does not support getting approximate counts. SELECT COUNT(*) requires significant CPU and I/O resources and may be quite slow depending on store size... use with care!!!");
-        return repo.getCount(partition);
+        if (isCountAllEnabled) {
+            return repo.getCount(partition);
+        } else {
+            LOG.warn("Store count is disabled and always returns '-1', enable via CassandraStores#withCountAllEnabled()");
+            return -1;
+        }
     }
-
 
     @Override
     public void put(Bytes key, byte[] value) {

@@ -8,15 +8,15 @@ import com.datastax.oss.driver.api.core.cql.Row;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.time.Duration;
-
 public abstract class AbstractCassandraKeyValueStoreRepository<K> {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractCassandraKeyValueStoreRepository.class);
 
     protected final CqlSession session;
 
-    public AbstractCassandraKeyValueStoreRepository(CqlSession session, String tableName, String tableOptions) {
+    public AbstractCassandraKeyValueStoreRepository(CqlSession session,
+                                                    String tableName,
+                                                    String tableOptions) {
         assert session != null : "session cannot be null";
         assert tableName != null && !tableName.isBlank() : "tableName cannot be null or blank";
         assert tableOptions != null : "tableOptions cannot be null";
@@ -33,7 +33,6 @@ public abstract class AbstractCassandraKeyValueStoreRepository<K> {
 
     protected long executeSelectCount(BoundStatement prepared) {
         try {
-            prepared = prepared.setTimeout(Duration.ofSeconds(5)); // TODO: should this be configurable? higher/lower?
             ResultSet rs = session.execute(prepared);
             Row result = rs.one();
             if (result == null) {

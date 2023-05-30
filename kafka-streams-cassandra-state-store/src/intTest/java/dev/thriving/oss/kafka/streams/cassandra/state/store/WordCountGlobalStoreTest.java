@@ -157,6 +157,7 @@ class WordCountGlobalStoreTest extends AbstractIntegrationTest {
                 .count(Materialized.<String, Long>as(
                                 CassandraStores.builder(session, STORE_NAME)
                                         .withKeyspace(CASSANDRA_KEYSPACE)
+                                        .withCountAllEnabled(true)
                                         .globalKeyValueStore()
                         )
                         .withLoggingDisabled()
