@@ -5,7 +5,27 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## [0.3.2](https://github.com/thriving-dev/kafka-streams-cassandra-state-store/releases/tag/x.y.z) (2023-04-17)
+## [0.4.0](https://github.com/thriving-dev/kafka-streams-cassandra-state-store/releases/tag/0.4.0) (2023-05-30)
+[0.3.2...0.4.0](https://github.com/thriving-dev/kafka-streams-cassandra-state-store/compare/0.3.2...0.4.0)
+
+### Added
+- feat: Add builder config option - opt-in to enable count for approximateNumEntries [#10](https://github.com/thriving-dev/kafka-streams-cassandra-state-store/issues/10)
+- feat: Add builder config option - allow setting execution profiles (for DDL; DML) [#11](https://github.com/thriving-dev/kafka-streams-cassandra-state-store/issues/11)
+- feat: Add builder config option - opt-out to avoid tables to be auto-created [#9](https://github.com/thriving-dev/kafka-streams-cassandra-state-store/issues/9)
+- feat: add Quarkus examples app as GraalVM native image [#7](https://github.com/thriving-dev/kafka-streams-cassandra-state-store/issues/7)
+
+### Changed
+- store size via `approximateNumEntries` is now by default disabled - opt-in option has been added to builder - ref [#10](https://github.com/thriving-dev/kafka-streams-cassandra-state-store/issues/10)
+
+### Fixed
+- bug: cassandra concurrent schema updates (initial concurrent table auto-creation) [#12](https://github.com/thriving-dev/kafka-streams-cassandra-state-store/issues/12)
+- small fix: example 'processor-api-all-range-prefix-count' not runnable
+
+### Other
+- smaller improvements to  
+
+
+## [0.3.2](https://github.com/thriving-dev/kafka-streams-cassandra-state-store/releases/tag/0.3.2) (2023-04-17)
 [0.3.1...0.3.2](https://github.com/thriving-dev/kafka-streams-cassandra-state-store/compare/0.3.1...0.3.2)
 
 ### Changed
