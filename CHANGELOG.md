@@ -22,7 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - small fix: example 'processor-api-all-range-prefix-count' not runnable
 
 ### Other
-- smaller improvements to  
+- documentation improved
 
 
 ## [0.3.2](https://github.com/thriving-dev/kafka-streams-cassandra-state-store/releases/tag/0.3.2) (2023-04-17)
