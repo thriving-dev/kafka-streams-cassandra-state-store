@@ -25,6 +25,7 @@ dependencies {
 
     // This dependency is used by the application.
     implementation("org.slf4j:slf4j-simple:2.0.6")
+    implementation("ch.qos.logback:logback-classic:1.4.7")
     implementation("org.apache.kafka:kafka-streams:3.4.0")
     implementation("com.datastax.oss:java-driver-core:4.15.0")
     implementation("org.glassfish.jersey.containers:jersey-container-servlet:3.1.0")
