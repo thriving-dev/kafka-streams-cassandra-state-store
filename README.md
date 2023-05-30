@@ -245,9 +245,39 @@ Default: `${normalisedStoreName}_kstreams_store` - normalise := lowercase, repla
 ##### `withCountAllEnabled()`
 Enable (opt-in) the CassandraKeyValueStore to use `SELECT COUNT(*)` when [ReadOnlyKeyValueStore#approximateNumEntries()](https://kafka.apache.org/34/javadoc/org/apache/kafka/streams/state/ReadOnlyKeyValueStore.html#approximateNumEntries()) is invoked.
 
-Cassandra/CQL does not support getting approximate counts. Exact row count using `SELECT COUNT(*)` requires significant CPU and I/O resources and may be quite slow depending on store size... use with care!
+⚠️ Cassandra/CQL does not support getting approximate counts. Exact row count using `SELECT COUNT(*)` requires significant CPU and I/O resources and may be quite slow depending on store size... use with care!
 
 Disabled by default.
+
+##### `withCreateTableDisabled()`
+Disable (opt-out) automatic table creation during store initialization.   
+Enabled by default.
+
+##### `withDmlExecutionProfile(String dmlExecutionProfile)`
+Set the execution profile to be used by the driver for all DDL (Data Definition Language) queries.
+
+ℹ️ Note: Only applies if table creation ({@link CassandraStores#withCreateTableDisabled()}) is enabled (default).   
+If no profile is set - DDL queries are executed with consistency `ALL`.   
+When using a custom profile, it is recommended to also set consistency=ALL   
+(Reason: avoid issues with concurrent schema updates)
+
+Reference: https://docs.datastax.com/en/developer/java-driver/4.15/manual/core/configuration/#execution-profiles
+
+Must be a non-blank String.   
+Set to `null` to disable (basic applies).
+
+Default: `null`
+
+##### `withCountAllEnabled()`
+Set the execution profile to be used by the driver for all DML (Data Manipulation Language) queries.
+
+Reference: https://docs.datastax.com/en/developer/java-driver/4.15/manual/core/configuration/#execution-profiles"
+
+Must be a non-blank String.   
+Set to `null` to disable (basic applies).
+
+Default: `null`
+
 
 ## Fine Print 
 
