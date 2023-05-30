@@ -253,7 +253,7 @@ Disabled by default.
 Disable (opt-out) automatic table creation during store initialization.   
 Enabled by default.
 
-##### `withDmlExecutionProfile(String dmlExecutionProfile)`
+##### `withDdlExecutionProfile(String ddlExecutionProfile)`
 Set the execution profile to be used by the driver for all DDL (Data Definition Language) queries.
 
 ℹ️ Note: Only applies if table creation ({@link CassandraStores#withCreateTableDisabled()}) is enabled (default).   
@@ -268,7 +268,7 @@ Set to `null` to disable (basic applies).
 
 Default: `null`
 
-##### `withCountAllEnabled()`
+##### `withDmlExecutionProfile(String dmlExecutionProfile)`
 Set the execution profile to be used by the driver for all DML (Data Manipulation Language) queries.
 
 Reference: https://docs.datastax.com/en/developer/java-driver/4.15/manual/core/configuration/#execution-profiles"
