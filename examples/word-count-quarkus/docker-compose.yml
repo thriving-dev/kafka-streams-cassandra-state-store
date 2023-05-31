@@ -129,10 +129,12 @@ services:
     deploy:
       replicas: 3
     depends_on:
-      scylla-1:
-        condition: service_healthy
       kafka-1:
         condition: service_healthy
+      scylla-1:
+        condition: service_healthy
+      scylla-load-keyspace:
+        condition: service_completed_successfully
     build:
       dockerfile: src/main/docker/Dockerfile.${QUARKUS_MODE:-jvm}
     environment:
