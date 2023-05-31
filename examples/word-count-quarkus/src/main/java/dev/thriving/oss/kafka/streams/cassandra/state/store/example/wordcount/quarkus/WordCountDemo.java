@@ -30,9 +30,6 @@ public class WordCountDemo {
     public Topology buildTopology() {
         StreamsBuilder builder = new StreamsBuilder();
 
-//        // init session
-//        CqlSession session = CqlSession.builder().build();
-
         final Serde<String> stringSerde = Serdes.String();
         final Serde<Long> longSerde = Serdes.Long();
         final KStream<String, String> source = builder.stream(INPUT_TOPIC, Consumed.with(stringSerde, stringSerde));
