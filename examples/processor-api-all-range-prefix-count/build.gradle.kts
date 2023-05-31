@@ -27,7 +27,7 @@ dependencies {
     implementation("org.slf4j:slf4j-simple:2.0.6")
     implementation("ch.qos.logback:logback-classic:1.4.7")
     implementation("org.apache.kafka:kafka-streams:3.4.0")
-    implementation("com.scylladb:java-driver-core:4.14.1.0")
+    implementation("com.scylladb:java-driver-core:4.15.0.0")
 }
 
 application {
