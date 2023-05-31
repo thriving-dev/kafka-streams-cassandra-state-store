@@ -37,9 +37,7 @@ Please carefully read documentation provided on [store types](#store-types) and 
 
 ## Get it!
 
-Classes of this package are in the package `dev.thriving.oss.kafka.streams.cassandra.state.store`.
-
-To use the package, you need to use following dependency:
+**kafka-streams-cassandra-state-store** is available on [Maven Central](https://central.sonatype.com/artifact/dev.thriving.oss/kafka-streams-cassandra-state-store/):
 
 #### Maven
 ```xml
@@ -49,6 +47,8 @@ To use the package, you need to use following dependency:
     <version>${version}</version>
 </dependency>
 ```
+
+Classes of this package are in the package `dev.thriving.oss.kafka.streams.cassandra.state.store`.
 
 #### Gradle (Groovy DSL)
 ```groovy
