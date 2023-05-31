@@ -39,7 +39,7 @@ import java.util.stream.Stream;
  * <p>
  * Before running this example you must create the input topic and the output topic (e.g. via
  * {@code bin/kafka-topics.sh --create ...}), and write some data to the input topic (e.g. via
- * {@code bin/kafka-console-producer.sh}). Otherwise you won't see any data arriving in the output topic.
+ * {@code bin/kafka-console-producer.sh}). Otherwise, you won't see any data arriving in the output topic.
  */
 public final class ProcessorApiAllRangePrefixCountDemo {
 
