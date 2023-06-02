@@ -9,6 +9,13 @@ For now, only KeyValueStore type is supported.
 ℹ️ [Kafka Streams](https://kafka.apache.org/documentation/streams/) is a Java client library for building stream-processing applications and microservices, where the input and output data are stored in Kafka clusters.   
 ℹ️ [Apache Cassandra](https://cassandra.apache.org/) is a free and open-source, distributed, wide-column store, NoSQL database management system designed to handle large amounts of data across many commodity servers, providing high availability with no single point of failure.
 
+### Blog post introducing the library + Demo YouTube
+
+https://thriving.dev/blog/introducing-kafka-streams-cassandra-state-store
+
+[![Watch the demo on YouTube](https://img.youtube.com/vi/2Co9-8E-uJE/mqdefault.jpg)](https://youtu.be/2Co9-8E-uJE)
+
+
 ### Project Status
 ⚠️ Current project status is to be considered **EXPERIMENTAL!!** ⚠️   
 Please carefully read documentation provided on [store types](#store-types) and [limitations](#known-limitations).
