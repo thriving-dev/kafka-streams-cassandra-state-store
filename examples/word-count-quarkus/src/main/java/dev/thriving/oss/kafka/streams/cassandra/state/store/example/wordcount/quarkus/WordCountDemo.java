@@ -15,6 +15,12 @@ import org.jboss.logging.Logger;
 import java.util.Arrays;
 import java.util.Locale;
 
+/**
+ * ref Kafka Streams Quick Start <a href="https://docs.confluent.io/platform/6.2/streams/quickstart.html">WordCount demo application</a>
+ * also <a href="https://github.com/apache/kafka/blob/3.4/streams/examples/src/main/java/org/apache/kafka/streams/examples/wordcount/WordCountDemo.java">WordCountDemo.java</a>
+ *
+ * @return Kafka Streams Topology
+ */
 @ApplicationScoped
 public class WordCountDemo {
 
@@ -30,14 +36,24 @@ public class WordCountDemo {
     public Topology buildTopology() {
         StreamsBuilder builder = new StreamsBuilder();
 
+        // Serializers/deserializers (serde) for String and Long types
         final Serde<String> stringSerde = Serdes.String();
         final Serde<Long> longSerde = Serdes.Long();
+
+        // Construct a `KStream` from the input topic "streams-plaintext-input", where message values
+        // represent lines of text (for the sake of this example, we ignore whatever may be stored
+        // in the message keys).
         final KStream<String, String> source = builder.stream(INPUT_TOPIC, Consumed.with(stringSerde, stringSerde));
 
-        final KTable<String, Long> counts = source
+        final KTable<String, Long> wordCounts = source
                 .peek((k, v) -> LOG.debugf("in => %s::%s", k, v))
+                // Split each text line, by whitespace, into words.  The text lines are the message
+                // values, i.e. we can ignore whatever data is in the message keys and thus invoke
+                // `flatMapValues` instead of the more generic `flatMap`.
                 .flatMapValues(value -> Arrays.asList(value.toLowerCase(Locale.getDefault()).split(" ")))
+                // We use `groupBy` to ensure the words are available as message keys
                 .groupBy((key, value) -> value)
+                // Count the occurrences of each word (message key).
                 .count(Materialized.<String, Long>as(
                                 CassandraStores.builder(quarkusCqlSession, "word-grouped-count")
                                         .withKeyspace("test")
@@ -50,9 +66,9 @@ public class WordCountDemo {
                         .withKeySerde(stringSerde)
                         .withValueSerde(longSerde));
 
-        // need to override value serde to Long type
-        counts.toStream()
+        wordCounts.toStream()
                 .peek((k, v) -> LOG.debugf("out => %s::%s", k, v))
+                // Convert the `KTable<String, Long>` into a `KStream<String, Long>` and write to the output topic.
                 .to(OUTPUT_TOPIC, Produced.with(stringSerde, longSerde));
 
         return builder.build();

@@ -22,7 +22,8 @@ dependencies {
     implementation("io.quarkus:quarkus-arc")
     implementation("io.quarkus:quarkus-resteasy-reactive-jackson")
     implementation("com.datastax.oss.quarkus:cassandra-quarkus-client")
-    implementation("com.scylladb:java-driver-core:4.15.0.0")
+
+    implementation("com.scylladb:java-driver-core:4.15.0.0") // ScyllaDB shard aware fork of the java driver
 
     testImplementation("io.quarkus:quarkus-junit5")
 }

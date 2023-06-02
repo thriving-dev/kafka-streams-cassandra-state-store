@@ -31,7 +31,7 @@ On Mac with Apple Silicon (M1/M2 chip) use:
 
 ### docker-compose stack
 
-Start docker-compose stack
+1. Start docker-compose stack
 ```bash
 export QUARKUS_MODE=native
 docker-compose up --build -d
@@ -39,16 +39,16 @@ docker-compose up --build -d
 
 ### Play with the application
 
-2. Produce some messages, e.g. via kcat to the input topic
+2. Start a console-consumer on the output topic
+```bash
+kcat -C -q -b localhost:19092 -t streams-wordcount-output -K:: -s key=s -s value=q
+```
+
+3Produce some messages, e.g. via kcat to the input topic
 ```bash
 echo "Hello world" | kcat -P -b localhost:19092 -t streams-plaintext-input
 echo "What a wonderful world" | kcat -P -b localhost:19092 -t streams-plaintext-input
 echo "What a day to say hello" | kcat -P -b localhost:19092 -t streams-plaintext-input
-```
-
-3. Start a console-consumer on the output topic
-```bash
-kcat -C -q -b localhost:19092 -t streams-wordcount-output -K:: -s key=s -s value=q
 ```
 
 4. Query the state from the Scylla cluster
@@ -60,7 +60,7 @@ docker exec -it scylla-1 cqlsh \
 
 ### (Cleanup)
 
-Remove docker-compose stack
+5. Delete docker-compose stack
 ```bash
 docker-compose down
 ```
@@ -121,7 +121,7 @@ On Mac with Apple Silicon (M1/M2 chip) use:
 ../../gradlew clean build -Dquarkus.package.type=native -Dquarkus.native.container-build=true  -Dquarkus.native.builder-image=quay.io/quarkus/ubi-quarkus-mandrel-builder-image:22.3-java17 -Dquarkus.native.resources.includes="librocksdbjni-linux-aarch64.so" -Dquarkus.native.resources.excludes="librocksdbjni-linux64.so"
 ```
 
-You can then execute your native executable with: `./build/word-count-quarkus-1.0.0-SNAPSHOT-runner`
+You can then execute your native executable with: `./build/word-count-quarkus-x.y.z-SNAPSHOT-runner`
 
 If you want to learn more about building native executables, please consult https://quarkus.io/guides/gradle-tooling.
 

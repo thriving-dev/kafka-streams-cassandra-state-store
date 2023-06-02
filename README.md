@@ -48,7 +48,7 @@ Please carefully read documentation provided on [store types](#store-types) and 
 </dependency>
 ```
 
-Classes of this package are in the package `dev.thriving.oss.kafka.streams.cassandra.state.store`.
+Classes of this library are in the package `dev.thriving.oss.kafka.streams.cassandra.state.store`.
 
 #### Gradle (Groovy DSL)
 ```groovy

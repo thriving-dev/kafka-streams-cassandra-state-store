@@ -125,7 +125,7 @@ services:
     command: /bin/bash -c "echo loading scylladb keyspace && cqlsh scylla-1 -f /schema.cql"
 
   app:
-    image: thriving-dev/word-count-quarkus:1.0
+    image: thriving-dev/word-count-quarkus:1.0.0
     deploy:
       replicas: 3
     depends_on:
