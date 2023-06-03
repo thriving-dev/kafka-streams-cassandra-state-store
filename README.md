@@ -419,7 +419,7 @@ Integration tests can be run separately via
   - [x] WordCount ScyllaDB
   - [x] WordCount Processor + all + range + prefixScan + approximateNumEntries
   - [x] GlobalCassandraStore + KStream enrichment 
-  - [x] Quarkus examples app as GraalVM native image
+  - [x] Quarkus examples app as GraalVM native image (https://github.com/thriving-dev/kafka-streams-cassandra-state-store/issues/7)
 - [x] additional features
   - [x] ~~Prefix scan with `stringKeyValueStore` (ScyllaDB only)~~ (removed with v0.3)
   - [ ] ~~Prefix scan with `stringKeyValueStore` (Cassandra with SASIIndex? https://stackoverflow.com/questions/49247092/order-by-and-like-in-same-cassandra-query/49268543#49268543)~~
@@ -471,8 +471,8 @@ Integration tests can be run separately via
   - [x] test against 'CQL injection' via `withTableOptions(..)` 
         => tried to add `compaction = { 'class' : 'LeveledCompactionStrategy' };DROP TABLE xyz` which fails due to wrong syntax in Cassandra 3.11/4.1 & ScyllaDB 5.1  
 - [ ] bugs
-  - [x] cassandra concurrent schema updates (concurrent table auto-creation) lead to schema collisions (tables are created by each task-thread in parallel on first application start)
-  - [ ] exception handling
+  - [x] cassandra concurrent schema updates (concurrent table auto-creation) lead to schema collisions (tables are created by each task-thread in parallel on first application start) (https://github.com/thriving-dev/kafka-streams-cassandra-state-store/issues/12)
+  - [ ] exception handling (https://github.com/thriving-dev/kafka-streams-cassandra-state-store/issues/13)
 - [ ] tests
   - [ ] unit tests (?)
   - [x] integration test using testcontainers
@@ -480,7 +480,7 @@ Integration tests can be run separately via
     - [x] WordCountInteractiveQueriesTest
     - [x] WordCountGlobalStoreTest
 - [ ] Advanced/Features/POCs Planned/Considered
-  - [ ] correctness / completeness
+  - [ ] correctness / completeness (https://github.com/thriving-dev/kafka-streams-cassandra-state-store/issues/14)
     - [ ] wrap stores with MeteredKeyValueStore ?
     - [ ] provide `timestampedKeyValueStore`
     - [ ] ? (TBC) logging / caching is always disabled (because it's not implemented to wrap store by CassandraStores...) 
@@ -489,10 +489,10 @@ Integration tests can be run separately via
     - [ ] WindowedStore functionality, example, ...
     - [ ] ...?
   - [x] Add builder config options
-    - [x] opt-out to avoid tables to be auto-created
-    - [x] allow setting execution profiles to be used for queries, separate for DDL|DML
-    - [x] opt-in to enable count using `SELECT COUNT(*)` for `approximateNumEntries`
-  - [ ] (?) simple inMemory read cache -> Caffeine? (separate lib?)
+    - [x] opt-out to avoid tables to be auto-created (https://github.com/thriving-dev/kafka-streams-cassandra-state-store/issues/9)
+    - [x] allow setting execution profiles to be used for queries, separate for DDL|DML (https://github.com/thriving-dev/kafka-streams-cassandra-state-store/issues/11)
+    - [x] opt-in to enable count using `SELECT COUNT(*)` for `approximateNumEntries` (https://github.com/thriving-dev/kafka-streams-cassandra-state-store/issues/10)
+  - [ ] (?) simple inMemory read cache -> Caffeine? (separate lib?) (https://github.com/thriving-dev/kafka-streams-cassandra-state-store/issues/18)
   - [ ] Benchmark
   - [ ] Explore buffered writes ('caching') -> parallel writes to Cassandra to boost performance?
   - [ ] add Metrics?
