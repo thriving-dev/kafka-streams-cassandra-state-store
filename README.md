@@ -471,7 +471,7 @@ Integration tests can be run separately via
   - [x] test against 'CQL injection' via `withTableOptions(..)` 
         => tried to add `compaction = { 'class' : 'LeveledCompactionStrategy' };DROP TABLE xyz` which fails due to wrong syntax in Cassandra 3.11/4.1 & ScyllaDB 5.1  
 - [ ] bugs
-  - [ ] cassandra concurrent schema updates (concurrent table auto-creation) lead to schema collisions (tables are created by each task-thread in parallel on first application start)
+  - [x] cassandra concurrent schema updates (concurrent table auto-creation) lead to schema collisions (tables are created by each task-thread in parallel on first application start)
   - [ ] exception handling
 - [ ] tests
   - [ ] unit tests (?)
@@ -488,9 +488,9 @@ Integration tests can be run separately via
   - [ ] add additional store types
     - [ ] WindowedStore functionality, example, ...
     - [ ] ...?
-  - [ ] Add builder config options
-    - [ ] opt-out to avoid tables to be auto-created
-    - [ ] allow setting execution profiles to be used for queries, separate for DDL|DML
+  - [x] Add builder config options
+    - [x] opt-out to avoid tables to be auto-created
+    - [x] allow setting execution profiles to be used for queries, separate for DDL|DML
     - [x] opt-in to enable count using `SELECT COUNT(*)` for `approximateNumEntries`
   - [ ] (?) simple inMemory read cache -> Caffeine? (separate lib?)
   - [ ] Benchmark
