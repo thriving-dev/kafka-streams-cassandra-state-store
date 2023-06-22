@@ -13,11 +13,8 @@ For now, only KeyValueStore type is supported.
 
 ### Blog post introducing the library + Demo YouTube
 
-https://thriving.dev/blog/introducing-kafka-streams-cassandra-state-store
-
-**Demo:** https://youtu.be/2Co9-8E-uJE   
-
-**Demo:** https://youtu.be/2Co9-8E-uJE
+* **Blog:** https://thriving.dev/blog/introducing-kafka-streams-cassandra-state-store
+* **Demo:** https://youtu.be/2Co9-8E-uJE
 
 
 ### Project Status
