@@ -25,13 +25,13 @@ Please carefully read documentation provided on [store types](#store-types) and 
 
 ### Implemented/compiled with
 * Java 17
-* kafka-streams 3.4
-* datastax java-driver-core 4.15.0
+* kafka-streams 3.5
+* datastax java-driver-core 4.16.0
 
 ### Supported client-libs
 * Kafka Streams 2.7.0+ (maybe even earlier versions, but wasn't tested further back)
-* Datastax java client (v4) `'com.datastax.oss:java-driver-core:4.15.0'`
-* ScyllaDB shard-aware datastax java client (v4) fork `'com.scylladb:java-driver-core:4.15.0.0'`
+* Datastax java client (v4) `'com.datastax.oss:java-driver-core:4.16.0'`
+* ScyllaDB shard-aware datastax java client (v4) fork `'com.scylladb:java-driver-core:4.15.0.1'`
 
 ### Supported databases
 * Apache Cassandra 3.11
@@ -68,8 +68,8 @@ implementation 'dev.thriving.oss:kafka-streams-cassandra-state-store:${version}'
 To avoid library collisions, the cassandra java driver is non-transitive.    
 Therefore you have to choose and add a _datastax driver based_ java client dependency to your project.
 
-* Datastax java client (v4) `'com.datastax.oss:java-driver-core:4.15.0'` (works for Cassandra 3.11, 4.0, 4.11)
-* ScyllaDB shard-aware datastax java client (v4) fork `'com.scylladb:java-driver-core:4.15.0.0'`
+* Datastax java client (v4) `'com.datastax.oss:java-driver-core:4.16.0'` (works for Cassandra 3.11, 4.0, 4.11)
+* ScyllaDB shard-aware datastax java client (v4) fork `'com.scylladb:java-driver-core:4.15.0.1'`
 
 ## Usage
 ### Quick start
