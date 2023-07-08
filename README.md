@@ -153,32 +153,22 @@ Due to the nature of cassandra tables having a single PK (no clustering key), th
 This global store should not be confused with a Kafka Streams Global Store!
 It has to be used as a non-global (regular!) streams KeyValue state store - though it allows to read entries from any streams context (streams task/thread).
 
-Tip: This store type can be useful when exposing state store access via REST API. Each running instance of your app can serve all requests without the need to proxy the request to the right instance having the streams task assigned for the key in question.
+**Tip:** This store type can be useful when exposing state store access via an API. Each running instance of your app can serve all requests without the need to proxy the request to the right instance having the streams task assigned for the key in question.
 
 ⚠️ For **querying** this **global CassandraKeyValueStore**, make sure to restrict the `WrappingStoreProvider` to a single (assigned) partition.
-Otherwise streams will return a `CompositeReadOnlyKeyValueStore` wrapping all assigned tasks' stores which will run the same query for all assigned partitions and combine multiple identical results.
+The KafkaStreams instance returns a `CompositeReadOnlyKeyValueStore` that holds the `WrappingStoreProvider`, wrapping all assigned tasks' stores. Without the correct `StoreQueryParameters` the same query is executed multiple times (for all assigned partitions) and combines multiple identical results.
+
+The `CassandraStateStore` interface provides static helper methods to get a correctly configured read-only store facade:
 
 ```java
-// get the first active task partition for the first streams thread
-int firstActiveTaskPartition = streams.metadataForLocalThreads()
-    .stream().findFirst()
-    .orElseThrow(() -> new RuntimeException("no streams threads found"))
-    .activeTasks()
-    .stream().findFirst()
-    .orElseThrow(() -> new RuntimeException("no active task found"))
-    .taskId().partition();
-
-// Lookup the KeyValueStore, use single store with a first active assigned partition (...it's a 'global' store)
-ReadOnlyKeyValueStore<String, Long> store = streams.store(
-    fromNameAndType(STORE_NAME, QueryableStoreTypes.<String, Long>keyValueStore())
-    .withPartition(firstActiveTaskPartition)
-    );
-
+// get a store to exec interactive queries
+ReadOnlyKeyValueStore<String, Long> store = CassandraStateStore.readOnlyGlobalKeyValueStore(streams, STORE_NAME);
+        
 // Get the value from the store
 Long value = store.get(key);
 ```
 
-(It might alternatively be easier to query the underlying CQL table manually & deserialize the data accordingly.)
+Example provided: [examples/global-store-restapi](tree/main/examples/global-store-restapi)
 
 #### Supported operations by store type
 

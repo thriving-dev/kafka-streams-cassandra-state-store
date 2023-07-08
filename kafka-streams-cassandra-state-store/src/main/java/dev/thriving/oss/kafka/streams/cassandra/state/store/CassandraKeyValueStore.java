@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.Objects;
 
-public class CassandraKeyValueStore implements KeyValueStore<Bytes, byte[]> {
+public class CassandraKeyValueStore implements CassandraStateStore, KeyValueStore<Bytes, byte[]> {
 
     private static final Logger LOG = LoggerFactory.getLogger(CassandraKeyValueStore.class);
 

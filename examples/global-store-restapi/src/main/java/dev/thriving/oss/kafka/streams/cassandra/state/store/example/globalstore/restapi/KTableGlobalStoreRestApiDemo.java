@@ -13,7 +13,6 @@ import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.Materialized;
-import org.apache.kafka.streams.state.QueryableStoreTypes;
 import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
@@ -28,7 +27,7 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 
-import static org.apache.kafka.streams.StoreQueryParameters.fromNameAndType;
+import static dev.thriving.oss.kafka.streams.cassandra.state.store.CassandraStateStore.readOnlyGlobalKeyValueStore;
 
 /**
  * Demonstrates, using the high-level KStream DSL, how to implement a regular KTable
@@ -100,20 +99,8 @@ public final class KTableGlobalStoreRestApiDemo {
     @Path("/keyvalue/{key}")
     @Produces(MediaType.APPLICATION_JSON)
     public KeyValue byKey(@PathParam("key") final String key) {
-        // get the first active task partition for the first streams thread
-        final int firstActiveTaskPartition = streams.metadataForLocalThreads()
-                .stream().findFirst()
-                .orElseThrow(() -> new RuntimeException("no streams threads found"))
-                .activeTasks()
-                .stream().findFirst()
-                .orElseThrow(() -> new RuntimeException("no active task found"))
-                .taskId().partition();
-
-        // Lookup the KeyValueStore, use single store with a first active assigned partition (...it's a 'global' store)
-        final ReadOnlyKeyValueStore<String, String> store = streams.store(
-                fromNameAndType(STORE_NAME, QueryableStoreTypes.<String, String>keyValueStore())
-                        .withPartition(firstActiveTaskPartition)
-        );
+        // get kv store from streams runtime
+        ReadOnlyKeyValueStore<String, String> store = readOnlyGlobalKeyValueStore(streams, STORE_NAME);
 
         // Get the value from the store
         final String value = store.get(key);
