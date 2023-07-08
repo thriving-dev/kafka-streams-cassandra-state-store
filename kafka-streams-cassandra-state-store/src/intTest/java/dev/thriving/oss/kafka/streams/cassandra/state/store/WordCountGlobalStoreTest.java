@@ -15,7 +15,6 @@ import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KTable;
 import org.apache.kafka.streams.kstream.Materialized;
 import org.apache.kafka.streams.kstream.Produced;
-import org.apache.kafka.streams.state.QueryableStoreTypes;
 import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
@@ -29,9 +28,9 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import static dev.thriving.oss.kafka.streams.cassandra.state.store.CassandraStateStore.readOnlyGlobalKeyValueStore;
 import static org.apache.kafka.common.utils.Utils.mkEntry;
 import static org.apache.kafka.common.utils.Utils.mkMap;
-import static org.apache.kafka.streams.StoreQueryParameters.fromNameAndType;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class WordCountGlobalStoreTest extends AbstractIntegrationTest {
@@ -116,19 +115,8 @@ class WordCountGlobalStoreTest extends AbstractIntegrationTest {
             assertThat(results).containsExactlyInAnyOrderEntriesOf(expectedWordCounts);
 
             // when (2)
-            // get the first active task partition for the first streams thread
-            int firstActiveTaskPartition = streams.metadataForLocalThreads()
-                    .stream().findFirst()
-                    .orElseThrow(() -> new RuntimeException("no streams threads found"))
-                    .activeTasks()
-                    .stream().findFirst()
-                    .orElseThrow(() -> new RuntimeException("no active task found"))
-                    .taskId().partition();
-            // Lookup the KeyValueStore, use single store with a first active assigned partition (...it's a 'global' store)
-            final ReadOnlyKeyValueStore<String, Long> store = streams.store(
-                    fromNameAndType(STORE_NAME, QueryableStoreTypes.<String, Long>keyValueStore())
-                            .withPartition(firstActiveTaskPartition)
-            );
+            // get a store to exec interactive queries
+            final ReadOnlyKeyValueStore<String, Long> store = readOnlyGlobalKeyValueStore(streams, STORE_NAME);
 
             // then (2)
             final Long valueForUnknownKey = store.get("unknown");

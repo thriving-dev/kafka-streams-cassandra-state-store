@@ -16,7 +16,6 @@ import org.apache.kafka.streams.kstream.KTable;
 import org.apache.kafka.streams.kstream.Materialized;
 import org.apache.kafka.streams.kstream.Produced;
 import org.apache.kafka.streams.state.KeyValueIterator;
-import org.apache.kafka.streams.state.QueryableStoreTypes;
 import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
@@ -30,9 +29,9 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import static dev.thriving.oss.kafka.streams.cassandra.state.store.CassandraStateStore.readOnlyKeyValueStore;
 import static org.apache.kafka.common.utils.Utils.mkEntry;
 import static org.apache.kafka.common.utils.Utils.mkMap;
-import static org.apache.kafka.streams.StoreQueryParameters.fromNameAndType;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class WordCountInteractiveQueriesTest extends AbstractIntegrationTest {
@@ -154,8 +153,7 @@ class WordCountInteractiveQueriesTest extends AbstractIntegrationTest {
 
             // when (2)
             // Lookup the KeyValueStore
-            final ReadOnlyKeyValueStore<String, Long> store =
-                    streams.store(fromNameAndType(STORE_NAME, QueryableStoreTypes.keyValueStore()));
+            final ReadOnlyKeyValueStore<String, Long> store = readOnlyKeyValueStore(streams, STORE_NAME);;
 
             // then (2)
             final Long valueForUnknownKey = store.get("unknown");

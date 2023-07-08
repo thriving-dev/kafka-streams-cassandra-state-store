@@ -43,6 +43,7 @@ public abstract class AbstractIntegrationTest {
         props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, redpanda.getBootstrapServers());
         props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
         props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
+        props.put(StreamsConfig.NUM_STREAM_THREADS_CONFIG, 4);
         return props;
     }
 
