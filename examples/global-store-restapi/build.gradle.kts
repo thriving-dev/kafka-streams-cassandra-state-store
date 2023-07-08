@@ -24,15 +24,15 @@ dependencies {
     implementation(project(":kafka-streams-cassandra-state-store"))
 
     // This dependency is used by the application.
-    implementation("org.slf4j:slf4j-simple:2.0.6")
-    implementation("ch.qos.logback:logback-classic:1.4.7")
-    implementation("org.apache.kafka:kafka-streams:3.4.0")
-    implementation("com.datastax.oss:java-driver-core:4.15.0")
-    implementation("org.glassfish.jersey.containers:jersey-container-servlet:3.1.0")
-    implementation("org.glassfish.jersey.inject:jersey-hk2:3.1.0")
-    implementation("org.glassfish.jersey.media:jersey-media-json-jackson:3.1.0")
-    implementation("org.eclipse.jetty:jetty-server:11.0.13")
-    implementation("org.eclipse.jetty:jetty-servlet:11.0.13")
+    implementation("org.slf4j:slf4j-simple:2.0.7")
+    implementation("ch.qos.logback:logback-classic:1.4.8")
+    implementation("org.apache.kafka:kafka-streams:3.5.0")
+    implementation("com.datastax.oss:java-driver-core:4.16.0")
+    implementation("org.glassfish.jersey.containers:jersey-container-servlet:3.1.2")
+    implementation("org.glassfish.jersey.inject:jersey-hk2:3.1.2")
+    implementation("org.glassfish.jersey.media:jersey-media-json-jackson:3.1.2")
+    implementation("org.eclipse.jetty:jetty-server:11.0.15")
+    implementation("org.eclipse.jetty:jetty-servlet:11.0.15")
 }
 
 application {
