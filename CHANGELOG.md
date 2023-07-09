@@ -5,6 +5,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [0.5.0](https://github.com/thriving-dev/kafka-streams-cassandra-state-store/releases/tag/0.5.0) (2023-07-09)
+[0.4.0...0.5.0](https://github.com/thriving-dev/kafka-streams-cassandra-state-store/compare/0.4.0...0.5.0)
+
+### Added
+- Interface `CassandraStateStore` https://github.com/thriving-dev/kafka-streams-cassandra-state-store/issues/19 https://github.com/thriving-dev/kafka-streams-cassandra-state-store/pull/20   
+  - implemented by all the libraries custom StateStore solutions (only `CassandraKeyValueStore` _yet_)
+  - provides static helper methods to get ReadOnly stores for interactive queries (see [docs](README.md#interactive-queries))
+
+### Changed
+- dependency updates, incl. kafka-streams 3.5.0 https://github.com/thriving-dev/kafka-streams-cassandra-state-store/pull/22   
+  Reminder: the library itself does not have any transitive dependencies. All dependencies are _compileOnly_ or for tests.
+
+
 ## [0.4.0](https://github.com/thriving-dev/kafka-streams-cassandra-state-store/releases/tag/0.4.0) (2023-05-30)
 [0.3.2...0.4.0](https://github.com/thriving-dev/kafka-streams-cassandra-state-store/compare/0.3.2...0.4.0)
 
@@ -101,7 +114,7 @@ First public release
 
 
 ## Template [x.y.z](https://github.com/thriving-dev/kafka-streams-cassandra-state-store/releases/tag/x.y.z) (yyyy-mm-dd)
-[0.1.0...0.2.0](https://github.com/thriving-dev/kafka-streams-cassandra-state-store/compare/0.1.0...0.2.0)
+[a.b.c...x.y.z](https://github.com/thriving-dev/kafka-streams-cassandra-state-store/compare/a.b.c...x.y.z)
 
 ### Added
 - for new features
