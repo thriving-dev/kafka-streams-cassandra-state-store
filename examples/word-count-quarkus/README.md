@@ -44,7 +44,7 @@ docker-compose up --build -d
 kcat -C -q -b localhost:19092 -t streams-wordcount-output -K:: -s key=s -s value=q
 ```
 
-3Produce some messages, e.g. via kcat to the input topic
+3. Produce some messages, e.g. via kcat to the input topic
 ```bash
 echo "Hello world" | kcat -P -b localhost:19092 -t streams-plaintext-input
 echo "What a wonderful world" | kcat -P -b localhost:19092 -t streams-plaintext-input
