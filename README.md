@@ -158,6 +158,8 @@ It has to be used as a non-global (regular!) streams KeyValue state store - thou
 ⚠️ For **querying** this **global CassandraKeyValueStore**, make sure to restrict the `WrappingStoreProvider` to a single (assigned) partition.
 The KafkaStreams instance returns a `CompositeReadOnlyKeyValueStore` that holds the `WrappingStoreProvider`, wrapping all assigned tasks' stores. Without the correct `StoreQueryParameters` the same query is executed multiple times (for all assigned partitions) and combines multiple identical results.
 
+
+#### Interactive Queries
 The `CassandraStateStore` interface provides static helper methods to get a correctly configured read-only store facade:
 
 ```java
