@@ -170,7 +170,7 @@ ReadOnlyKeyValueStore<String, Long> store = CassandraStateStore.readOnlyGlobalKe
 Long value = store.get(key);
 ```
 
-Example provided: [examples/global-store-restapi](tree/main/examples/global-store-restapi)
+Example provided: [examples/global-store-restapi](examples/global-store-restapi)
 
 #### Supported operations by store type
 
