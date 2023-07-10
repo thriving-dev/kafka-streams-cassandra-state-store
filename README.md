@@ -95,7 +95,7 @@ KTable<Long,String> table = builder.table(
   "topicName",
   Materialized.<Long,String>as(
                  CassandraStores.builder(session, "store-name")
-                         .keyValueStore()
+                         .partitionedKeyValueStore()
               )
               .withKeySerde(Serdes.Long())
               .withValueSerde(Serdes.String())
@@ -114,7 +114,7 @@ Topology topology = new Topology();
 
 StoreBuilder<KeyValueStore<String, Long>> storeBuilder = Stores.keyValueStoreBuilder(
                 CassandraStores.builder(session, "store-name")
-                        .keyValueStore(),
+                        .partitionedKeyValueStore(),
                 Serdes.String(),
                 Serdes.Long())
         .withLoggingDisabled()
@@ -136,13 +136,14 @@ Take a look at the notorious word-count example with Cassandra 4 -> [/examples/w
 
 ### Store Types
 kafka-streams-cassandra-state-store comes with 2 different store types:
-- keyValueStore
+- partitionedKeyValueStore
 - globalKeyValueStore
 
-#### keyValueStore (recommended default)
+#### partitionedKeyValueStore (recommended default)
 A persistent `KeyValueStore<Bytes, byte[]>`.
 The underlying cassandra table is **partitioned by** the store context **task partition**.
-Therefore, all CRUD operations against this store always query by and return results for a single stream task.
+Therefore, it behaves exactly like the regular state stores (RocksDB/InMemory/MemoryLRUCache).
+All CRUD operations against this store always query by and return results for a single stream task.
 
 #### globalKeyValueStore
 A persistent `KeyValueStore<Bytes, byte[]>`.
@@ -174,23 +175,23 @@ Example provided: [examples/global-store-restapi](examples/global-store-restapi)
 
 #### Supported operations by store type
 
-|                         | keyValueStore | globalKeyValueStore |
-| ----------------------- |---------------|---------------------|
-| get                     | ✅             | ✅                   |
-| put                     | ✅             | ✅                   |
-| putIfAbsent             | ✅             | ✅                   |
-| putAll                  | ✅             | ✅                   |
-| delete                  | ✅             | ✅                   |
-| range                   | ✅             | ❌                   |
-| reverseRange            | ✅             | ❌                   |
-| all                     | ✅             | ✅                   |
-| reverseAll              | ✅             | ❌                   |
-| prefixScan              | ✅             | ❌                   |
-| approximateNumEntries   | ✅*            | ✅*                  |
-| query::RangeQuery       | ✅             | ❌                   |
-| query::KeyQuery         | ✅             | ✅                   |
-| query::WindowKeyQuery   | ❌             | ❌                   |
-| query::WindowRangeQuery | ❌             | ❌                   |
+|                         | partitionedKeyValueStore | globalKeyValueStore |
+|-------------------------|--------------------------|---------------------|
+| get                     | ✅                        | ✅                   |
+| put                     | ✅                        | ✅                   |
+| putIfAbsent             | ✅                        | ✅                   |
+| putAll                  | ✅                        | ✅                   |
+| delete                  | ✅                        | ✅                   |
+| range                   | ✅                        | ❌                   |
+| reverseRange            | ✅                        | ❌                   |
+| all                     | ✅                        | ✅                   |
+| reverseAll              | ✅                        | ❌                   |
+| prefixScan              | ✅                        | ❌                   |
+| approximateNumEntries   | ✅*                       | ✅*                  |
+| query::RangeQuery       | ✅                        | ❌                   |
+| query::KeyQuery         | ✅                        | ✅                   |
+| query::WindowKeyQuery   | ❌                        | ❌                   |
+| query::WindowRangeQuery | ❌                        | ❌                   |
 
 *opt-in required
 
@@ -201,7 +202,7 @@ Basic usage example:
 ```java
 CassandraStores.builder(session, "word-grouped-count")
         .withKeyspace("")
-        .keyValueStore()
+        .partitionedKeyValueStore()
 ```
 
 Advanced usage example:
@@ -215,7 +216,7 @@ CassandraStores.builder(session, "word-grouped-count")
                 """)
         .withTableNameFn(storeName ->
             String.format("%s_kstreams_store", storeName.toLowerCase().replaceAll("[^a-z0-9_]", "_")))
-        .keyValueStore()
+        .partitionedKeyValueStore()
 ```
 
 Please also see [Quick start](#quick-start) for full kafka-streams example. 
@@ -319,7 +320,7 @@ Not all methods have been implemented. Please check [store types method support 
 
 #### Underlying CQL Schema
 
-##### keyValueStore
+##### partitionedKeyValueStore
 Using defaults, for a state store named "word-count" following CQL Schema applies:
 ```sql
 CREATE TABLE IF NOT EXISTS word_count_kstreams_store (
@@ -490,5 +491,7 @@ Integration tests can be run separately via
   - [ ] Explore buffered writes ('caching') -> parallel writes to Cassandra to boost performance?
   - [ ] add Metrics?
     - [ ] (?) Metrics also for Caches?
-  - [ ] move (parts of) documentation to separate pages/wiki? 
+  - [ ] move (parts of) documentation to separate pages/wiki?
+  - [ ] explore using indexes (e.g. global secondary indexes) for partitioned kv store
+  - [ ] Custom ReadOnlyKeyValueStore for 'partitionedKeyValueStore' type optimised interactive queries
 

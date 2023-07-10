@@ -29,7 +29,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import static dev.thriving.oss.kafka.streams.cassandra.state.store.CassandraStateStore.readOnlyKeyValueStore;
+import static dev.thriving.oss.kafka.streams.cassandra.state.store.CassandraStateStore.readOnlyPartitionedKeyValueStore;
 import static org.apache.kafka.common.utils.Utils.mkEntry;
 import static org.apache.kafka.common.utils.Utils.mkMap;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -153,7 +153,7 @@ class WordCountInteractiveQueriesTest extends AbstractIntegrationTest {
 
             // when (2)
             // Lookup the KeyValueStore
-            final ReadOnlyKeyValueStore<String, Long> store = readOnlyKeyValueStore(streams, STORE_NAME);;
+            final ReadOnlyKeyValueStore<String, Long> store = readOnlyPartitionedKeyValueStore(streams, STORE_NAME);;
 
             // then (2)
             final Long valueForUnknownKey = store.get("unknown");
@@ -228,7 +228,7 @@ class WordCountInteractiveQueriesTest extends AbstractIntegrationTest {
                                 CassandraStores.builder(session, STORE_NAME)
                                         .withKeyspace(CASSANDRA_KEYSPACE)
                                         .withCountAllEnabled()
-                                        .keyValueStore()
+                                        .partitionedKeyValueStore()
                         )
                         .withLoggingDisabled()
                         .withCachingDisabled()

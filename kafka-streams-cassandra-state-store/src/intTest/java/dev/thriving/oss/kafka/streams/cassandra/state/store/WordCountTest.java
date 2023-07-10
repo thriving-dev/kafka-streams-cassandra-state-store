@@ -129,7 +129,7 @@ class WordCountTest extends AbstractIntegrationTest {
                 .count(Materialized.<String, Long>as(
                                 CassandraStores.builder(session, STORE_NAME)
                                         .withKeyspace(CASSANDRA_KEYSPACE)
-                                        .keyValueStore()
+                                        .partitionedKeyValueStore()
                         )
                         .withLoggingDisabled()
                         .withCachingDisabled()

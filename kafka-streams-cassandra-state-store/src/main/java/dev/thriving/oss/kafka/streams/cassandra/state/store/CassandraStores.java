@@ -25,7 +25,7 @@ import java.util.function.Function;
  *   "topicName",
  *   Materialized.<Long,String>as(
  *                  CassandraStores.builder(session, "store-name")
- *                          .keyValueStore()
+ *                          .partitionedKeyValueStore()
  *               )
  *               .withKeySerde(Serdes.Long())
  *               .withValueSerde(Serdes.String())
@@ -41,7 +41,7 @@ import java.util.function.Function;
  *
  * StoreBuilder<KeyValueStore<String, Long>> storeBuilder = Stores.keyValueStoreBuilder(
  *                 CassandraStores.builder(session, "store-name")
- *                         .keyValueStore(),
+ *                         .partitionedKeyValueStore(),
  *                 Serdes.String(),
  *                 Serdes.Long())
  *         .withLoggingDisabled()
@@ -81,7 +81,7 @@ public final class CassandraStores {
      * - {@link #withTableNameFn(Function)}
      * <p>
      * With the builder configured, you can create different implementation of {@link KeyValueBytesStoreSupplier} via:
-     * - {@link #keyValueStore()}
+     * - {@link #partitionedKeyValueStore()}
      * - {@link #globalKeyValueStore()}
      * <p>
      * <b>!Important: Always disable logging + caching (by default kafka streams is buffering writes)
@@ -264,7 +264,7 @@ public final class CassandraStores {
      * @return an instance of a {@link KeyValueBytesStoreSupplier} that can be used
      *      * to build a persistent key-value store
      */
-    public KeyValueBytesStoreSupplier keyValueStore() {
+    public KeyValueBytesStoreSupplier partitionedKeyValueStore() {
         return new KeyValueBytesStoreSupplier() {
             @Override
             public String name() {

@@ -59,7 +59,7 @@ public class WordCountDemo {
                                         .withKeyspace("test")
                                         .withDdlExecutionProfile("ddl")
                                         .withDmlExecutionProfile("dml")
-                                        .keyValueStore()
+                                        .partitionedKeyValueStore()
                         )
                         .withLoggingDisabled()
                         .withCachingDisabled()
