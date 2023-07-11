@@ -139,7 +139,7 @@ kafka-streams-cassandra-state-store comes with 2 different store types:
 - partitionedKeyValueStore
 - globalKeyValueStore
 
-#### partitionedKeyValueStore (recommended default)
+#### partitionedKeyValueStore
 A persistent `KeyValueStore<Bytes, byte[]>`.
 The underlying cassandra table is **partitioned by** the store context **task partition**.
 Therefore, it behaves exactly like the regular state stores (RocksDB/InMemory/MemoryLRUCache).
