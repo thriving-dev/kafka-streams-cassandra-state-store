@@ -38,7 +38,7 @@ public interface CassandraStateStore extends StateStore {
      *                                             to the parameters, or if the store is not available locally, then
      *                                             an InvalidStateStoreException is thrown upon store access.
      */
-    static <X, Y> ReadOnlyKeyValueStore<X, Y> readOnlyKeyValueStore(KafkaStreams streams, String storeName) {
+    static <X, Y> ReadOnlyKeyValueStore<X, Y> readOnlyPartitionedKeyValueStore(KafkaStreams streams, String storeName) {
         // get store fromNameAndType (regular way)
         return streams.store(fromNameAndType(storeName, QueryableStoreTypes.keyValueStore()));
     }

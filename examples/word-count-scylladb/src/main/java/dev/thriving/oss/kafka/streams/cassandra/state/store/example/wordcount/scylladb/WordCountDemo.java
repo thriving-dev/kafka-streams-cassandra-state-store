@@ -68,7 +68,7 @@ public final class WordCountDemo {
                 .groupBy((key, value) -> value)
                 .count(Materialized.<String, Long>as(
                                 CassandraStores.builder(session, "word-grouped-count")
-                                        .keyValueStore()
+                                        .partitionedKeyValueStore()
                         )
                         .withLoggingDisabled()
                         .withCachingDisabled()

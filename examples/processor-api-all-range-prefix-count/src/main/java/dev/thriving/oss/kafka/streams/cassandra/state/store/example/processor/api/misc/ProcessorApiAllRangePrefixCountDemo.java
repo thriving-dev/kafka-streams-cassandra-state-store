@@ -75,7 +75,7 @@ public final class ProcessorApiAllRangePrefixCountDemo {
                 Stores.keyValueStoreBuilder(
                         CassandraStores.builder(session, WORD_GROUPED_COUNT_STORE)
                                 .withCountAllEnabled()
-                                .keyValueStore(),
+                                .partitionedKeyValueStore(),
                         stringSerde,
                         longSerde)
                         .withLoggingDisabled()
