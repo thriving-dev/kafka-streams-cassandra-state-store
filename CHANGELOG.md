@@ -5,6 +5,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [0.6.0](https://github.com/thriving-dev/kafka-streams-cassandra-state-store/releases/tag/0.6.0) (2023-07-11)
+[0.5.0...0.6.0](https://github.com/thriving-dev/kafka-streams-cassandra-state-store/compare/0.5.0...0.6.0)
+
+### Changed
+- to have an explicit naming of store types, it was decided to rename `CassandraStores.keyValueStore` to `CassandraStores.partitionedKeyValueStore`
+- the renamed `partitionedKeyValueStore` is no longer recommended as the default choice
+
+
 ## [0.5.0](https://github.com/thriving-dev/kafka-streams-cassandra-state-store/releases/tag/0.5.0) (2023-07-09)
 [0.4.0...0.5.0](https://github.com/thriving-dev/kafka-streams-cassandra-state-store/compare/0.4.0...0.5.0)
 
