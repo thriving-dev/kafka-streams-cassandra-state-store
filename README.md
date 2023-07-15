@@ -419,7 +419,7 @@ Integration tests can be run separately via
   - [ ] ~~Prefix scan with `stringKeyValueStore` (Cassandra with SASIIndex? https://stackoverflow.com/questions/49247092/order-by-and-like-in-same-cassandra-query/49268543#49268543)~~
   - [x] `ReadOnlyKeyValueStore.prefixScan` implementation using range (see InMemoryKeyValueStore implementation)
   - [x] Implement `globalKeyValueStore`
-  - [ ] Support KIP-889: Versioned State Stores (to be delivered with kafka 3.5.0)
+  - [ ] Support KIP-889: Versioned State Stores (to be delivered with kafka 3.5.0) (https://github.com/thriving-dev/kafka-streams-cassandra-state-store/issues/21)
 - [x] OpenSource
   - [x] choose + add license
   - [x] add CHANGELOG.md
@@ -474,11 +474,11 @@ Integration tests can be run separately via
     - [x] WordCountInteractiveQueriesTest
     - [x] WordCountGlobalStoreTest
 - [ ] Advanced/Features/POCs Planned/Considered
-  - [ ] correctness / completeness (https://github.com/thriving-dev/kafka-streams-cassandra-state-store/issues/14)
-    - [ ] wrap stores with MeteredKeyValueStore ?
-    - [ ] provide `timestampedKeyValueStore`
-    - [ ] ? (TBC) logging / caching is always disabled (because it's not implemented to wrap store by CassandraStores...) 
-      - [ ] always disable logging + caching?
+  - [x] correctness / completeness (https://github.com/thriving-dev/kafka-streams-cassandra-state-store/issues/14)
+    - [ ] ~wrap stores with MeteredKeyValueStore ?~ -> done automatically via builders
+    - [ ] ~provide `timestampedKeyValueStore`~ -> no use case
+    - [ ] ~? (TBC) logging / caching is always disabled (because it's not implemented to wrap store by CassandraStores...)~
+      - [ ] ~always disable logging + caching?~
   - [ ] add additional store types
     - [ ] WindowedStore functionality, example, ...
     - [ ] ...?
