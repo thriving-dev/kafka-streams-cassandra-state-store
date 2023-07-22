@@ -15,6 +15,7 @@ import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KTable;
 import org.apache.kafka.streams.kstream.Materialized;
 import org.apache.kafka.streams.kstream.Produced;
+import org.apache.kafka.streams.state.KeyValueIterator;
 import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
@@ -124,6 +125,13 @@ class WordCountGlobalKeyValueStoreTest extends AbstractIntegrationTest {
 
             final Long valueForHello = store.get("hello");
             assertThat(valueForHello).isNotNull().isEqualTo(expectedWordCounts.get("hello"));
+
+            final KeyValueIterator<String, Long> allIterator = store.all();
+            assertThat(allIterator).isNotNull();
+            final Map<String, Long> allResults = new HashMap<>();
+            allIterator.forEachRemaining(it -> allResults.put(it.key, it.value));
+            assertThat(allResults).hasSize(expectedWordCounts.size());
+            assertThat(allResults).containsExactlyInAnyOrderEntriesOf(expectedWordCounts);
 
             final long approximateNumEntries = store.approximateNumEntries();
             assertThat(approximateNumEntries).isEqualTo(expectedWordCounts.size());

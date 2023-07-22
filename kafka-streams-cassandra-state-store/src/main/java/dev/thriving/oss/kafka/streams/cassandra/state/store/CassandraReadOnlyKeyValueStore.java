@@ -1,5 +1,6 @@
 package dev.thriving.oss.kafka.streams.cassandra.state.store;
 
+import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.shaded.guava.common.collect.ImmutableList;
 import dev.thriving.oss.kafka.streams.cassandra.state.store.repo.CassandraKeyValueStoreRepository;
 import dev.thriving.oss.kafka.streams.cassandra.state.store.utils.CompositeKeyValueIterator;
@@ -18,7 +19,23 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 
-public class CassandraReadOnlyKeyValueStore<K, V> implements ReadOnlyKeyValueStore<K, V> {
+/**
+ * Optimised, special implementation of {@link ReadOnlyKeyValueStore} for 'partitioned' type CassandraKeyValueStore.
+ * Queries the state directly from the underlying Cassandra table.
+ * No 'RPC layer' is required since queries for all/individual partitions are executed from this instance, and query
+ * results are merged where necessary.
+ * <br/>
+ * Note: package private, get via
+ * {@link CassandraStateStore#readOnlyPartitionedKeyValueStore(KafkaStreams, String, CqlSession, String, boolean, String, Serde, Serde)}
+ * or
+ * {@link CassandraStateStore#readOnlyPartitionedKeyValueStore(KafkaStreams, String, CqlSession, String, boolean, String, Serde, Serde, Function, StreamPartitioner)}
+ * <br/>
+ * Note: The instance has to be created when the streams app is in RUNNING state and can then be re-used!
+ *
+ * @param <K> key data type
+ * @param <V> value data type
+ */
+class CassandraReadOnlyKeyValueStore<K, V> implements ReadOnlyKeyValueStore<K, V> {
 
     private static final Logger LOG = LoggerFactory.getLogger(CassandraReadOnlyKeyValueStore.class);
 
@@ -31,7 +48,7 @@ public class CassandraReadOnlyKeyValueStore<K, V> implements ReadOnlyKeyValueSto
     private final List<Integer> partitions;
     private final List<Integer> reversePartitions;
 
-    public CassandraReadOnlyKeyValueStore(KafkaStreams streams,
+    CassandraReadOnlyKeyValueStore(KafkaStreams streams,
                                           CassandraKeyValueStoreRepository repo,
                                           boolean isCountAllEnabled,
                                           Serde<K> keySerde,
@@ -43,11 +60,11 @@ public class CassandraReadOnlyKeyValueStore<K, V> implements ReadOnlyKeyValueSto
         this.valueSerde = valueSerde;
         this.partitioner = partitioner;
 
-        // TODO: better way to dynamically determine the number of partitions (streams tasks) that does not require `application.server` streams config to be set
+        // TODO(#23/#25): better way to dynamically determine the number of partitions (streams tasks) that does not require `application.server` streams config to be set
         int maxPartition = streams.metadataForAllStreamsClients().stream()
                 .flatMap(streamsMetadata -> streamsMetadata.topicPartitions().stream())
                 .mapToInt(TopicPartition::partition)
-                .max().orElseThrow(() -> new RuntimeException("No StreamsClients metadata available to determine no. of partitions"));
+                .max().orElseThrow(() -> new RuntimeException("No StreamsClients metadata available to determine no. of partitions -> please provide `application.server` config!!"));
         partitions = IntStream.rangeClosed(0, maxPartition)
                 .boxed()
                 .toList();
