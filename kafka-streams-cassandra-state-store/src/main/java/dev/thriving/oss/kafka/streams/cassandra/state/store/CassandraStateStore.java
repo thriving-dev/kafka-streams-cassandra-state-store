@@ -1,13 +1,20 @@
 package dev.thriving.oss.kafka.streams.cassandra.state.store;
 
+import com.datastax.oss.driver.api.core.CqlSession;
+import dev.thriving.oss.kafka.streams.cassandra.state.store.repo.PartitionedCassandraKeyValueStoreRepository;
+import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.errors.InvalidStateStoreException;
 import org.apache.kafka.streams.errors.InvalidStateStorePartitionException;
 import org.apache.kafka.streams.errors.StreamsNotStartedException;
 import org.apache.kafka.streams.errors.UnknownStateStoreException;
 import org.apache.kafka.streams.processor.StateStore;
+import org.apache.kafka.streams.processor.StreamPartitioner;
+import org.apache.kafka.streams.processor.internals.DefaultStreamPartitioner;
 import org.apache.kafka.streams.state.QueryableStoreTypes;
 import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
+
+import java.util.function.Function;
 
 import static org.apache.kafka.streams.StoreQueryParameters.fromNameAndType;
 
@@ -16,6 +23,8 @@ import static org.apache.kafka.streams.StoreQueryParameters.fromNameAndType;
  * Further, provides helper methods to get ReadOnly stores for interactive queries.
  */
 public interface CassandraStateStore extends StateStore {
+
+    Function<String, String> DEFAULT_TABLE_NAME_FN = storeName -> String.format("%s_kstreams_store", storeName.toLowerCase().replaceAll("[^a-z0-9_]", "_"));
 
     /**
      * Get a facade wrapping the local {@link CassandraStateStore}.
@@ -41,6 +50,59 @@ public interface CassandraStateStore extends StateStore {
     static <X, Y> ReadOnlyKeyValueStore<X, Y> readOnlyPartitionedKeyValueStore(KafkaStreams streams, String storeName) {
         // get store fromNameAndType (regular way)
         return streams.store(fromNameAndType(storeName, QueryableStoreTypes.keyValueStore()));
+    }
+
+    static <X, Y> ReadOnlyKeyValueStore<X, Y> readOnlyPartitionedKeyValueStore(KafkaStreams streams,
+                                                                               String storeName,
+                                                                               CqlSession session,
+                                                                               String keyspace,
+                                                                               boolean isCountAllEnabled,
+                                                                               String dmlExecutionProfile,
+                                                                               Serde<X> keySerde,
+                                                                               Serde<Y> valueSerde) {
+        return readOnlyPartitionedKeyValueStore(
+                streams,
+                storeName,
+                session,
+                keyspace,
+                isCountAllEnabled,
+                dmlExecutionProfile,
+                keySerde,
+                valueSerde,
+                DEFAULT_TABLE_NAME_FN,
+                new DefaultStreamPartitioner<>(keySerde.serializer())
+        );
+    }
+
+    static <X, Y> ReadOnlyKeyValueStore<X, Y> readOnlyPartitionedKeyValueStore(KafkaStreams streams,
+                                                                               String storeName,
+                                                                               CqlSession session,
+                                                                               String keyspace,
+                                                                               boolean isCountAllEnabled,
+                                                                               String dmlExecutionProfile,
+                                                                               Serde<X> keySerde,
+                                                                               Serde<Y> valueSerde,
+                                                                               Function<String, String> tableNameFn,
+                                                                               StreamPartitioner<X, Y> partitioner) {
+        // TODO: improve... duplicate code -> when the store is defined
+        String resolvedTableName = tableNameFn.apply(storeName);
+        String fullTableName = keyspace != null ? keyspace + "." + resolvedTableName : resolvedTableName;
+
+        return new CassandraReadOnlyKeyValueStore<>(
+                streams,
+                new PartitionedCassandraKeyValueStoreRepository<>(
+                        session,
+                        fullTableName,
+                        false,
+                        "",
+                        null,
+                        dmlExecutionProfile // TODO: improve... duplicate code -> when the store is defined
+                ),
+                isCountAllEnabled,
+                keySerde,
+                valueSerde,
+                partitioner
+        );
     }
 
     /**

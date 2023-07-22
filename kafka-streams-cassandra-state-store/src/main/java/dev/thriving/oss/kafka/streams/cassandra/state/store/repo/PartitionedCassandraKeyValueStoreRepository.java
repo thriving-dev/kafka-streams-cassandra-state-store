@@ -23,6 +23,7 @@ public class PartitionedCassandraKeyValueStoreRepository<K> extends AbstractCass
     private PreparedStatement deleteByPartitionAndKey;
     private PreparedStatement selectByPartition;
     private PreparedStatement selectByPartitionReversed;
+    private PreparedStatement selectCountAll;
     private PreparedStatement selectCountByPartition;
     private PreparedStatement selectByPartitionAndKeyFrom;
     private PreparedStatement selectByPartitionAndKeyTo;
@@ -66,6 +67,7 @@ public class PartitionedCassandraKeyValueStoreRepository<K> extends AbstractCass
 
         selectByPartition = session.prepare("SELECT key, value FROM " + tableName + " WHERE partition=?");
         selectByPartitionReversed = session.prepare("SELECT key, value FROM " + tableName + " WHERE partition=? ORDER BY key DESC");
+        selectCountAll = session.prepare("SELECT COUNT(*) FROM " + tableName);
         selectCountByPartition = session.prepare("SELECT COUNT(*) FROM " + tableName + " WHERE partition=?");
 
         selectByPartitionAndKeyFrom = session.prepare("SELECT key, value FROM " + tableName + " WHERE partition=? AND key>=?");
@@ -159,6 +161,13 @@ public class PartitionedCassandraKeyValueStoreRepository<K> extends AbstractCass
         stmt = stmt.setExecutionProfileName(ddlExecutionProfile);
         ResultSet rs = session.execute(stmt);
         return new CassandraKeyValueIterator(rs.iterator());
+    }
+
+    @Override
+    public long getCount() {
+        BoundStatement stmt = selectCountAll.bind();
+        stmt = stmt.setExecutionProfileName(ddlExecutionProfile);
+        return executeSelectCount(stmt);
     }
 
     @Override

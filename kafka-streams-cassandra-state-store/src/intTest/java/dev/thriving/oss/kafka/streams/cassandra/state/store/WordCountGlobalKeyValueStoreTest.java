@@ -33,9 +33,9 @@ import static org.apache.kafka.common.utils.Utils.mkEntry;
 import static org.apache.kafka.common.utils.Utils.mkMap;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class WordCountGlobalStoreTest extends AbstractIntegrationTest {
+class WordCountGlobalKeyValueStoreTest extends AbstractIntegrationTest {
 
-    private static final Logger LOG = LoggerFactory.getLogger(WordCountGlobalStoreTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(WordCountGlobalKeyValueStoreTest.class);
 
     private static final String INPUT_TOPIC = "inputTopic";
     private static final String OUTPUT_TOPIC = "outputTopic";
@@ -122,8 +122,8 @@ class WordCountGlobalStoreTest extends AbstractIntegrationTest {
             final Long valueForUnknownKey = store.get("unknown");
             assertThat(valueForUnknownKey).isNull();
 
-            final Long valueForBelgium = store.get("hello");
-            assertThat(valueForBelgium).isNotNull().isEqualTo(1L);
+            final Long valueForHello = store.get("hello");
+            assertThat(valueForHello).isNotNull().isEqualTo(expectedWordCounts.get("hello"));
 
             final long approximateNumEntries = store.approximateNumEntries();
             assertThat(approximateNumEntries).isEqualTo(expectedWordCounts.size());
