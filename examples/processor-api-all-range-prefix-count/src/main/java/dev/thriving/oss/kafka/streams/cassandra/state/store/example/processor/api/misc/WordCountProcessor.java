@@ -24,6 +24,8 @@ public class WordCountProcessor implements Processor<String, String, String, Lon
         this.context = context;
         this.store = context.getStateStore(ProcessorApiAllRangePrefixCountDemo.WORD_GROUPED_COUNT_STORE);
 
+        LOG.info("Processor init for task: {}", context.taskId());
+
         context.schedule(Duration.ofSeconds(5), PunctuationType.WALL_CLOCK_TIME, this::prefixScan);
         context.schedule(Duration.ofSeconds(12), PunctuationType.WALL_CLOCK_TIME, this::rangeFrom);
         context.schedule(Duration.ofSeconds(17), PunctuationType.WALL_CLOCK_TIME, this::approximateNumEntries);
@@ -47,24 +49,24 @@ public class WordCountProcessor implements Processor<String, String, String, Lon
 
     private void prefixScan(long timestamp) {
         try (KeyValueIterator<String, Long> iter = store.prefixScan("bel", Serdes.String().serializer())) {
-            iter.forEachRemaining(kv -> LOG.info("prefixScan('bel') -> {}::{}", kv.key, kv.value));
+            iter.forEachRemaining(kv -> LOG.info("[{}] prefixScan('bel') -> {}::{}", context.taskId(), kv.key, kv.value));
         }
     }
 
     private void approximateNumEntries(long timestamp) {
         long count = store.approximateNumEntries();
-        LOG.info("approximateNumEntries() -> {}", count);
+        LOG.info("[{}] approximateNumEntries() -> {}", context.taskId(), count);
     }
 
     private void rangeFrom(long timestamp) {
         try (KeyValueIterator<String, Long> iter = store.range("netherlands", "romania")) {
-            iter.forEachRemaining(kv -> LOG.info("range('netherlands', 'romania') -> {}::{}", kv.key, kv.value));
+            iter.forEachRemaining(kv -> LOG.info("[{}] range('netherlands', 'romania') -> {}::{}", context.taskId(), kv.key, kv.value));
         }
     }
 
     private void all(long timestamp) {
         try (KeyValueIterator<String, Long> iter = store.all()) {
-            iter.forEachRemaining(kv -> LOG.info("all() -> {}::{}", kv.key, kv.value));
+            iter.forEachRemaining(kv -> LOG.info("[{}] all() -> {}::{}", context.taskId(), kv.key, kv.value));
         }
     }
 

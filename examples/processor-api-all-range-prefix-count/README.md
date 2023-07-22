@@ -29,6 +29,7 @@ echo "Albania  Andorra  Armenia  Austria  Azerbaijan  Belarus  Belgium  BosniaAn
 ```bash
 ../../gradlew run
 ```
+-> !!! check the application logs emitted periodically from scheduled Punctuators... !!!
 
 4. Terminal 4: Start a console-consumer on the output topic
 ```bash
