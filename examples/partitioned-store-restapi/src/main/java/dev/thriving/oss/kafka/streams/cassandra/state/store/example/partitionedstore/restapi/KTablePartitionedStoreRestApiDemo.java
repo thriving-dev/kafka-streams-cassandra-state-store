@@ -93,7 +93,7 @@ public final class KTablePartitionedStoreRestApiDemo {
         final Serde<String> stringSerde = Serdes.String();
 
         source.peek((k, v) -> LOG.debug("in => {}::{}", k, v))
-                .repartition()
+                .repartition() // note: this is required because the example's README uses 'kcat' which seems causes partition misalignment, probably due to not serializing and partitioning keys as Strings (StringSerde) but maybe bytes
                 .toTable(Materialized.<String, String>as(
                                 CassandraStores.builder(session, STORE_NAME)
                                         .partitionedKeyValueStore()
