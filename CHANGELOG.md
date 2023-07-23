@@ -20,7 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Offered by `CassandraStateStore` static methods, for an example please check the [README](README.md#interactive-queries)
     - `CassandraStateStore#readOnlyPartitionedKeyValueStore(KafkaStreams, String, CqlSession, String, boolean, String, Serde, Serde)`
     - `CassandraStateStore#readOnlyPartitionedKeyValueStore(KafkaStreams, String, CqlSession, String, boolean, String, Serde, Serde, Function, StreamPartitioner)`
-- New example '[processor-api-all-range-prefix-count](examples/processor-api-all-range-prefix-count)' featuring the new `CassandraPartitionedReadOnlyKeyValueStore`
+- New example '[partitioned-store-restapi](examples/partitioned-store-restapi)' featuring the new `CassandraPartitionedReadOnlyKeyValueStore`
   - Implements a REST API with endpoints for all available 'Interactive Query' methods to play with hands-on
 
 ### Changed
