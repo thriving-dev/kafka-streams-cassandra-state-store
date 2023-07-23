@@ -46,7 +46,7 @@ public abstract class AbstractIntegrationTest {
         props.put(StreamsConfig.NUM_STREAM_THREADS_CONFIG, 4);
 
         // TODO(#23/#25): needed to have metadata available (`streams.metadataForAllStreamsClients()`)
-        //       ref dev.thriving.oss.kafka.streams.cassandra.state.store.CassandraReadOnlyKeyValueStore.CassandraReadOnlyKeyValueStore
+        //       ref dev.thriving.oss.kafka.streams.cassandra.state.store.CassandraPartitionedReadOnlyKeyValueStore.CassandraPartitionedReadOnlyKeyValueStore
         props.put(StreamsConfig.APPLICATION_SERVER_CONFIG, "test:1234");
 
         return props;

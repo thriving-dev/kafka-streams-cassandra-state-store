@@ -228,7 +228,7 @@ public final class KTablePartitionedStoreRestApiDemo {
     }
 
     /**
-     * Get the optimised special implementation of ReadOnlyKeyValueStore (CassandraReadOnlyKeyValueStore).
+     * Get the optimised special implementation of ReadOnlyKeyValueStore (CassandraPartitionedReadOnlyKeyValueStore).
      * Lazy init, re-use.
      * @return instance of ReadOnlyKeyValueStore
      */

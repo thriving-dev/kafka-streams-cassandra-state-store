@@ -35,9 +35,9 @@ import java.util.stream.IntStream;
  * @param <K> key data type
  * @param <V> value data type
  */
-class CassandraReadOnlyKeyValueStore<K, V> implements ReadOnlyKeyValueStore<K, V> {
+class CassandraPartitionedReadOnlyKeyValueStore<K, V> implements ReadOnlyKeyValueStore<K, V> {
 
-    private static final Logger LOG = LoggerFactory.getLogger(CassandraReadOnlyKeyValueStore.class);
+    private static final Logger LOG = LoggerFactory.getLogger(CassandraPartitionedReadOnlyKeyValueStore.class);
 
     private final CassandraKeyValueStoreRepository repo;
     private final boolean isCountAllEnabled;
@@ -48,12 +48,12 @@ class CassandraReadOnlyKeyValueStore<K, V> implements ReadOnlyKeyValueStore<K, V
     private final List<Integer> partitions;
     private final List<Integer> reversePartitions;
 
-    CassandraReadOnlyKeyValueStore(KafkaStreams streams,
-                                          CassandraKeyValueStoreRepository repo,
-                                          boolean isCountAllEnabled,
-                                          Serde<K> keySerde,
-                                          Serde<V> valueSerde,
-                                          StreamPartitioner<K, V> partitioner) {
+    CassandraPartitionedReadOnlyKeyValueStore(KafkaStreams streams,
+                                              CassandraKeyValueStoreRepository repo,
+                                              boolean isCountAllEnabled,
+                                              Serde<K> keySerde,
+                                              Serde<V> valueSerde,
+                                              StreamPartitioner<K, V> partitioner) {
         this.repo = repo;
         this.isCountAllEnabled = isCountAllEnabled;
         this.keySerde = keySerde;

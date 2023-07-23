@@ -198,7 +198,7 @@ ReadOnlyKeyValueStore<String, Long> store = CassandraStateStore.readOnlyPartitio
 // Get the value from the store
 Long value = store.get(key);
 ```
-⚠️ The special implementation `CassandraReadOnlyKeyValueStore` requires `application.server` config to be set (to be able to access metadata).
+⚠️ The special implementation `CassandraPartitionedReadOnlyKeyValueStore` requires `application.server` config to be set (to be able to access metadata).
 
 Example provided: [examples/partitioned-store-restapi](examples/partitioned-store-restapi)
 

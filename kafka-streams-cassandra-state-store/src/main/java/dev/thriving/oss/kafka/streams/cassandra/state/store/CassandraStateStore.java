@@ -47,7 +47,7 @@ public interface CassandraStateStore extends StateStore {
      * @param valueSerde          the value Serde to use (cannot be {@code null})
      * @param <K>                 key data type
      * @param <V>                 value data type
-     * @return an instance of {@link CassandraReadOnlyKeyValueStore}
+     * @return an instance of {@link CassandraPartitionedReadOnlyKeyValueStore}
      * @throws StreamsNotStartedException If Streams has not yet been started. Just call {@link KafkaStreams#start()}
      *                                    and then retry this call.
      */
@@ -95,7 +95,7 @@ public interface CassandraStateStore extends StateStore {
      * @param partitioner         The partitioner to determine the partition for a key. If null, DefaultStreamPartitioner is used.
      * @param <K>                 key data type
      * @param <V>                 value data type
-     * @return an instance of {@link CassandraReadOnlyKeyValueStore}
+     * @return an instance of {@link CassandraPartitionedReadOnlyKeyValueStore}
      * @throws StreamsNotStartedException If Streams has not yet been started. Just call {@link KafkaStreams#start()}
      *                                    and then retry this call.
      */
@@ -127,7 +127,7 @@ public interface CassandraStateStore extends StateStore {
         String resolvedTableName = tableNameFn.apply(name);
         String fullTableName = keyspace != null ? keyspace + "." + resolvedTableName : resolvedTableName;
 
-        return new CassandraReadOnlyKeyValueStore<>(
+        return new CassandraPartitionedReadOnlyKeyValueStore<>(
                 streams,
                 new PartitionedCassandraKeyValueStoreRepository<>(
                         session,
