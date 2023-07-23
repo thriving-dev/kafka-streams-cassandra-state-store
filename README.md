@@ -163,15 +163,46 @@ The KafkaStreams instance returns a `CompositeReadOnlyKeyValueStore` that holds 
 #### Interactive Queries
 The `CassandraStateStore` interface provides static helper methods to get a correctly configured read-only store facade:
 
+💡Please read the blog post for more details: https://thriving.dev/blog/interactive-queries-with-kafka-streams-cassandra-state-store
+
+**globalKeyValueStore:**
 ```java
-// get a store to exec interactive queries
+// get a read-only store to exec interactive queries ('global' type cassandra KeyValueStore)
 ReadOnlyKeyValueStore<String, Long> store = CassandraStateStore.readOnlyGlobalKeyValueStore(streams, STORE_NAME);
         
 // Get the value from the store
 Long value = store.get(key);
 ```
-
 Example provided: [examples/global-store-restapi](examples/global-store-restapi)
+
+**partitionedKeyValueStore:**   
+Get an optimised special implementation of {@link ReadOnlyKeyValueStore} for 'local' type CassandraKeyValueStore.
+The returned object can be used to query the state directly from the underlying Cassandra table.
+No 'RPC layer' is required since queries for all/individual partitions are executed from this instance, and query
+results are merged where necessary.
+```java
+// get a read-only store to exec interactive queries ('partitioned' type cassandra KeyValueStore)
+ReadOnlyKeyValueStore<String, Long> store = CassandraStateStore.readOnlyPartitionedKeyValueStore(
+        streams,                                                // streams
+        "word-count",                                           // storeName
+        session,                                                // session
+        "kstreams_wordcount",                                   // keyspace
+        true,                                                   // isCountAllEnabled
+        "dml",                                                  // dmlExecutionProfile
+        stringSerde,                                            // keySerde
+        longSerde,                                              // valueSerde
+        CassandraStateStore.DEFAULT_TABLE_NAME_FN,              // tableNameFn
+        new DefaultStreamPartitioner<>(keySerde.serializer())   // partitioner
+);
+        
+// Get the value from the store
+Long value = store.get(key);
+```
+⚠️ The special implementation `CassandraReadOnlyKeyValueStore` requires `application.server` config to be set (to be able to access metadata).
+
+Example provided: [examples/partitioned-store-restapi](examples/partitioned-store-restapi)
+
+More examples can also be found in the [integration tests](kafka-streams-cassandra-state-store/src/intTest/java/dev/thriving/oss/kafka/streams/cassandra/state/store).
 
 #### Supported operations by store type
 

@@ -34,9 +34,9 @@ import static org.apache.kafka.common.utils.Utils.mkEntry;
 import static org.apache.kafka.common.utils.Utils.mkMap;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class WordCountInteractiveQueriesTest extends AbstractIntegrationTest {
+class WordCountPartitionedKeyValueStoreTest extends AbstractIntegrationTest {
 
-    private static final Logger LOG = LoggerFactory.getLogger(WordCountInteractiveQueriesTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(WordCountPartitionedKeyValueStoreTest.class);
 
     private static final String INPUT_TOPIC = "inputTopic";
     private static final String OUTPUT_TOPIC = "outputTopic";
@@ -153,7 +153,16 @@ class WordCountInteractiveQueriesTest extends AbstractIntegrationTest {
 
             // when (2)
             // Lookup the KeyValueStore
-            final ReadOnlyKeyValueStore<String, Long> store = readOnlyPartitionedKeyValueStore(streams, STORE_NAME);;
+            final ReadOnlyKeyValueStore<String, Long> store = readOnlyPartitionedKeyValueStore(
+                    streams,
+                    STORE_NAME,
+                    session,
+                    CASSANDRA_KEYSPACE,
+                    true,
+                    null,
+                    stringSerde,
+                    longSerde
+            );
 
             // then (2)
             final Long valueForUnknownKey = store.get("unknown");

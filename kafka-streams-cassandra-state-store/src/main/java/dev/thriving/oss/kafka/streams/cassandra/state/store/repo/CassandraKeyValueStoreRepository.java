@@ -15,6 +15,7 @@ public interface CassandraKeyValueStoreRepository {
     KeyValueIterator<Bytes, byte[]> getAll(int partition, boolean forward);
     KeyValueIterator<Bytes, byte[]> getForRange(int partition, Bytes from, Bytes to, boolean forward, boolean toInclusive);
 
+    long getCount();
     long getCount(int partition);
 
 }

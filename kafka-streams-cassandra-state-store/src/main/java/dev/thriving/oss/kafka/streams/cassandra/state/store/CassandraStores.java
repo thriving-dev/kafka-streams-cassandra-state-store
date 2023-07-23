@@ -11,6 +11,8 @@ import org.slf4j.LoggerFactory;
 import java.util.Objects;
 import java.util.function.Function;
 
+import static dev.thriving.oss.kafka.streams.cassandra.state.store.CassandraStateStore.DEFAULT_TABLE_NAME_FN;
+
 /**
  * Factory for creating cassandra backed state stores in Kafka Streams.
  * <p>
@@ -61,7 +63,7 @@ public final class CassandraStores {
             compaction = { 'class' : 'LeveledCompactionStrategy' }
             """;
 
-    private Function<String, String> tableNameFn = storeName -> String.format("%s_kstreams_store", storeName.toLowerCase().replaceAll("[^a-z0-9_]", "_"));
+    private Function<String, String> tableNameFn = DEFAULT_TABLE_NAME_FN;
     private boolean isCountAllEnabled = false;
     private boolean createTable = true;
     private String ddlExecutionProfile = null;

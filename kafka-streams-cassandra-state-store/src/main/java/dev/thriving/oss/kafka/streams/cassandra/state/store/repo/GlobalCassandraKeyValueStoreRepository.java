@@ -113,10 +113,15 @@ public class GlobalCassandraKeyValueStoreRepository extends AbstractCassandraKey
     }
 
     @Override
-    public long getCount(int partition) {
+    public long getCount() {
         BoundStatement stmt = selectCountAll.bind();
         stmt = stmt.setExecutionProfileName(ddlExecutionProfile);
         return executeSelectCount(stmt);
+    }
+
+    @Override
+    public long getCount(int partition) {
+        return getCount();
     }
 
 }
