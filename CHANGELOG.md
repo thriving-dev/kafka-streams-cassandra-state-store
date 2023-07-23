@@ -5,6 +5,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [0.7.0](https://github.com/thriving-dev/kafka-streams-cassandra-state-store/releases/tag/0.7.0) (2023-07-23)
+[0.6.0...0.7.0](https://github.com/thriving-dev/kafka-streams-cassandra-state-store/compare/0.6.0...0.7.0)
+
+### Added
+- Advanced, optimised, efficient, custom implementation of `ReadOnlyKeyValueStore` for 'Interactive Queries' with for 'partitioned' type CassandraKeyValueStore
+  - Offered by `CassandraStateStore` static methods, for an example please check the [README](README.md#interactive-queries)
+    - `CassandraStateStore#readOnlyPartitionedKeyValueStore(KafkaStreams, String, CqlSession, String, boolean, String, Serde, Serde)`
+    - `CassandraStateStore#readOnlyPartitionedKeyValueStore(KafkaStreams, String, CqlSession, String, boolean, String, Serde, Serde, Function, StreamPartitioner)`
+- New example '[processor-api-all-range-prefix-count](examples/processor-api-all-range-prefix-count)' featuring the new `CassandraReadOnlyKeyValueStore`
+  - Implements a REST API with endpoints for all available 'Interactive Query' methods to play with hands-on
+
+### Changed
+- Integration test is renamed `WordCountGlobalStoreTest` -> `WordCountGlobalKeyValueStoreTest`
+  - test + assertions added for `ReadOnlyKeyValueStore.all()`
+
+### Removed
+- First impl. of `CassandraStateStore#readOnlyPartitionedKeyValueStore(KafkaStreams, String)` was removed and replaced by the more complex methods that return an instance of `CassandraReadOnlyKeyValueStore` (already mentioned above) 
+
+
 ## [0.6.0](https://github.com/thriving-dev/kafka-streams-cassandra-state-store/releases/tag/0.6.0) (2023-07-11)
 [0.5.0...0.6.0](https://github.com/thriving-dev/kafka-streams-cassandra-state-store/compare/0.5.0...0.6.0)
 
