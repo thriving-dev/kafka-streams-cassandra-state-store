@@ -9,6 +9,7 @@ import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serializer;
 import org.apache.kafka.common.utils.Bytes;
 import org.apache.kafka.streams.KafkaStreams;
+import org.apache.kafka.streams.errors.StreamsNotStartedException;
 import org.apache.kafka.streams.processor.StreamPartitioner;
 import org.apache.kafka.streams.state.KeyValueIterator;
 import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
@@ -44,33 +45,55 @@ class CassandraPartitionedReadOnlyKeyValueStore<K, V> implements ReadOnlyKeyValu
     private final Serde<K> keySerde;
     private final Serde<V> valueSerde;
     private final StreamPartitioner<K, V> partitioner;
-
     private final List<Integer> partitions;
     private final List<Integer> reversePartitions;
 
+    /**
+     * @param streams           the kafka streams instance
+     * @param repo              the CassandraKeyValueStoreRepository instance
+     * @param isCountAllEnabled enable `SELECT COUNT(*)` to be used. . SELECT COUNT(*) requires significant CPU and I/O resources and may be quite slow depending on store size... use with care!!!
+     * @param keySerde          the key Serde to use (cannot be {@code null})
+     * @param valueSerde        the value Serde to use (cannot be {@code null})
+     * @param partitioner       The partitioner to determine the partition for a key. If null, DefaultStreamPartitioner is used.
+     * @throws StreamsNotStartedException if KafkaStreams has not been started
+     * @throws IllegalStateException      if KafkaStreams is not running
+     */
     CassandraPartitionedReadOnlyKeyValueStore(KafkaStreams streams,
                                               CassandraKeyValueStoreRepository repo,
                                               boolean isCountAllEnabled,
                                               Serde<K> keySerde,
                                               Serde<V> valueSerde,
-                                              StreamPartitioner<K, V> partitioner) {
+                                              StreamPartitioner<K, V> partitioner)
+            throws StreamsNotStartedException, IllegalStateException {
         this.repo = repo;
         this.isCountAllEnabled = isCountAllEnabled;
         this.keySerde = keySerde;
         this.valueSerde = valueSerde;
         this.partitioner = partitioner;
 
-        // TODO(#23/#25): better way to dynamically determine the number of partitions (streams tasks) that does not require `application.server` streams config to be set
+        // validate state
+        validateIsRunningOrRebalancing(streams.state());
+
+        // construct complete list of partitions to use for querying Cassandra (+ reverse) across partitions
+        // TODO(#23/#25): is there a better way to dynamically determine the number of partitions (streams tasks) that does not require `application.server` streams config to be set?
         int maxPartition = streams.metadataForAllStreamsClients().stream()
                 .flatMap(streamsMetadata -> streamsMetadata.topicPartitions().stream())
                 .mapToInt(TopicPartition::partition)
                 .max().orElseThrow(() -> new RuntimeException("No StreamsClients metadata available to determine no. of partitions -> please provide `application.server` config!!"));
-        partitions = IntStream.rangeClosed(0, maxPartition)
-                .boxed()
-                .toList();
+        partitions = IntStream.rangeClosed(0, maxPartition).boxed().toList();
         ArrayList<Integer> reversePartitions = new ArrayList<>(partitions);
         Collections.reverse(reversePartitions);
         this.reversePartitions = ImmutableList.copyOf(reversePartitions);
+    }
+
+    // ref: copied + adapted from `org.apache.kafka.streams.KafkaStreams.validateIsRunningOrRebalancing` (at 3.5.0)
+    private void validateIsRunningOrRebalancing(KafkaStreams.State state) {
+        if (state.hasNotStarted()) {
+            throw new StreamsNotStartedException("KafkaStreams has not been started, you can retry after calling start()");
+        }
+        if (!state.isRunningOrRebalancing()) {
+            throw new IllegalStateException("KafkaStreams is not running. State is " + state + ", you can retry once running.");
+        }
     }
 
     @Override
@@ -81,6 +104,7 @@ class CassandraPartitionedReadOnlyKeyValueStore<K, V> implements ReadOnlyKeyValu
         return valueSerde.deserializer().deserialize(null, valueBytes);
     }
 
+    // ref: copied + adapted from `org.apache.kafka.streams.processor.internals.StreamsMetadataState.getPartition` (at 3.5.0)
     private int getPartitionForKey(K key) {
         Optional<Set<Integer>> optionalIntegerSet = partitioner.partitions(null, key, null, partitions.size());
         if (!optionalIntegerSet.isPresent()) {
