@@ -37,7 +37,7 @@ dependencies {
 
 application {
     // Define the main class for the application.
-    mainClass.set("dev.thriving.oss.kafka.streams.cassandra.state.store.example.partitionedstore.restapi.KTableGlobalStoreRestApiDemo")
+    mainClass.set("dev.thriving.oss.kafka.streams.cassandra.state.store.example.partitionedstore.restapi.KTablePartitionedStoreRestApiDemo")
 }
 
 tasks.named<Test>("test") {

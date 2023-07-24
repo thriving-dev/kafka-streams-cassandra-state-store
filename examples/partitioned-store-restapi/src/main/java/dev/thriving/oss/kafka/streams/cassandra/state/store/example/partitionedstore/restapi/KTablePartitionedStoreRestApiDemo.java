@@ -72,7 +72,7 @@ public final class KTablePartitionedStoreRestApiDemo {
 
     static Properties getStreamsConfig() {
         final Properties props = new Properties();
-        props.put(StreamsConfig.APPLICATION_ID_CONFIG, "global-store-restapi");
+        props.put(StreamsConfig.APPLICATION_ID_CONFIG, "partitioned-store-restapi");
         props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG,
                 Optional.ofNullable(System.getenv("BOOTSTRAP_SERVERS_CONFIG"))
                         .orElse("localhost:19092"));

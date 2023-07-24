@@ -1,5 +1,10 @@
 # kafka-streams-cassandra-state-store/examples 
-## global-store-restapi
+## partitioned-store-restapi
+
+Read more details on the `CassandraPartitionedReadOnlyKeyValueStore` class, that _implements_ `ReadOnlyKeyValueStore<K, V>` in the blog post.
+https://thriving.dev/blog/interactive-queries-with-kafka-streams-cassandra-state-store-part-2
+
+The example also is featured in a YouTube demo. The link can be found in the blog post or on the https://www.youtube.com/@thriving_dev YouTube Channel. 
 
 ### run example
 
