@@ -5,6 +5,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [0.7.2](https://github.com/thriving-dev/kafka-streams-cassandra-state-store/releases/tag/0.7.2) (2023-07-24)
+[0.7.1...0.7.2](https://github.com/thriving-dev/kafka-streams-cassandra-state-store/compare/0.7.1...0.7.2)
+
+### Polishing & Cleanup
+- chore: example/*-restapi enable datastax-java-driver `RequestLogger`
+- chore: example/partitioned-store-restapi use ScyllaDB
+- chore: example/partitioned-store-restapi fix main class + `application.id`
+- chore: polishing, more javadoc+comments, `validateIsRunningOrRebalancing()`
+
+
 ## [0.7.1](https://github.com/thriving-dev/kafka-streams-cassandra-state-store/releases/tag/0.7.1) (2023-07-23)
 [0.7.0...0.7.1](https://github.com/thriving-dev/kafka-streams-cassandra-state-store/compare/0.7.0...0.7.1)
 
