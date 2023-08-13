@@ -12,11 +12,12 @@ import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.StreamsBuilder;
-import org.apache.kafka.streams.kstream.KStream;
-import org.apache.kafka.streams.kstream.KTable;
-import org.apache.kafka.streams.kstream.Materialized;
-import org.apache.kafka.streams.kstream.Produced;
+import org.apache.kafka.streams.kstream.*;
+import org.apache.kafka.streams.processor.api.Processor;
+import org.apache.kafka.streams.processor.api.ProcessorContext;
+import org.apache.kafka.streams.processor.api.Record;
 import org.apache.kafka.streams.state.Stores;
+import org.apache.kafka.streams.state.VersionedKeyValueStore;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.rnorth.ducttape.unreliables.Unreliables;
@@ -39,6 +40,9 @@ class PartitionedVersionedKeyValueStoreTest extends AbstractIntegrationTest {
     private static final String INPUT_TOPIC_ORDERS = "orders";
     private static final String OUTPUT_TOPIC_PRICED_ORDERS = "priced_orders";
     private static final String STORE_NAME = "meal-prices";
+
+    // Note: this is a hack required to get access to the underlying state store. Ref -> StoreProdivingProcessor
+    VersionedKeyValueStore<String, Long> store;
 
     @Test
     public void shouldAllowToGetRecordsFromVersionedStore() throws ExecutionException, InterruptedException, TimeoutException {
@@ -96,7 +100,6 @@ class PartitionedVersionedKeyValueStoreTest extends AbstractIntegrationTest {
                     throw new RuntimeException(e);
                 }
             });
-            Thread.sleep(500);
             inputOrders.forEach(it -> {
                 try {
                     ordersProducer.send(it).get();
@@ -120,6 +123,12 @@ class PartitionedVersionedKeyValueStoreTest extends AbstractIntegrationTest {
             assertThat(results.get(1)).isEqualTo(KeyValue.pair(TEST_KEY, 9L));
             assertThat(results.get(2)).isEqualTo(KeyValue.pair(TEST_KEY, 11L));
             assertThat(results.get(3)).isEqualTo(KeyValue.pair(TEST_KEY, 12L));
+
+            assertThat(store.get(TEST_KEY).value()).isEqualTo(9L);
+            assertThat(store.get(TEST_KEY, 60L).value()).isEqualTo(9L);
+            assertThat(store.get(TEST_KEY, 50L).value()).isEqualTo(11L);
+            assertThat(store.get(TEST_KEY, 35L).value()).isEqualTo(12L);
+            assertThat(store.get(TEST_KEY, 30L)).isNull();
         }
     }
 
@@ -148,10 +157,36 @@ class PartitionedVersionedKeyValueStoreTest extends AbstractIntegrationTest {
                         prices,
                         (meal, price) -> price
                 )
+                .process(StoreProdivingProcessor::new, Named.as("StoreProdivingProcessor"), STORE_NAME)
                 .peek((k, v) -> LOG.info("out => {}::{}", k, v))
                 .to(OUTPUT_TOPIC_PRICED_ORDERS, Produced.with(Serdes.String(), Serdes.Long()));
 
         return new KafkaStreams(builder.build(), streamsConfiguration);
     }
 
+    /**
+     * Note: this is a hack required to get access to the underlying state store.
+     * To be removed/refactored once interactive queries are supported in a future release of Apache Kafka.
+     */
+    private class StoreProdivingProcessor implements Processor<String, Long, String, Long> {
+
+        private ProcessorContext<String, Long> context;
+        @Override
+        public void init(ProcessorContext<String, Long> context) {
+            Processor.super.init(context);
+            this.context = context;
+            store = context.getStateStore(STORE_NAME);
+        }
+
+        @Override
+        public void process(Record<String, Long> record) {
+            context.forward(record);
+        }
+
+        @Override
+        public void close() {
+            Processor.super.close();
+            store = null;
+        }
+    }
 }
