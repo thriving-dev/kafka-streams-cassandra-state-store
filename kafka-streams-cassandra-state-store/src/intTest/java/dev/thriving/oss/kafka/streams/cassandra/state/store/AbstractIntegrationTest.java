@@ -39,7 +39,7 @@ public abstract class AbstractIntegrationTest {
     @NotNull
     protected Properties getStreamsProperties() {
         final Properties props = new Properties();
-        props.put(StreamsConfig.APPLICATION_ID_CONFIG, "integration-test");
+        props.put(StreamsConfig.APPLICATION_ID_CONFIG, "integration-test-" + UUID.randomUUID());
         props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, redpanda.getBootstrapServers());
         props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
         props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
