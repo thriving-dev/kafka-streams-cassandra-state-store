@@ -14,7 +14,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GlobalCassandraKeyValueStoreRepository extends AbstractCassandraKeyValueStoreRepository<ByteBuffer> implements CassandraKeyValueStoreRepository {
+public class GlobalCassandraKeyValueStoreRepository extends AbstractCassandraStateStoreRepository<ByteBuffer> implements CassandraKeyValueStoreRepository {
 
     private static final Logger LOG = LoggerFactory.getLogger(GlobalCassandraKeyValueStoreRepository.class);
 

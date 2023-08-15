@@ -16,7 +16,6 @@ import org.apache.kafka.streams.kstream.*;
 import org.apache.kafka.streams.processor.api.Processor;
 import org.apache.kafka.streams.processor.api.ProcessorContext;
 import org.apache.kafka.streams.processor.api.Record;
-import org.apache.kafka.streams.state.Stores;
 import org.apache.kafka.streams.state.VersionedKeyValueStore;
 import org.apache.kafka.streams.state.VersionedRecord;
 import org.jetbrains.annotations.NotNull;
@@ -328,6 +327,130 @@ class PartitionedVersionedKeyValueStoreTest extends AbstractIntegrationTest {
             assertThat(store.get(TEST_KEY).value()).isEqualTo(9L);
             assertThat(store.get(TEST_KEY, 50L).value()).isEqualTo(8L); // was 11$ before
             assertThat(store.get(TEST_KEY, 53L).value()).isEqualTo(9L);
+        }
+    }
+
+    @Test
+    public void shouldPutOrDeleteBeforeFirstKnownRecord() throws ExecutionException, InterruptedException, TimeoutException {
+        // GIVEN
+        final String TEST_KEY = "kimchi";
+        final List<ProducerRecord<String, Long>> inputPrices = Arrays.asList(
+                new ProducerRecord<>(INPUT_TOPIC_PRICES, null, 48L, TEST_KEY, 11L),
+                new ProducerRecord<>(INPUT_TOPIC_PRICES, null, 53L, TEST_KEY, 9L),
+                new ProducerRecord<>(INPUT_TOPIC_PRICES, null, 64L, "any", 99L) // advance stream time
+        );
+        final List<ProducerRecord<String, String>> inputOrders = Arrays.asList(
+                new ProducerRecord<>(INPUT_TOPIC_ORDERS, null, 65L, TEST_KEY, TEST_KEY),
+                new ProducerRecord<>(INPUT_TOPIC_ORDERS, null, 60L, TEST_KEY, TEST_KEY),
+                new ProducerRecord<>(INPUT_TOPIC_ORDERS, null, 50L, TEST_KEY, TEST_KEY),
+                new ProducerRecord<>(INPUT_TOPIC_ORDERS, null, 35L, TEST_KEY, TEST_KEY),
+                new ProducerRecord<>(INPUT_TOPIC_ORDERS, null, 30L, TEST_KEY, TEST_KEY)
+        );
+
+        // configure and start the processor topology.
+        final Serde<String> stringSerde = Serdes.String();
+        final Serde<Long> longSerde = Serdes.Long();
+        final Properties props = getStreamsProperties();
+
+        // WHEN
+        try (
+                final AdminClient adminClient = initAdminClient();
+                final KafkaProducer<String, Long> pricesProducer = initProducer(stringSerde, longSerde);
+                final KafkaProducer<String, String> ordersProducer = initProducer(stringSerde, stringSerde);
+                final KafkaConsumer<String, Long> consumer = initConsumer(stringSerde, longSerde);
+                final CqlSession session = initSession();
+                final KafkaStreams streams = initStreams(props, session)
+        ) {
+            // setup input and output topics.
+            int partitions = 1;
+            Collection<NewTopic> topics = Arrays.asList(
+                    new NewTopic(INPUT_TOPIC_PRICES, partitions, (short) 1),
+                    new NewTopic(INPUT_TOPIC_ORDERS, partitions, (short) 1),
+                    new NewTopic(OUTPUT_TOPIC_PRICED_ORDERS, partitions, (short) 1)
+            );
+            adminClient.createTopics(topics).all().get(30, TimeUnit.SECONDS);
+
+            consumer.subscribe(Collections.singletonList(OUTPUT_TOPIC_PRICED_ORDERS));
+
+            // start streams.
+            streams.start();
+
+            // produce some input data to the input topics.
+            inputPrices.forEach(it -> {
+                try {
+                    pricesProducer.send(it).get();
+                } catch (InterruptedException | ExecutionException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+            inputOrders.forEach(it -> {
+                try {
+                    ordersProducer.send(it).get();
+                } catch (InterruptedException | ExecutionException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+
+            // consume and collect streams output
+            final List<KeyValue<String, Long>> results = new ArrayList<>();
+            Unreliables.retryUntilTrue(10, TimeUnit.SECONDS, () -> {
+                        ConsumerRecords<String, Long> records = consumer.poll(Duration.ofMillis(500));
+                        records.iterator().forEachRemaining(record -> results.add(KeyValue.pair(record.key(), record.value())));
+
+                        return results.size() >= 3;
+                    }
+            );
+
+            // THEN
+            assertThat(results.size()).isEqualTo(3);
+            assertThat(results.get(0)).isEqualTo(KeyValue.pair(TEST_KEY, 9L));
+            assertThat(results.get(1)).isEqualTo(KeyValue.pair(TEST_KEY, 9L));
+            assertThat(results.get(2)).isEqualTo(KeyValue.pair(TEST_KEY, 11L));
+
+            assertThat(store.get(TEST_KEY).value()).isEqualTo(9L);
+            assertThat(store.get(TEST_KEY, 60L).value()).isEqualTo(9L);
+            assertThat(store.get(TEST_KEY, 50L).value()).isEqualTo(11L);
+            assertThat(store.get(TEST_KEY, 35L)).isNull();
+
+            // WHEN 2
+            long validTo = store.put(TEST_KEY, 8L, 40L);
+
+            // THEN 2
+            assertThat(validTo).isEqualTo(48L);
+            assertThat(store.get(TEST_KEY).value()).isEqualTo(9L);
+            assertThat(store.get(TEST_KEY, 35L)).isNull();
+            assertThat(store.get(TEST_KEY, 38L)).isNull();
+            assertThat(store.get(TEST_KEY, 40L).value()).isEqualTo(8L);
+            assertThat(store.get(TEST_KEY, 47L).value()).isEqualTo(8L);
+            assertThat(store.get(TEST_KEY, 48L).value()).isEqualTo(11L);
+            assertThat(store.get(TEST_KEY, 50L).value()).isEqualTo(11L);
+
+            // WHEN 3
+            VersionedRecord<Long> deleted = store.delete(TEST_KEY, 38L);
+
+            // THEN 3
+            assertThat(deleted).isNull();
+            assertThat(store.get(TEST_KEY).value()).isEqualTo(9L);
+            assertThat(store.get(TEST_KEY, 35L)).isNull();
+            assertThat(store.get(TEST_KEY, 38L)).isNull();
+            assertThat(store.get(TEST_KEY, 40L).value()).isEqualTo(8L);
+            assertThat(store.get(TEST_KEY, 47L).value()).isEqualTo(8L);
+            assertThat(store.get(TEST_KEY, 48L).value()).isEqualTo(11L);
+            assertThat(store.get(TEST_KEY, 50L).value()).isEqualTo(11L);
+
+            // WHEN 4
+            long validTo4 = store.put(TEST_KEY, 5L, 36L);
+
+            // THEN 4
+            assertThat(validTo4).isEqualTo(38L);
+            assertThat(store.get(TEST_KEY).value()).isEqualTo(9L);
+            assertThat(store.get(TEST_KEY, 35L)).isNull();
+            assertThat(store.get(TEST_KEY, 36L).value()).isEqualTo(5L);
+            assertThat(store.get(TEST_KEY, 38L)).isNull();
+            assertThat(store.get(TEST_KEY, 40L).value()).isEqualTo(8L);
+            assertThat(store.get(TEST_KEY, 47L).value()).isEqualTo(8L);
+            assertThat(store.get(TEST_KEY, 48L).value()).isEqualTo(11L);
+            assertThat(store.get(TEST_KEY, 50L).value()).isEqualTo(11L);
         }
     }
 
@@ -838,17 +961,21 @@ class PartitionedVersionedKeyValueStoreTest extends AbstractIntegrationTest {
         final Serde<Long> longSerde = Serdes.Long();
 
         // prices table
-        final KTable<String, Long> prices = builder.table(
-                INPUT_TOPIC_PRICES,
-                Materialized.<String, Long>as(
-                                Stores.persistentVersionedKeyValueStore(
-                                        STORE_NAME,
-                                        Duration.ofMillis(30)))
-                        .withKeySerde(stringSerde)
-                        .withValueSerde(longSerde));
+        final KTable<String, Long> prices = builder.stream(INPUT_TOPIC_PRICES, Consumed.with(stringSerde, longSerde))
+                .peek((k, v) -> LOG.info("in[prices] => {}::{}", k, v))
+                .toTable(
+                    Materialized.<String, Long>as(
+                                    // Stores.persistentVersionedKeyValueStore(STORE_NAME, Duration.ofMillis(30)))
+                                    CassandraStores.builder(session, STORE_NAME)
+                                            .partitionedVersionedKeyValueStore(Duration.ofMillis(30)))
+                            .withCachingDisabled()
+                            .withLoggingDisabled()
+                            .withKeySerde(stringSerde)
+                            .withValueSerde(longSerde));
 
         // orders stream
-        final KStream<String, String> orders = builder.stream(INPUT_TOPIC_ORDERS);
+        final KStream<String, String> orders = builder.stream(INPUT_TOPIC_ORDERS, Consumed.with(stringSerde, stringSerde))
+                .peek((k, v) -> LOG.info("in[orders] => {}::{}", k, v));
 
         // join orders -> prices (versioned)
         orders.join(
