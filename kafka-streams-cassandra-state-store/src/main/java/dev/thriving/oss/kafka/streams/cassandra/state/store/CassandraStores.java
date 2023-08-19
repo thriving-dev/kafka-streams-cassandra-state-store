@@ -419,9 +419,27 @@ public final class CassandraStores {
     }
 
     /**
-     * TODO
-     * @param duration
-     * @return
+     * Creates a persistent {@link VersionedBytesStoreSupplier}.
+     * <p>
+     * The versioned key value store is persisted in a cassandra table, having the 'key' as sole PRIMARY KEY.
+     * Therefore, all CRUD operations against this store always are "global", partitioned by the key itself.
+     * <p>
+     * The store supports Cassandra 3.11, Cassandra 4, ScyllaDB.
+     * <p>
+     * Supported operations:
+     * - put
+     * - delete
+     * - get (asOfTimestamp)
+     * - get (latest)
+     *
+     * @param historyRetention length of time that old record versions are available for query
+     *                         (cannot be negative). If a timestamp bound provided to
+     *                         {@link VersionedKeyValueStore#get(Object, long)} is older than this
+     *                         specified history retention, then the get operation will not return data.
+     *                         This parameter also determines the "grace period" after which
+     *                         out-of-order writes will no longer be accepted.
+     * @return an instance of a {@link VersionedBytesStoreSupplier} that can be used
+     *         to build a persistent versioned key-value store
      */
     public VersionedBytesStoreSupplier globalVersionedKeyValueStore(Duration historyRetention) {
         return new VersionedBytesStoreSupplier() {
