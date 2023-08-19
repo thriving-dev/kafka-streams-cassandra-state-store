@@ -5,11 +5,6 @@ import dev.thriving.oss.kafka.streams.cassandra.state.store.repo.VersionedEntry;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.utils.Bytes;
 import org.apache.kafka.streams.errors.InvalidStateStoreException;
-import org.apache.kafka.streams.processor.ProcessorContext;
-import org.apache.kafka.streams.processor.StateStore;
-import org.apache.kafka.streams.processor.StateStoreContext;
-import org.apache.kafka.streams.processor.internals.RecordBatchingStateRestoreCallback;
-import org.apache.kafka.streams.query.Position;
 import org.apache.kafka.streams.state.VersionedKeyValueStore;
 import org.apache.kafka.streams.state.VersionedRecord;
 import org.slf4j.Logger;
@@ -20,24 +15,19 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-public class CassandraVersionedKeyValueStore implements CassandraStateStore, VersionedKeyValueStore<Bytes, byte[]> {
+public class CassandraVersionedKeyValueStore extends AbstractCassandraStore implements VersionedKeyValueStore<Bytes, byte[]> {
 
     private static final Logger LOG = LoggerFactory.getLogger(CassandraVersionedKeyValueStore.class);
 
-    protected final String name;
     private final CassandraVersionedKeyValueStoreRepository repo;
     private final long historyRetention;
     private final long gracePeriod;
-    protected StateStoreContext context;
-    protected int partition;
     private long observedStreamTime = ConsumerRecord.NO_TIMESTAMP;
-    protected Position position = Position.emptyPosition();
-    private volatile boolean open = false;
 
     public CassandraVersionedKeyValueStore(String name,
                                            CassandraVersionedKeyValueStoreRepository repo,
                                            long historyRetentionMs) {
-        this.name = name;
+        super(name);
         this.repo = repo;
         this.historyRetention = historyRetentionMs;
         // history retention doubles as grace period for now. could be nice to allow users to
@@ -45,66 +35,6 @@ public class CassandraVersionedKeyValueStore implements CassandraStateStore, Ver
         // history retention >= grace period, for sound semantics.
         this.gracePeriod = historyRetentionMs;
 
-    }
-
-    @Deprecated
-    @Override
-    public void init(final ProcessorContext context,
-                     final StateStore root) {
-        if (context instanceof StateStoreContext) {
-            init((StateStoreContext) context, root);
-        } else {
-            throw new UnsupportedOperationException(
-                    "Use CassandraVersionedKeyValueStore#init(StateStoreContext, StateStore) instead."
-            );
-        }
-    }
-
-    @Override
-    public void init(StateStoreContext context, StateStore root) {
-        this.context = context;
-        this.partition = context.taskId().partition();
-
-        if (root != null) {
-            // register the store
-            context.register(
-                    root,
-                    (RecordBatchingStateRestoreCallback) records -> {
-                    }
-            );
-        }
-
-        open = true;
-    }
-
-    @Override
-    public void close() {
-        this.open = false;
-    }
-
-    @Override
-    public String name() {
-        return name;
-    }
-
-    @Override
-    public void flush() {
-        // do-nothing
-    }
-
-    @Override
-    public boolean persistent() {
-        return true;
-    }
-
-    @Override
-    public boolean isOpen() {
-        return open;
-    }
-
-    @Override
-    public Position getPosition() {
-        return position;
     }
 
     @Override

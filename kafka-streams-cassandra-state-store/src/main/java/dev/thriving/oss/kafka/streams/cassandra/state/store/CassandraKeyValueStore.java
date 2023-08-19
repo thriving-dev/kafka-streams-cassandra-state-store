@@ -4,11 +4,10 @@ import dev.thriving.oss.kafka.streams.cassandra.state.store.repo.CassandraKeyVal
 import org.apache.kafka.common.serialization.Serializer;
 import org.apache.kafka.common.utils.Bytes;
 import org.apache.kafka.streams.KeyValue;
-import org.apache.kafka.streams.processor.ProcessorContext;
-import org.apache.kafka.streams.processor.StateStore;
-import org.apache.kafka.streams.processor.StateStoreContext;
-import org.apache.kafka.streams.processor.internals.RecordBatchingStateRestoreCallback;
-import org.apache.kafka.streams.query.*;
+import org.apache.kafka.streams.query.PositionBound;
+import org.apache.kafka.streams.query.Query;
+import org.apache.kafka.streams.query.QueryConfig;
+import org.apache.kafka.streams.query.QueryResult;
 import org.apache.kafka.streams.state.KeyValueIterator;
 import org.apache.kafka.streams.state.KeyValueStore;
 import org.apache.kafka.streams.state.internals.StoreQueryUtils;
@@ -18,76 +17,17 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.Objects;
 
-public class CassandraKeyValueStore implements CassandraStateStore, KeyValueStore<Bytes, byte[]> {
+public class CassandraKeyValueStore extends AbstractCassandraStore implements KeyValueStore<Bytes, byte[]> {
 
     private static final Logger LOG = LoggerFactory.getLogger(CassandraKeyValueStore.class);
 
-    protected final String name;
     private final CassandraKeyValueStoreRepository repo;
     private final boolean isCountAllEnabled;
-    protected StateStoreContext context;
-    protected int partition;
-    protected Position position = Position.emptyPosition();
-    private volatile boolean open = false;
 
     public CassandraKeyValueStore(String name, CassandraKeyValueStoreRepository repo, boolean isCountAllEnabled) {
-        this.name = name;
+        super(name);
         this.repo = repo;
         this.isCountAllEnabled = isCountAllEnabled;
-    }
-
-    @Deprecated
-    @Override
-    public void init(final ProcessorContext context,
-                     final StateStore root) {
-        if (context instanceof StateStoreContext) {
-            init((StateStoreContext) context, root);
-        } else {
-            throw new UnsupportedOperationException(
-                    "Use CassandraKeyValueStore#init(StateStoreContext, StateStore) instead."
-            );
-        }
-    }
-
-    @Override
-    public void init(StateStoreContext context, StateStore root) {
-        this.context = context;
-        this.partition = context.taskId().partition();
-
-        if (root != null) {
-            // register the store
-            context.register(
-                    root,
-                    (RecordBatchingStateRestoreCallback) records -> { }
-            );
-        }
-
-        open = true;
-    }
-
-    @Override
-    public void close() {
-        this.open = false;
-    }
-
-    @Override
-    public String name() {
-        return name;
-    }
-
-    @Override
-    public void flush() {
-        // do-nothing
-    }
-
-    @Override
-    public boolean persistent() {
-        return true;
-    }
-
-    @Override
-    public boolean isOpen() {
-        return open;
     }
 
     @Override
@@ -100,11 +40,6 @@ public class CassandraKeyValueStore implements CassandraStateStore, KeyValueStor
                 position,
                 context
         );
-    }
-
-    @Override
-    public Position getPosition() {
-        return position;
     }
 
     @Override
