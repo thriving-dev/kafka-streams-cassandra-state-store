@@ -268,7 +268,7 @@ public final class CassandraStores {
      * - prefixScan
      *
      * @return an instance of a {@link KeyValueBytesStoreSupplier} that can be used
-     * * to build a persistent key-value store
+     *         to build a persistent key-value store
      */
     public KeyValueBytesStoreSupplier partitionedKeyValueStore() {
         return new KeyValueBytesStoreSupplier() {
@@ -329,7 +329,7 @@ public final class CassandraStores {
      * - prefixScan
      *
      * @return an instance of a {@link KeyValueBytesStoreSupplier} that can be used
-     * * to build a persistent key-value store
+     *         to build a persistent key-value store
      */
     public KeyValueBytesStoreSupplier globalKeyValueStore() {
         return new KeyValueBytesStoreSupplier() {
@@ -359,9 +359,27 @@ public final class CassandraStores {
     }
 
     /**
-     * TODO
-     * @param historyRetention
-     * @return
+     * Creates a persistent {@link VersionedBytesStoreSupplier}.
+     * <p>
+     * The versioned key value store is persisted in a cassandra table, partitioned by the store context task partition.
+     * Therefore, all CRUD operations against this store always are by stream task partition.
+     * <p>
+     * The store supports Cassandra 3.11, Cassandra 4, ScyllaDB.
+     * <p>
+     * Supported operations:
+     * - put
+     * - delete
+     * - get (asOfTimestamp)
+     * - get (latest)
+     *
+     * @param historyRetention length of time that old record versions are available for query
+     *                         (cannot be negative). If a timestamp bound provided to
+     *                         {@link VersionedKeyValueStore#get(Object, long)} is older than this
+     *                         specified history retention, then the get operation will not return data.
+     *                         This parameter also determines the "grace period" after which
+     *                         out-of-order writes will no longer be accepted.
+     * @return an instance of a {@link VersionedBytesStoreSupplier} that can be used
+     *         to build a persistent versioned key-value store
      */
     public VersionedBytesStoreSupplier partitionedVersionedKeyValueStore(Duration historyRetention) {
         return new VersionedBytesStoreSupplier() {
