@@ -2,6 +2,7 @@ package dev.thriving.oss.kafka.streams.cassandra.state.store;
 
 import com.datastax.oss.driver.api.core.CqlSession;
 import dev.thriving.oss.kafka.streams.cassandra.state.store.repo.GlobalCassandraKeyValueStoreRepository;
+import dev.thriving.oss.kafka.streams.cassandra.state.store.repo.GlobalCassandraVersionedKeyValueStoreRepository;
 import dev.thriving.oss.kafka.streams.cassandra.state.store.repo.PartitionedCassandraKeyValueStoreRepository;
 import dev.thriving.oss.kafka.streams.cassandra.state.store.repo.PartitionedCassandraVersionedKeyValueStoreRepository;
 import org.apache.kafka.common.utils.Bytes;
@@ -417,9 +418,49 @@ public final class CassandraStores {
         };
     }
 
+    /**
+     * TODO
+     * @param duration
+     * @return
+     */
+    public VersionedBytesStoreSupplier globalVersionedKeyValueStore(Duration historyRetention) {
+        return new VersionedBytesStoreSupplier() {
+            @Override
+            public String name() {
+                return name;
+            }
+
+            @Override
+            public KeyValueStore<Bytes, byte[]> get() {
+                return new VersionedKeyValueToBytesStoreAdapter(
+                        new CassandraVersionedKeyValueStore(
+                                name,
+                                new GlobalCassandraVersionedKeyValueStoreRepository<>(
+                                        session,
+                                        resolveTableName(),
+                                        createTable,
+                                        tableOptions,
+                                        ddlExecutionProfile,
+                                        dmlExecutionProfile),
+                                historyRetention.toMillis()
+                        )
+                );
+            }
+
+            @Override
+            public String metricsScope() {
+                return METRICS_SCOPE;
+            }
+
+            @Override
+            public long historyRetentionMs() {
+                return historyRetention.toMillis();
+            }
+        };
+    }
+
     private String resolveTableName() {
         String resolvedTableName = tableNameFn.apply(name);
         return keyspace != null ? keyspace + "." + resolvedTableName : resolvedTableName;
     }
-
 }
