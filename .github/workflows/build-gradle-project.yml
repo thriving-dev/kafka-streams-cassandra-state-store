@@ -10,7 +10,7 @@ on:
       - main
 
 jobs:
-  build:
+  pipeline:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout project sources
@@ -27,3 +27,13 @@ jobs:
         run: ./gradlew build -x intTest --no-daemon
       - name: Run integration tests
         run: ./gradlew intTest --no-daemon
+
+      # Only pushes to main trigger a publication to Sonatype OSS
+      - name: Deploy to Sonatype OSS (maven central)
+        if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/ops/publish-to-maven-central-with-github-actions'
+        run: ./gradlew publishToSonatype closeAndReleaseSonatypeStagingRepository
+        env:
+          GPG_SIGNING_KEY: ${{ secrets.GPG_SIGNING_KEY }}
+          GPG_SIGNING_PASSPHRASE: ${{ secrets.GPG_SIGNING_PASSPHRASE }}
+          OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
+          OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
