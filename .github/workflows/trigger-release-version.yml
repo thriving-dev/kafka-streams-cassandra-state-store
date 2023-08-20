@@ -29,7 +29,9 @@ jobs:
         uses: gradle/gradle-build-action@v2
       - name: Get current version
         id: get_version
-        run: echo "current_version=$(git describe --abbrev=0 --tags)" >> $GITHUB_ENV
+        run: |
+          git fetch --tag
+          echo "current_version=$(git describe --abbrev=0 --tags)" >> $GITHUB_ENV
 
       - name: Determine version type
         id: bump_version
