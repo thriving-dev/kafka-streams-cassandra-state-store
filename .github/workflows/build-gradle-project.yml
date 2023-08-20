@@ -28,7 +28,7 @@ jobs:
       - name: Run integration tests
         run: ./gradlew intTest --no-daemon
 
-      # Only pushes to main trigger a publication to Sonatype OSS
+      # Only pushes to main and pushed tags trigger a publication to Sonatype OSS
       - name: Deploy to Sonatype OSS (maven central)
         if: ${{ (github.ref == 'refs/heads/main') || (startsWith(github.ref, 'refs/tags/')) }}
         run: ./gradlew publishToSonatype closeAndReleaseSonatypeStagingRepository
