@@ -16,6 +16,7 @@ on:
 jobs:
   release-version:
     runs-on: ubuntu-latest
+    if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
     steps:
       - name: Checkout project sources
         uses: actions/checkout@v3
@@ -37,9 +38,10 @@ jobs:
       - name: Determine version type
         id: bump_version
         run: |
-          export major=$(echo ${{ env.current_version }} | cut -d. -f1)
-          export minor=$(echo ${{ env.current_version }} | cut -d. -f2)
-          export patch=$(echo ${{ env.current_version }} | cut -d. -f3)
+          export major=$(echo "${VERSION}" | cut -d. -f1)
+          export minor=$(echo "${VERSION}" | cut -d. -f2)
+          export patch=$(echo "${VERSION}" | cut -d. -f3)
+          echo "resolved: ${major}.${minor}.${patch}"
           
           if [ -n "${{ env.type == 'major' }}" ]; then
             echo "new_version=${major}.0.0" >> $GITHUB_ENV
@@ -51,9 +53,11 @@ jobs:
             echo "new_version=${major}.${minor}.${patch+1}" >> $GITHUB_ENV
             echo "new_snapshot_version=${major}.${major}.${minor}.${patch+2}-SNAPSHOT" >> $GITHUB_ENV
           fi
+        env:
+          VERSION: ${{ env.current_version }}
       - name: Run 'gradle release'
         id: gradle_release
-        if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+        #if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
         run: |
           echo "Type: ${{ inputs.type }}"
           echo "Current version: ${{ env.current_version }}"
