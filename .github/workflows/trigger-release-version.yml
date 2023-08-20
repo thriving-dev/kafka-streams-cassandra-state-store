@@ -19,6 +19,7 @@ jobs:
     steps:
       - name: Checkout project sources
         uses: actions/checkout@v3
+      - run: git fetch --prune --unshallow
       - uses: actions/setup-java@v3
         with:
           distribution: 'corretto'
@@ -27,11 +28,10 @@ jobs:
       - uses: gradle/wrapper-validation-action@v1
       - name: Setup Gradle
         uses: gradle/gradle-build-action@v2
+
       - name: Get current version
         id: get_version
-        run: |
-          git fetch --tag
-          echo "current_version=$(git describe --abbrev=0 --tags)" >> $GITHUB_ENV
+        run: echo "current_version=$(git describe --abbrev=0 --tags)" >> $GITHUB_ENV
 
       - name: Determine version type
         id: bump_version
