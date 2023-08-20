@@ -3,15 +3,49 @@ name: Release
 on:
   workflow_dispatch:
     inputs:
-      version:
-        description: 'Version'
+      type:
+        description: 'Release type'
         required: true
+        default: 'patch'
+        type: choice
+        options:
+          - major
+          - minor
+          - patch
 
 jobs:
   release-version:
     runs-on: ubuntu-latest
     steps:
-      - run: |
-          echo "Version: $VERSION"
-        env:
-          VERSION: ${{ inputs.version }}
+      - name: Get current version
+        id: get_version
+        run: echo "current_version=$(git describe --abbrev=0 --tags)" >> $GITHUB_ENV
+
+      - name: Determine version type
+        id: bump_version
+        run: |
+          export major=$(echo ${{ env.current_version }} | cut -d '.' -f 1)
+          export minor=$(echo ${{ env.current_version }} | cut -d '.' -f 2)
+          export patch=$(echo ${{ env.current_version }} | cut -d '.' -f 3)
+          
+          if [ -n "${{ env.type == 'major' }}" ]; then
+            echo "new_version=${major}.0.0" >> $GITHUB_ENV
+            echo "new_snapshot_version=${major}.0.1-SNAPSHOT" >> $GITHUB_ENV
+          elif [ -n "${{ env.type == 'minor' }}" ]; then
+            echo "new_version=${major}.${minor+1}.0" >> $GITHUB_ENV
+            echo "new_snapshot_version=${major}.${minor+1}.0.1-SNAPSHOT" >> $GITHUB_ENV
+          else
+            echo "new_version=${major}.${minor}.${patch+1}" >> $GITHUB_ENV
+            echo "new_snapshot_version=${major}.${major}.${minor}.${patch+2}-SNAPSHOT" >> $GITHUB_ENV
+          fi
+      - name: Run 'gradle release'
+        id: gradle_release
+        if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+        run: |
+          echo "Type: ${{ inputs.type }}"
+          echo "Current version: ${{ env.current_version }}"
+          echo "New version: ${{ env.new_version }}"
+          echo "New snapshot version: ${{ env.new_snapshot_version }}"
+        #env:
+        #  TYPE: ${{ inputs.type }}
+        #  VERSION: ${{ env.current_version }}
