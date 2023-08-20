@@ -40,18 +40,18 @@ jobs:
         run: |
           export major=$(echo "${VERSION}" | cut -d. -f1)
           export minor=$(echo "${VERSION}" | cut -d. -f2)
-          export patch=$(echo "${VERSION}" | cut -d. -f3)
+          export patch=$(echo "${VERSION}" | cut -d. -f3 | cut -d- -f1)
           echo "resolved: ${major}.${minor}.${patch}"
           
           if [[ "$TYPE" == "major" ]]; then
-            echo "new_version=${major+1}.0.0" >> $GITHUB_ENV
-            echo "new_snapshot_version=${major+1}.0.1-SNAPSHOT" >> $GITHUB_ENV
+            echo "new_version=$((major+1)).0.0" >> $GITHUB_ENV
+            echo "new_snapshot_version=$((major+1)).0.1-SNAPSHOT" >> $GITHUB_ENV
           elif [ "$TYPE" == "minor" ]; then
-            echo "new_version=${major}.${minor+1}.0" >> $GITHUB_ENV
-            echo "new_snapshot_version=${major}.${minor+1}.0.1-SNAPSHOT" >> $GITHUB_ENV
+            echo "new_version=${major}.$((minor+1)).0" >> $GITHUB_ENV
+            echo "new_snapshot_version=${major}.$((minor+1)).1-SNAPSHOT" >> $GITHUB_ENV
           else
-            echo "new_version=${major}.${minor}.${patch+1}" >> $GITHUB_ENV
-            echo "new_snapshot_version=${major}.${major}.${minor}.${patch+2}-SNAPSHOT" >> $GITHUB_ENV
+            echo "new_version=${major}.${minor}.$((patch+1))" >> $GITHUB_ENV
+            echo "new_snapshot_version=${major}.${minor}.$((patch+2))-SNAPSHOT" >> $GITHUB_ENV
           fi
         env:
           TYPE: ${{ inputs.type }}
