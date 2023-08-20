@@ -63,4 +63,5 @@ jobs:
           echo "Current version: ${{ env.current_version }}"
           echo "New version: ${{ env.new_version }}"
           echo "New snapshot version: ${{ env.new_snapshot_version }}"
-          ./gradlew release -Prelease.useAutomaticVersion=true -Prelease.releaseVersion=${{ env.new_version }} -Prelease.newVersion=${{ env.new_snapshot_version }}
+          echo "./gradlew release -Prelease.useAutomaticVersion=true -Prelease.releaseVersion=${{ env.new_version }} -Prelease.newVersion=${{ env.new_snapshot_version }}"
+          gradle release -Prelease.useAutomaticVersion=true -Prelease.releaseVersion=${{ env.new_version }} -Prelease.newVersion=${{ env.new_snapshot_version }}
