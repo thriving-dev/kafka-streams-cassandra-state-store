@@ -43,10 +43,10 @@ jobs:
           export patch=$(echo "${VERSION}" | cut -d. -f3)
           echo "resolved: ${major}.${minor}.${patch}"
           
-          if [ -n "${{ env.type == 'major' }}" ]; then
-            echo "new_version=${major}.0.0" >> $GITHUB_ENV
-            echo "new_snapshot_version=${major}.0.1-SNAPSHOT" >> $GITHUB_ENV
-          elif [ -n "${{ env.type == 'minor' }}" ]; then
+          if [[ "$TYPE" == "major" ]]; then
+            echo "new_version=${major+1}.0.0" >> $GITHUB_ENV
+            echo "new_snapshot_version=${major+1}.0.1-SNAPSHOT" >> $GITHUB_ENV
+          elif [ "$TYPE" == "minor" ]; then
             echo "new_version=${major}.${minor+1}.0" >> $GITHUB_ENV
             echo "new_snapshot_version=${major}.${minor+1}.0.1-SNAPSHOT" >> $GITHUB_ENV
           else
@@ -54,6 +54,7 @@ jobs:
             echo "new_snapshot_version=${major}.${major}.${minor}.${patch+2}-SNAPSHOT" >> $GITHUB_ENV
           fi
         env:
+          TYPE: ${{ inputs.type }}
           VERSION: ${{ env.current_version }}
       - name: Run 'gradle release'
         id: gradle_release
