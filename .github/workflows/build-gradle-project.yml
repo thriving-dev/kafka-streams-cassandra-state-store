@@ -1,6 +1,13 @@
 name: Java CI
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - main
+    tags: ['*']
+  pull_request:
+    branches:
+      - main
 
 jobs:
   build:
@@ -17,4 +24,6 @@ jobs:
       - name: Setup Gradle
         uses: gradle/gradle-build-action@v2
       - name: Run build with Gradle Wrapper
-        run: ./gradlew build --no-daemon
+        run: ./gradlew build -x intTest --no-daemon
+      - name: Run integration tests
+        run: ./gradlew intTest --no-daemon
