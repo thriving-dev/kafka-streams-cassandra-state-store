@@ -19,7 +19,6 @@ jobs:
     steps:
       - name: Checkout project sources
         uses: actions/checkout@v3
-      - run: git fetch --prune --unshallow
       - uses: actions/setup-java@v3
         with:
           distribution: 'corretto'
@@ -31,14 +30,16 @@ jobs:
 
       - name: Get current version
         id: get_version
-        run: echo "current_version=$(git describe --abbrev=0 --tags)" >> $GITHUB_ENV
+        run: |
+          source gradle.properties
+          echo "current_version=${version}" >> $GITHUB_ENV
 
       - name: Determine version type
         id: bump_version
         run: |
-          export major=$(echo ${{ env.current_version }} | cut -d '.' -f 1)
-          export minor=$(echo ${{ env.current_version }} | cut -d '.' -f 2)
-          export patch=$(echo ${{ env.current_version }} | cut -d '.' -f 3)
+          export major=$(echo ${{ env.current_version }} | cut -d. -f1)
+          export minor=$(echo ${{ env.current_version }} | cut -d. -f2)
+          export patch=$(echo ${{ env.current_version }} | cut -d. -f3)
           
           if [ -n "${{ env.type == 'major' }}" ]; then
             echo "new_version=${major}.0.0" >> $GITHUB_ENV
