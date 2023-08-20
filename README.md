@@ -472,7 +472,8 @@ Integration tests can be run separately via
     - (vs. depandabot?)
       - https://github.com/renovatebot/github-action
       - https://docs.renovatebot.com/java/
-  - [ ] github actions to publish to maven central (snapshot, releases) https://julien.ponge.org/blog/publishing-from-gradle-to-maven-central-with-github-actions/
+  - [x] github actions to publish to maven central (snapshot, releases) https://julien.ponge.org/blog/publishing-from-gradle-to-maven-central-with-github-actions/
+  - [x] github actions for triggering 'gradle release' from repo with automatic semver 
 - [x] Write Documentation
   - [x] summary
   - [x] compatibility cassandra 3.11, 4.x, ScyllaDB
