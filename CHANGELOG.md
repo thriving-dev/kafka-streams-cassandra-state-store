@@ -5,6 +5,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [0.7.3](https://github.com/thriving-dev/kafka-streams-cassandra-state-store/releases/tag/0.7.3) (2023-08-20)
+[0.7.2...0.7.3](https://github.com/thriving-dev/kafka-streams-cassandra-state-store/compare/0.7.2...0.7.3)
+
+### Added
+- Ops: GitHub action step to trigger a publication to Sonatype OSS for main branch and tags
+- Ops: New GitHub action for triggering 'gradle release' from repo with automatic semver
+
+
 ## [0.7.2](https://github.com/thriving-dev/kafka-streams-cassandra-state-store/releases/tag/0.7.2) (2023-07-24)
 [0.7.1...0.7.2](https://github.com/thriving-dev/kafka-streams-cassandra-state-store/compare/0.7.1...0.7.2)
 
