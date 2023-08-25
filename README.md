@@ -135,9 +135,11 @@ Take a look at the notorious word-count example with Cassandra 4 -> [/examples/w
 - [kcat](https://github.com/edenhill/kcat) for interacting with Kafka (consume/produce)
 
 ### Store Types
-kafka-streams-cassandra-state-store comes with 2 different store types:
+kafka-streams-cassandra-state-store comes with 4 different store types:
 - partitionedKeyValueStore
 - globalKeyValueStore
+- partitionedVersionedKeyValueStore
+- globalVersionedKeyValueStore
 
 #### partitionedKeyValueStore
 A persistent `KeyValueStore<Bytes, byte[]>`.
@@ -147,7 +149,7 @@ All CRUD operations against this store always query by and return results for a 
 
 #### globalKeyValueStore
 A persistent `KeyValueStore<Bytes, byte[]>`.
-The underlying cassandra table uses the **record key as sole /PRIMARY KEY/**.
+The underlying cassandra table uses the **record key as sole PRIMARY KEY**.
 Therefore, all CRUD operations against this store work from any streams task and therefore always are “global”.
 Due to the nature of cassandra tables having a single PK (no clustering key), this store supports only a limited number of operations.
 
@@ -159,6 +161,16 @@ It has to be used as a non-global (regular!) streams KeyValue state store - thou
 ⚠️ For **querying** this **global CassandraKeyValueStore**, make sure to restrict the `WrappingStoreProvider` to a single (assigned) partition.
 The KafkaStreams instance returns a `CompositeReadOnlyKeyValueStore` that holds the `WrappingStoreProvider`, wrapping all assigned tasks' stores. Without the correct `StoreQueryParameters` the same query is executed multiple times (for all assigned partitions) and combines multiple identical results.
 
+#### partitionedVersionedKeyValueStore
+A persistent `VersionedKeyValueStore<Bytes, byte[]>`.
+The underlying cassandra table is **partitioned by** the store context **task partition**.
+Therefore, it behaves exactly like the regular versioned state store (RocksDB).
+All CRUD operations against this store always query by and return results for a single stream task.
+
+#### globalVersionedKeyValueStore
+A persistent `VersionedKeyValueStore<Bytes, byte[]>`.
+The underlying cassandra table uses the **record key + validTo as composite PRIMARY KEY** (validTo as the clustering key).
+Therefore, all CRUD operations against this store work from any streams task and therefore always are “global”.
 
 #### Interactive Queries
 The `CassandraStateStore` interface provides static helper methods to get a correctly configured read-only store facade:
@@ -204,7 +216,11 @@ Example provided: [examples/partitioned-store-restapi](examples/partitioned-stor
 
 More examples can also be found in the [integration tests](kafka-streams-cassandra-state-store/src/intTest/java/dev/thriving/oss/kafka/streams/cassandra/state/store).
 
-#### Supported operations by store type
+**partitionedVersionedKeyValueStore/globalVersionedKeyValueStore:**
+With Kafka 3.5 interactive queries interfaces are not yet available for versioned key value stores. Plans exist to add this in the future.
+Following KIPs have been identified (_asOfTImestamp_ 2023-08-25): KIP-960, KIP-968, KIP-969.
+
+#### Supported operations by store type (KeyValueStore)
 
 |                         | partitionedKeyValueStore | globalKeyValueStore |
 |-------------------------|--------------------------|---------------------|
@@ -225,6 +241,15 @@ More examples can also be found in the [integration tests](kafka-streams-cassand
 | query::WindowRangeQuery | ❌                        | ❌                   |
 
 *opt-in required
+
+#### Supported operations by store type (VersionedKeyValueStore)
+
+|                            | partitionedVersionedKeyValueStore | globalVersionedKeyValueStore |
+|----------------------------|-----------------------------------|------------------------------|
+| get(key)                   | ✅                                 | ✅                            |
+| get(key, asOfTimestamp)    | ✅                                 | ✅                            |
+| put(key, value, timestamp) | ✅                                 | ✅                            |
+| delete(key, timestamp)     | ✅                                 | ✅                            |
 
 ### Builder
 The `CassandraStores` class provides a method `public static CassandraStores builder(final CqlSession session, final String name)` that returns an instance of _CassandraStores_ which ultimately is used to build an instance of `KeyValueBytesStoreSupplier` to add to your topology.
@@ -374,6 +399,33 @@ CREATE TABLE IF NOT EXISTS clicks_global_kstreams_store (
 ) WITH compaction = { 'class' : 'LeveledCompactionStrategy' }
 ```
 
+##### partitionedVersionedKeyValueStore
+Using defaults, for a state store named "word-count" following CQL Schema applies:
+```sql
+CREATE TABLE IF NOT EXISTS word_count_kstreams_store (
+    partition int,
+    key blob,
+    validFrom timestamp,
+    validTo timestamp,
+    time timestamp,
+    value blob,
+    PRIMARY KEY ((partition), key, validTo)
+) WITH compaction = { 'class' : 'LeveledCompactionStrategy' }
+```
+
+##### globalVersionedKeyValueStore
+Using defaults, for a state store named "clicks-global" following CQL Schema applies:
+```sql
+CREATE TABLE IF NOT EXISTS clicks_global_kstreams_store (
+    key blob,
+    validFrom timestamp,
+    validTo timestamp,
+    time timestamp,
+    value blob,
+    PRIMARY KEY ((key), validTo)
+) WITH compaction = { 'class' : 'LeveledCompactionStrategy' }
+```
+
 #### Feat: Cassandra table with default TTL
 
 💡 **Tip:** Cassandra has a table option `default_time_to_live` (default expiration time (“TTL”) in seconds for a table) which can be useful for certain use cases where data (state) can or should expire.
@@ -450,7 +502,7 @@ Integration tests can be run separately via
   - [ ] ~~Prefix scan with `stringKeyValueStore` (Cassandra with SASIIndex? https://stackoverflow.com/questions/49247092/order-by-and-like-in-same-cassandra-query/49268543#49268543)~~
   - [x] `ReadOnlyKeyValueStore.prefixScan` implementation using range (see InMemoryKeyValueStore implementation)
   - [x] Implement `globalKeyValueStore`
-  - [ ] Support KIP-889: Versioned State Stores (to be delivered with kafka 3.5.0) (https://github.com/thriving-dev/kafka-streams-cassandra-state-store/issues/21)
+  - [x] Support KIP-889: Versioned State Stores (to be delivered with kafka 3.5.0) (https://github.com/thriving-dev/kafka-streams-cassandra-state-store/issues/21)
 - [x] OpenSource
   - [x] choose + add license
   - [x] add CHANGELOG.md
