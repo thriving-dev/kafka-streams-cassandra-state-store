@@ -5,6 +5,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [0.8.0](https://github.com/thriving-dev/kafka-streams-cassandra-state-store/releases/tag/0.8.0) (2023-08-26)
+[0.7.3...0.8.0](https://github.com/thriving-dev/kafka-streams-cassandra-state-store/compare/0.7.3...0.8.0)
+
+### Added
+- feat: Implement VersionedKeyValueStore<K, V> [#21](https://github.com/thriving-dev/kafka-streams-cassandra-state-store/issues/21)
+  - ref [KIP-889: Versioned State Stores](https://cwiki.apache.org/confluence/display/KAFKA/KIP-889%3A+Versioned+State+Stores)
+  - New store types, provided via `CassandraStores`
+    - partitionedVersionedKeyValueStore
+    - globalVersionedKeyValueStore
+
+
 ## [0.7.3](https://github.com/thriving-dev/kafka-streams-cassandra-state-store/releases/tag/0.7.3) (2023-08-20)
 [0.7.2...0.7.3](https://github.com/thriving-dev/kafka-streams-cassandra-state-store/compare/0.7.2...0.7.3)
 
