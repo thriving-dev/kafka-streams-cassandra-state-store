@@ -9,20 +9,20 @@ import com.datastax.oss.driver.api.core.cql.Row;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class AbstractCassandraKeyValueStoreRepository<K> {
+public abstract class AbstractCassandraStateStoreRepository<K> {
 
-    private static final Logger LOG = LoggerFactory.getLogger(AbstractCassandraKeyValueStoreRepository.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractCassandraStateStoreRepository.class);
 
     protected final CqlSession session;
     protected final String ddlExecutionProfile;
     protected final String dmlExecutionProfile;
 
-    public AbstractCassandraKeyValueStoreRepository(CqlSession session,
-                                                    String tableName,
-                                                    boolean createTable,
-                                                    String tableOptions,
-                                                    String ddlExecutionProfile,
-                                                    String dmlExecutionProfile) {
+    public AbstractCassandraStateStoreRepository(CqlSession session,
+                                                 String tableName,
+                                                 boolean createTable,
+                                                 String tableOptions,
+                                                 String ddlExecutionProfile,
+                                                 String dmlExecutionProfile) {
         assert session != null : "session cannot be null";
         assert tableName != null && !tableName.isBlank() : "tableName cannot be null or blank";
         assert tableOptions != null : "tableOptions cannot be null";

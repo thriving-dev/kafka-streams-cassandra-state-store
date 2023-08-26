@@ -14,7 +14,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PartitionedCassandraKeyValueStoreRepository<K> extends AbstractCassandraKeyValueStoreRepository<K> implements CassandraKeyValueStoreRepository {
+public class PartitionedCassandraKeyValueStoreRepository<K> extends AbstractCassandraStateStoreRepository<K> implements CassandraKeyValueStoreRepository {
 
     private static final Logger LOG = LoggerFactory.getLogger(PartitionedCassandraKeyValueStoreRepository.class);
 
@@ -110,7 +110,7 @@ public class PartitionedCassandraKeyValueStoreRepository<K> extends AbstractCass
             inserts.add(insert.bind(ByteBuffer.wrap(it.key.get()), Instant.now(), ByteBuffer.wrap(it.value)));
         });
         BatchStatement batch = BatchStatement.newInstance(DefaultBatchType.LOGGED);
-        batch.addAll(inserts);
+        batch = batch.addAll(inserts);
         if (dmlExecutionProfile != null) {
             batch = batch.setExecutionProfileName(ddlExecutionProfile);
         }

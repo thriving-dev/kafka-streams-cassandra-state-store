@@ -13,4 +13,5 @@
     </root>
 
     <logger name="org.testcontainers" level="INFO"/>
+    <logger name="com.datastax.oss.driver" level="INFO"/>
 </configuration>

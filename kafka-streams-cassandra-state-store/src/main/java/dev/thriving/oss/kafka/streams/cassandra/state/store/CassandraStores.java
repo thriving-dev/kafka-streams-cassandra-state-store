@@ -2,12 +2,16 @@ package dev.thriving.oss.kafka.streams.cassandra.state.store;
 
 import com.datastax.oss.driver.api.core.CqlSession;
 import dev.thriving.oss.kafka.streams.cassandra.state.store.repo.GlobalCassandraKeyValueStoreRepository;
+import dev.thriving.oss.kafka.streams.cassandra.state.store.repo.GlobalCassandraVersionedKeyValueStoreRepository;
 import dev.thriving.oss.kafka.streams.cassandra.state.store.repo.PartitionedCassandraKeyValueStoreRepository;
+import dev.thriving.oss.kafka.streams.cassandra.state.store.repo.PartitionedCassandraVersionedKeyValueStoreRepository;
 import org.apache.kafka.common.utils.Bytes;
 import org.apache.kafka.streams.state.*;
+import org.apache.kafka.streams.state.internals.VersionedKeyValueToBytesStoreAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.Duration;
 import java.util.Objects;
 import java.util.function.Function;
 
@@ -55,6 +59,7 @@ import static dev.thriving.oss.kafka.streams.cassandra.state.store.CassandraStat
 public final class CassandraStores {
 
     private static final Logger LOG = LoggerFactory.getLogger(CassandraStores.class);
+    private static final String METRICS_SCOPE = "cassandra";
 
     private final String name;
     private final CqlSession session;
@@ -99,7 +104,7 @@ public final class CassandraStores {
      * or {@link org.apache.kafka.streams.kstream.Materialized}.
      *
      * @param session cassandra session to be used by the store (cannot be {@code null})
-     * @param name name of the store (cannot be {@code null})
+     * @param name    name of the store (cannot be {@code null})
      * @return an instance of {@link CassandraStores} that can be used to build a {@link KeyValueBytesStoreSupplier}
      */
     public static CassandraStores builder(final CqlSession session, final String name) {
@@ -155,7 +160,7 @@ public final class CassandraStores {
      * Please note changing the store name for a pre-existing store will result in a new empty table to be created.
      * <p>
      * Default: `${normalisedStoreName}_kstreams_store` - normalise := lowercase, replaces all [^a-z0-9_] with '_'
-     *   e.g. ("TEXT3.word-count2") -> "text3_word_count2_kstreams_store"
+     * e.g. ("TEXT3.word-count2") -> "text3_word_count2_kstreams_store"
      *
      * @param tableNameFn function to transform 'kstreams store name' -> 'cql table name' (cannot be {@code null})
      * @return itself
@@ -199,9 +204,9 @@ public final class CassandraStores {
      * Set the execution profile to be used by the driver for all DDL (Data Definition Language) queries.
      * <p>
      * Note: Only applies if table creation ({@link CassandraStores#withCreateTableDisabled()}) is enabled (default).
-     *       If no profile is set - DDL queries are executed with consistency `ALL`.
-     *       When using a custom profile, it is recommended to also set consistency=ALL
-     *       (reason: avoid issues with concurrent schema updates)
+     * If no profile is set - DDL queries are executed with consistency `ALL`.
+     * When using a custom profile, it is recommended to also set consistency=ALL
+     * (reason: avoid issues with concurrent schema updates)
      * <p>
      * Reference: <a href="https://docs.datastax.com/en/developer/java-driver/4.15/manual/core/configuration/#execution-profiles">...</a>
      * <p>
@@ -264,7 +269,7 @@ public final class CassandraStores {
      * - prefixScan
      *
      * @return an instance of a {@link KeyValueBytesStoreSupplier} that can be used
-     *      * to build a persistent key-value store
+     *         to build a persistent key-value store
      */
     public KeyValueBytesStoreSupplier partitionedKeyValueStore() {
         return new KeyValueBytesStoreSupplier() {
@@ -288,7 +293,7 @@ public final class CassandraStores {
 
             @Override
             public String metricsScope() {
-                return "cassandra";
+                return METRICS_SCOPE;
             }
         };
     }
@@ -325,7 +330,7 @@ public final class CassandraStores {
      * - prefixScan
      *
      * @return an instance of a {@link KeyValueBytesStoreSupplier} that can be used
-     *      * to build a persistent key-value store
+     *         to build a persistent key-value store
      */
     public KeyValueBytesStoreSupplier globalKeyValueStore() {
         return new KeyValueBytesStoreSupplier() {
@@ -349,7 +354,125 @@ public final class CassandraStores {
 
             @Override
             public String metricsScope() {
-                return "cassandra";
+                return METRICS_SCOPE;
+            }
+        };
+    }
+
+    /**
+     * Creates a persistent {@link VersionedBytesStoreSupplier}.
+     * <p>
+     * The versioned key value store is persisted in a cassandra table, partitioned by the store context task partition.
+     * Therefore, all CRUD operations against this store always are by stream task partition.
+     * <p>
+     * The store supports Cassandra 3.11, Cassandra 4, ScyllaDB.
+     * <p>
+     * Supported operations:
+     * - put
+     * - delete
+     * - get (asOfTimestamp)
+     * - get (latest)
+     *
+     * @param historyRetention length of time that old record versions are available for query
+     *                         (cannot be negative). If a timestamp bound provided to
+     *                         {@link VersionedKeyValueStore#get(Object, long)} is older than this
+     *                         specified history retention, then the get operation will not return data.
+     *                         This parameter also determines the "grace period" after which
+     *                         out-of-order writes will no longer be accepted.
+     * @return an instance of a {@link VersionedBytesStoreSupplier} that can be used
+     *         to build a persistent versioned key-value store
+     */
+    public VersionedBytesStoreSupplier partitionedVersionedKeyValueStore(Duration historyRetention) {
+        return new VersionedBytesStoreSupplier() {
+            @Override
+            public String name() {
+                return name;
+            }
+
+            @Override
+            public KeyValueStore<Bytes, byte[]> get() {
+                return new VersionedKeyValueToBytesStoreAdapter(
+                        new CassandraVersionedKeyValueStore(
+                                name,
+                                new PartitionedCassandraVersionedKeyValueStoreRepository<>(
+                                        session,
+                                        resolveTableName(),
+                                        createTable,
+                                        tableOptions,
+                                        ddlExecutionProfile,
+                                        dmlExecutionProfile),
+                                historyRetention.toMillis()
+                        )
+                );
+            }
+
+            @Override
+            public String metricsScope() {
+                return METRICS_SCOPE;
+            }
+
+            @Override
+            public long historyRetentionMs() {
+                return historyRetention.toMillis();
+            }
+        };
+    }
+
+    /**
+     * Creates a persistent {@link VersionedBytesStoreSupplier}.
+     * <p>
+     * The versioned key value store is persisted in a cassandra table, having the 'key' as sole PRIMARY KEY.
+     * Therefore, all CRUD operations against this store always are "global", partitioned by the key itself.
+     * <p>
+     * The store supports Cassandra 3.11, Cassandra 4, ScyllaDB.
+     * <p>
+     * Supported operations:
+     * - put
+     * - delete
+     * - get (asOfTimestamp)
+     * - get (latest)
+     *
+     * @param historyRetention length of time that old record versions are available for query
+     *                         (cannot be negative). If a timestamp bound provided to
+     *                         {@link VersionedKeyValueStore#get(Object, long)} is older than this
+     *                         specified history retention, then the get operation will not return data.
+     *                         This parameter also determines the "grace period" after which
+     *                         out-of-order writes will no longer be accepted.
+     * @return an instance of a {@link VersionedBytesStoreSupplier} that can be used
+     *         to build a persistent versioned key-value store
+     */
+    public VersionedBytesStoreSupplier globalVersionedKeyValueStore(Duration historyRetention) {
+        return new VersionedBytesStoreSupplier() {
+            @Override
+            public String name() {
+                return name;
+            }
+
+            @Override
+            public KeyValueStore<Bytes, byte[]> get() {
+                return new VersionedKeyValueToBytesStoreAdapter(
+                        new CassandraVersionedKeyValueStore(
+                                name,
+                                new GlobalCassandraVersionedKeyValueStoreRepository<>(
+                                        session,
+                                        resolveTableName(),
+                                        createTable,
+                                        tableOptions,
+                                        ddlExecutionProfile,
+                                        dmlExecutionProfile),
+                                historyRetention.toMillis()
+                        )
+                );
+            }
+
+            @Override
+            public String metricsScope() {
+                return METRICS_SCOPE;
+            }
+
+            @Override
+            public long historyRetentionMs() {
+                return historyRetention.toMillis();
             }
         };
     }
@@ -358,5 +481,4 @@ public final class CassandraStores {
         String resolvedTableName = tableNameFn.apply(name);
         return keyspace != null ? keyspace + "." + resolvedTableName : resolvedTableName;
     }
-
 }
