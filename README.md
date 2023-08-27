@@ -217,7 +217,7 @@ Example provided: [examples/partitioned-store-restapi](examples/partitioned-stor
 
 More examples can also be found in the [integration tests](kafka-streams-cassandra-state-store/src/intTest/java/dev/thriving/oss/kafka/streams/cassandra/state/store).
 
-**partitionedVersionedKeyValueStore/globalVersionedKeyValueStore:**
+**partitionedVersionedKeyValueStore/globalVersionedKeyValueStore:**   
 With Kafka 3.5 interactive queries interfaces are not yet available for versioned key value stores. Plans exist to add this in the future.
 Following KIPs have been identified (_asOfTImestamp_ 2023-08-25): KIP-960, KIP-968, KIP-969.
 
