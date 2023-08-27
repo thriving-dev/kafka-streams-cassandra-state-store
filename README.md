@@ -579,4 +579,9 @@ Integration tests can be run separately via
   - [ ] move (parts of) documentation to separate pages/wiki?
   - [ ] explore using indexes (e.g. global secondary indexes) for partitioned kv store
   - [ ] Custom ReadOnlyKeyValueStore for 'partitionedKeyValueStore' type optimised interactive queries
+  - [ ] Follow-up tasks on 'Versioned State Stores'
+    - [ ] Add interactive queries support once follow-up KIPs are delivered
+    - [ ] Benchmark
+    - [ ] Consider (in-memory) caching options to improve performance (ref [#18](https://github.com/thriving-dev/kafka-streams-cassandra-state-store/issues/18)) 
+
 
