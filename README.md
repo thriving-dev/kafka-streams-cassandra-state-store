@@ -444,7 +444,7 @@ The reason is that searching becomes too slow as search within partition is slow
 
 For the current implementation, the cassandra table created for the 'default' key-value store is partitioned by the kafka _partition key_ ("wide partition pattern").
 Please keep these issues in mind when working with relevant data volumes.    
-In case you don't need to query your store / only lookup by key ('range', 'prefixScan'; ref [Supported operations by store type](#supported-operations-by-store-type)) it's recommended to use `globalKeyValueStore` rather than `keyValueStore` since it is partitioned by the _event key_ (:= primary key).
+In case you don't need to query your store / only lookup by key ('range', 'prefixScan'; ref [Supported operations by store type](#supported-operations-by-store-type-keyvaluestore)) it's recommended to use `globalKeyValueStore` rather than `keyValueStore` since it is partitioned by the _event key_ (:= primary key).
 
 ℹ️ References:
 - blog post on [Wide Partitions in Apache Cassandra 3.11](https://thelastpickle.com/blog/2019/01/11/wide-partitions-cassandra-3-11.html)    
