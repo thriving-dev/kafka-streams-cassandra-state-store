@@ -982,7 +982,7 @@ class PartitionedVersionedKeyValueStoreTest extends AbstractIntegrationTest {
                         prices,
                         (meal, price) -> price
                 )
-                .process(StoreProdivingProcessor::new, Named.as("StoreProdivingProcessor"), STORE_NAME)
+                .process(StoreProdivingProcessor::new, Named.as("StoreProvidingProcessor"), STORE_NAME)
                 .peek((k, v) -> LOG.info("out => {}::{}", k, v))
                 .to(OUTPUT_TOPIC_PRICED_ORDERS, Produced.with(Serdes.String(), Serdes.Long()));
 
