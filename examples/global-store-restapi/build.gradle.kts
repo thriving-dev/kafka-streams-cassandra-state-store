@@ -30,7 +30,7 @@ dependencies {
     implementation("com.datastax.oss:java-driver-core:4.16.0")
     implementation("org.glassfish.jersey.containers:jersey-container-servlet:3.1.2")
     implementation("org.glassfish.jersey.inject:jersey-hk2:3.1.2")
-    implementation("org.glassfish.jersey.media:jersey-media-json-jackson:3.1.2")
+    implementation("org.glassfish.jersey.media:jersey-media-json-jackson:3.1.3")
     implementation("org.eclipse.jetty:jetty-server:11.0.15")
     implementation("org.eclipse.jetty:jetty-servlet:11.0.15")
 }
