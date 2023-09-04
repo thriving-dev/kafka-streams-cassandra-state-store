@@ -32,7 +32,7 @@ dependencies {
     implementation("org.glassfish.jersey.inject:jersey-hk2:3.1.2")
     implementation("org.glassfish.jersey.media:jersey-media-json-jackson:3.1.3")
     implementation("org.eclipse.jetty:jetty-server:12.0.1")
-    implementation("org.eclipse.jetty:jetty-servlet:11.0.15")
+    implementation("org.eclipse.jetty.ee10:jetty-ee10-servlet:12.0.1")
 }
 
 application {
