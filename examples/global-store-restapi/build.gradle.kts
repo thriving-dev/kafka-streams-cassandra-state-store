@@ -27,7 +27,7 @@ dependencies {
     implementation("org.slf4j:slf4j-simple:2.0.7")
     implementation("ch.qos.logback:logback-classic:1.4.8")
     implementation("org.apache.kafka:kafka-streams:3.5.0")
-    implementation("com.datastax.oss:java-driver-core:4.16.0")
+    implementation("com.datastax.oss:java-driver-core:4.17.0")
     implementation("org.glassfish.jersey.containers:jersey-container-servlet:3.1.2")
     implementation("org.glassfish.jersey.inject:jersey-hk2:3.1.2")
     implementation("org.glassfish.jersey.media:jersey-media-json-jackson:3.1.2")
