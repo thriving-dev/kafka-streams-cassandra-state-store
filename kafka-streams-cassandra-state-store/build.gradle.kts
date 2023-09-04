@@ -35,7 +35,7 @@ configurations["intTestRuntimeOnly"].extendsFrom(configurations.runtimeOnly.get(
 dependencies {
     // This dependency is used internally, and not exposed to consumers on their own compile classpath.
     compileOnly("org.apache.kafka:kafka-streams:3.5.0")
-    compileOnly("com.datastax.oss:java-driver-core:4.16.0")
+    compileOnly("com.datastax.oss:java-driver-core:4.17.0")
 
     intTestImplementation("org.junit.jupiter:junit-jupiter:5.9.3")
     intTestImplementation("org.testcontainers:testcontainers:1.18.3")
@@ -44,7 +44,7 @@ dependencies {
     intTestImplementation("org.testcontainers:cassandra:1.18.3")
     intTestImplementation("ch.qos.logback:logback-classic:1.4.8")
     intTestImplementation("org.apache.kafka:kafka-streams:3.5.0")
-    intTestImplementation("com.datastax.oss:java-driver-core:4.16.0")
+    intTestImplementation("com.datastax.oss:java-driver-core:4.17.0")
     intTestImplementation("org.assertj:assertj-core:3.24.2")
     intTestImplementation("com.google.guava:guava:32.1.1-jre")
 }
