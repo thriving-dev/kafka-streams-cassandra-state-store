@@ -39,7 +39,7 @@ dependencies {
 
     intTestImplementation("org.junit.jupiter:junit-jupiter:5.9.3")
     intTestImplementation("org.testcontainers:testcontainers:1.18.3")
-    intTestImplementation("org.testcontainers:junit-jupiter:1.18.3")
+    intTestImplementation("org.testcontainers:junit-jupiter:1.19.0")
     intTestImplementation("org.testcontainers:redpanda:1.19.0")
     intTestImplementation("org.testcontainers:cassandra:1.18.3")
     intTestImplementation("ch.qos.logback:logback-classic:1.4.8")
