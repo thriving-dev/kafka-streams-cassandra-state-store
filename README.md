@@ -558,6 +558,8 @@ Integration tests can be run separately via
     - [x] WordCountTest
     - [x] WordCountInteractiveQueriesTest
     - [x] WordCountGlobalStoreTest
+- [ ] Other
+  - [ ] migrate to gradle version catalogs https://docs.gradle.org/current/userguide/platforms.html, https://developer.android.com/build/migrate-to-catalogs
 - [ ] Advanced/Features/POCs Planned/Considered
   - [x] correctness / completeness (https://github.com/thriving-dev/kafka-streams-cassandra-state-store/issues/14)
     - [ ] ~wrap stores with MeteredKeyValueStore ?~ -> done automatically via builders
