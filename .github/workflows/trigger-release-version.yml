@@ -60,8 +60,8 @@ jobs:
           VERSION: ${{ env.current_version }}
       - name: Set gradle global config 'user.name' and 'user.email'
         run: |
-          git config --global user.name "GitHub Actions"
-          git config --global user.email "ci@thriving.dev"
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
       - name: Run 'gradle release'
         id: gradle_release
         run: |
