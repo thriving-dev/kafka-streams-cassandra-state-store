@@ -27,7 +27,3 @@ subprojects {
         shouldRunAfter(tasks.withType<Sign>())
     }
 }
-
-// tasks.afterReleaseBuild {
-//     dependsOn(project.tasks.release)
-// }
