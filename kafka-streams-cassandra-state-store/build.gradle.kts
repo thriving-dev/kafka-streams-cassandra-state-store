@@ -42,7 +42,7 @@ dependencies {
     intTestImplementation("org.testcontainers:junit-jupiter:1.19.0")
     intTestImplementation("org.testcontainers:redpanda:1.19.0")
     intTestImplementation("org.testcontainers:cassandra:1.18.3")
-    intTestImplementation("ch.qos.logback:logback-classic:1.4.8")
+    intTestImplementation("ch.qos.logback:logback-classic:1.4.11")
     intTestImplementation("org.apache.kafka:kafka-streams:3.5.0")
     intTestImplementation("com.datastax.oss:java-driver-core:4.17.0")
     intTestImplementation("org.assertj:assertj-core:3.24.2")
