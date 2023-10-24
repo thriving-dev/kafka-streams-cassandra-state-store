@@ -6,6 +6,11 @@
   ],
   "packageRules": [
     {
+      "description": "Automatically merge patch-level updates",
+      "matchUpdateTypes": ["patch", "digest"],
+      "automerge": true
+    },
+    {
       "matchPackagePatterns": ["^org\\.eclipse\\.jetty:.+"],
       "allowedVersions": "<12.0.0"
     }
