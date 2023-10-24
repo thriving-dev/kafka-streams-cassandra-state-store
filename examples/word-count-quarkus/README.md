@@ -15,7 +15,27 @@ The docker-compose stack features
   - kafka topics (p=12, r=3), via debezium `CREATE_TOPICS` ENV var 
   - cassandra schema (keyspace), via 'init container'
 
-## quick start (native executable)
+## (A) quick start (JVM)
+
+**Important: run from the directory of this README.md !!**
+
+### build
+
+Instructions for building as a executable from Mac on Apple Silicon.   
+_Note: for other OS / JVM, see [quarkus](#quarkus) section below..._
+
+```shell script
+../../gradlew clean build -Dquarkus.container-image.build=true
+```
+
+### docker-compose stack
+
+Start docker-compose stack
+```bash
+docker-compose up --build -d
+```
+
+## (B) quick start (native executable)
 
 **Important: run from the directory of this README.md !!**
 
@@ -26,41 +46,41 @@ _Note: for other OS / JVM, see [quarkus](#quarkus) section below..._
 
 On Mac with Apple Silicon (M1/M2 chip) use:
 ```shell script
-../../gradlew clean build -Dquarkus.package.type=native -Dquarkus.native.container-build=true  -Dquarkus.native.builder-image=quay.io/quarkus/ubi-quarkus-mandrel-builder-image:22.3-java17 -Dquarkus.native.resources.includes="librocksdbjni-linux-aarch64.so" -Dquarkus.native.resources.excludes="librocksdbjni-linux64.so"
+../../gradlew clean build -Dquarkus.package.type=native -Dquarkus.native.container-build=true  -Dquarkus.native.builder-image=quay.io/quarkus/ubi-quarkus-mandrel-builder-image:23.0-java17 -Dquarkus.native.container-runtime-options="--platform=linux/arm64" -Dquarkus.native.resources.includes="librocksdbjni-linux-aarch64.so" -Dquarkus.native.resources.excludes="librocksdbjni-linux64.so"
 ```
 
 ### docker-compose stack
 
-1. Start docker-compose stack
+Start docker-compose stack
 ```bash
 export QUARKUS_MODE=native
 docker-compose up --build -d
 ```
 
-### Play with the application
+## Play with the application
 
-2. Start a console-consumer on the output topic
+1. Start a console-consumer on the output topic
 ```bash
 kcat -C -q -b localhost:19092 -t streams-wordcount-output -K:: -s key=s -s value=q
 ```
 
-3. Produce some messages, e.g. via kcat to the input topic
+2. Produce some messages, e.g. via kcat to the input topic
 ```bash
 echo "Hello world" | kcat -P -b localhost:19092 -t streams-plaintext-input
 echo "What a wonderful world" | kcat -P -b localhost:19092 -t streams-plaintext-input
 echo "What a day to say hello" | kcat -P -b localhost:19092 -t streams-plaintext-input
 ```
 
-4. Query the state from the Scylla cluster
+3. Query the state from the Scylla cluster
 ```bash
 docker exec -it scylla-1 cqlsh \
     -k test \
     -e "SELECT partition, blobAsText(key) as key, time, value FROM word_grouped_count_kstreams_store;"
 ```
 
-### (Cleanup)
+## (Cleanup)
 
-5. Delete docker-compose stack
+Delete docker-compose stack
 ```bash
 docker-compose down
 ```
