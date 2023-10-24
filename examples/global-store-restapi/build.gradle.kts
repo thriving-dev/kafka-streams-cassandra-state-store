@@ -17,22 +17,16 @@ repositories {
 }
 
 dependencies {
-    // Use JUnit Jupiter for testing.
-    testImplementation("org.junit.jupiter:junit-jupiter:5.9.1")
-
     // Root lib
     implementation(project(":kafka-streams-cassandra-state-store"))
 
     // This dependency is used by the application.
-    implementation("org.slf4j:slf4j-simple:2.0.7")
-    implementation("ch.qos.logback:logback-classic:1.4.8")
-    implementation("org.apache.kafka:kafka-streams:3.5.0")
-    implementation("com.datastax.oss:java-driver-core:4.17.0")
-    implementation("org.glassfish.jersey.containers:jersey-container-servlet:3.1.2")
-    implementation("org.glassfish.jersey.inject:jersey-hk2:3.1.2")
-    implementation("org.glassfish.jersey.media:jersey-media-json-jackson:3.1.3")
-    implementation("org.eclipse.jetty:jetty-server:11.0.15")
-    implementation("org.eclipse.jetty:jetty-servlet:11.0.15")
+    implementation(libs.slf4j.simple)
+    implementation(libs.logback.classic)
+    implementation(libs.kafka.streams)
+    implementation(libs.datastax.java.driver)
+    implementation(libs.bundles.jersey)
+    implementation(libs.bundles.jetty)
 }
 
 application {

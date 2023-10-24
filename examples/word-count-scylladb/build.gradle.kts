@@ -17,16 +17,13 @@ repositories {
 }
 
 dependencies {
-    // Use JUnit Jupiter for testing.
-    testImplementation("org.junit.jupiter:junit-jupiter:5.9.1")
-
     // Root lib
     implementation(project(":kafka-streams-cassandra-state-store"))
 
     // This dependency is used by the application.
-    implementation("org.slf4j:slf4j-simple:2.0.7")
-    implementation("org.apache.kafka:kafka-streams:3.5.0")
-    implementation("com.scylladb:java-driver-core:4.15.0.1")
+    implementation(libs.slf4j.simple)
+    implementation(libs.kafka.streams)
+    implementation(libs.scylladb.java.driver)
 }
 
 application {
