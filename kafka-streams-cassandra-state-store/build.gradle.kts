@@ -128,6 +128,7 @@ tasks.jar {
 }
 
 java {
+    sourceCompatibility = JavaVersion.VERSION_21
     withSourcesJar()
     withJavadocJar()
 }
