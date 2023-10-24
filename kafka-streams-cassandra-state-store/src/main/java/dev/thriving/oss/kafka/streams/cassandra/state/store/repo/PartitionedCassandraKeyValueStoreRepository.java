@@ -108,7 +108,7 @@ public class PartitionedCassandraKeyValueStoreRepository<K> extends AbstractCass
     public void saveBatch(int partition, List<KeyValue<Bytes, byte[]>> entries) {
         List<BatchableStatement<?>> inserts = new ArrayList<>();
         entries.forEach(it -> {
-            inserts.add(insert.bind(ByteBuffer.wrap(it.key.get()), Instant.now(), ByteBuffer.wrap(it.value)));
+            inserts.add(insert.bind(partition, ByteBuffer.wrap(it.key.get()), Instant.now(), ByteBuffer.wrap(it.value)));
         });
         BatchStatement batch = BatchStatement.newInstance(DefaultBatchType.LOGGED);
         batch = batch.addAll(inserts);
