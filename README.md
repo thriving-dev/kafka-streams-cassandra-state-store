@@ -1,7 +1,10 @@
 # kafka-streams-cassandra-state-store
 
-[![Java CI](https://github.com/thriving-dev/kafka-streams-cassandra-state-store/actions/workflows/build-gradle-project.yml/badge.svg)](https://github.com/hartmut-co-uk/kafka-streams-cassandra-state-store/actions/workflows/build-gradle-project.yml)
+[![Use this template](https://img.shields.io/badge/from-java--library--template-brightgreen?logo=dropbox)](https://github.com/thriving-dev/java-library-template/generate)
+[![Java CI](https://github.com/thriving-dev/kafka-streams-cassandra-state-store/actions/workflows/1.pipeline.yml/badge.svg)](https://github.com/thriving-dev/kafka-streams-cassandra-state-store/actions/workflows/1.pipeline.yml)
 [![Maven Central](https://img.shields.io/maven-central/v/dev.thriving.oss/kafka-streams-cassandra-state-store.svg)](https://central.sonatype.com/artifact/dev.thriving.oss/kafka-streams-cassandra-state-store)
+[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](CODE_OF_CONDUCT.md)
+[![Javadoc](https://img.shields.io/badge/JavaDoc-Online-green)](https://thriving-dev.github.io/kafka-streams-cassandra-state-store/javadoc/)
 
 ## Overview 
 Kafka Streams State Store implementation that persists data to Apache Cassandra.
