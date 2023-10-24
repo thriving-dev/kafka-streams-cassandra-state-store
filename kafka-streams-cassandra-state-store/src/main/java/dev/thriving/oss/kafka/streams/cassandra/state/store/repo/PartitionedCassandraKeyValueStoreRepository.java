@@ -58,6 +58,7 @@ public class PartitionedCassandraKeyValueStoreRepository<K> extends AbstractCass
                 """.formatted(tableName, tableOptions.isBlank() ? "" : "WITH " + tableOptions);
     }
 
+    @Override
     protected void initPreparedStatements(String tableName) {
         insert = session.prepare("INSERT INTO " + tableName + " (partition, key, time, value) VALUES (?, ?, ?, ?)");
 
