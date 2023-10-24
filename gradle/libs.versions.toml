@@ -12,7 +12,7 @@ assertj = "3.24.2"
 testcontainers = "1.19.1"
 guava = "32.1.1-jre"
 
-logback = "1.4.8"
+logback = "1.4.11"
 slf4j = "2.0.7"
 
 jetty = "11.0.15"
