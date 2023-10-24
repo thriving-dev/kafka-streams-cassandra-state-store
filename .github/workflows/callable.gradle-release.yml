@@ -1,24 +1,29 @@
-name: Release
+name: Gradle Release
 
 on:
-  workflow_dispatch:
+  workflow_call:
     inputs:
       type:
         description: 'Release type'
         required: true
-        default: 'patch'
-        type: choice
-        options:
-          - major
-          - minor
-          - patch
+        type: string
 
 jobs:
-  release-version:
+  release:
+    name: gradle release
     runs-on: ubuntu-latest
     steps:
+      - name: Validate 'Release Type' param
+        env:
+          TYPE: ${{ inputs.type }}
+        run: |
+          valid_types=(major minor patch)
+          if [[ ! ${valid_types[*]} =~ "$TYPE" ]]; then
+            echo "Unknown release type: $TYPE"
+            exit 1
+          fi
       - name: Checkout project sources ('main' branch)
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: main
           token: ${{ secrets.CI_GITHUB_TOKEN }}
@@ -26,19 +31,21 @@ jobs:
         with:
           distribution: 'corretto'
           java-version: '17'
-          cache: 'gradle'
       - uses: gradle/wrapper-validation-action@v1
       - name: Setup Gradle
-        uses: gradle/gradle-build-action@v2
+        uses: gradle/gradle-build-action@v2.9.0
+        with:
+          cache-read-only: true
 
       - name: Get current version
-        id: get_version
         run: |
           source gradle.properties
           echo "current_version=${version}" >> $GITHUB_ENV
 
       - name: Determine version type
-        id: bump_version
+        env:
+          TYPE: ${{ inputs.type }}
+          VERSION: ${{ env.current_version }}
         run: |
           export major=$(echo "${VERSION}" | cut -d. -f1)
           export minor=$(echo "${VERSION}" | cut -d. -f2)
@@ -55,15 +62,11 @@ jobs:
             echo "new_version=${major}.${minor}.${patch}" >> $GITHUB_ENV
             echo "new_snapshot_version=${major}.${minor}.$((patch+1))-SNAPSHOT" >> $GITHUB_ENV
           fi
-        env:
-          TYPE: ${{ inputs.type }}
-          VERSION: ${{ env.current_version }}
-      - name: Set gradle global config 'user.name' and 'user.email'
+      - name: Set git config 'user.name' and 'user.email'
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
       - name: Run 'gradle release'
-        id: gradle_release
         run: |
           echo "Type: ${{ inputs.type }}"
           echo "Current version: ${{ env.current_version }}"
