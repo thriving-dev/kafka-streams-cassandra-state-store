@@ -25,7 +25,7 @@ jobs:
           cache-read-only: true
 
       - name: Generate javadoc (gradle)
-        run: ./gradlew javadoc
+        run: ./gradlew :kafka-streams-cassandra-state-store:javadoc
 
       - name: Conclude javadoc version and set env
         run: |
