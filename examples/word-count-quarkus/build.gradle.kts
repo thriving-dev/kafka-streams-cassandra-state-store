@@ -1,6 +1,6 @@
 plugins {
     java
-    id("io.quarkus") version "3.1.0.Final"
+    alias(libs.plugins.quarkus)
 }
 
 repositories {
@@ -23,7 +23,8 @@ dependencies {
     implementation("io.quarkus:quarkus-resteasy-reactive-jackson")
     implementation("com.datastax.oss.quarkus:cassandra-quarkus-client")
 
-    implementation("com.scylladb:java-driver-core:4.15.0.1") // ScyllaDB shard aware fork of the java driver
+    // ScyllaDB shard aware fork of the java driver
+    implementation(libs.scylladb.java.driver)
 
     testImplementation("io.quarkus:quarkus-junit5")
 }
