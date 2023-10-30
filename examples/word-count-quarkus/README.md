@@ -46,7 +46,12 @@ _Note: for other OS / JVM, see [quarkus](#quarkus) section below..._
 
 On Mac with Apple Silicon (M1/M2 chip) use:
 ```shell script
-../../gradlew clean build -Dquarkus.package.type=native -Dquarkus.native.container-build=true  -Dquarkus.native.builder-image=quay.io/quarkus/ubi-quarkus-mandrel-builder-image:23.0-java17 -Dquarkus.native.container-runtime-options="--platform=linux/arm64" -Dquarkus.native.resources.includes="librocksdbjni-linux-aarch64.so" -Dquarkus.native.resources.excludes="librocksdbjni-linux64.so"
+../../gradlew clean build \
+  -Dquarkus.package.type=native \
+  -Dquarkus.native.container-build=true \
+  -Dquarkus.native.container-runtime-options="--platform=linux/arm64" \
+  -Dquarkus.native.resources.includes="librocksdbjni-linux-aarch64.so" \
+  -Dquarkus.native.resources.excludes="librocksdbjni-linux64.so"
 ```
 
 ### docker-compose stack
@@ -138,7 +143,7 @@ Or, if you don't have GraalVM installed, you can run the native executable build
 
 On Mac with Apple Silicon (M1/M2 chip) use:
 ```shell script
-../../gradlew clean build -Dquarkus.package.type=native -Dquarkus.native.container-build=true  -Dquarkus.native.builder-image=quay.io/quarkus/ubi-quarkus-mandrel-builder-image:22.3-java17 -Dquarkus.native.resources.includes="librocksdbjni-linux-aarch64.so" -Dquarkus.native.resources.excludes="librocksdbjni-linux64.so"
+../../gradlew clean build -Dquarkus.package.type=native -Dquarkus.native.container-build=true -Dquarkus.native.resources.includes="librocksdbjni-linux-aarch64.so" -Dquarkus.native.resources.excludes="librocksdbjni-linux64.so"
 ```
 
 You can then execute your native executable with: `./build/word-count-quarkus-x.y.z-SNAPSHOT-runner`
@@ -156,7 +161,7 @@ If you want to learn more about building native executables, please consult http
 
 Produce/consumer without kcat
 ```bash
-docker exec -it kafka-1  bin/kafka-console-producer.sh --bootstrap-server=localhost:9092 --topic streams-plaintext-input
+docker exec -it kafka-1 bin/kafka-console-producer.sh --bootstrap-server=localhost:9092 --topic streams-plaintext-input
 docker exec -it kafka-1 bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 \
         --topic streams-wordcount-output \
         --from-beginning \
