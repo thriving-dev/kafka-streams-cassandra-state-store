@@ -35,7 +35,7 @@ jobs:
           # queries: security-extended,security-and-quality
           queries: security-extended,security-and-quality
 
-      - uses: actions/setup-java@v3
+      - uses: actions/setup-java@v4
         with:
           distribution: 'corretto'
           java-version: '17'
