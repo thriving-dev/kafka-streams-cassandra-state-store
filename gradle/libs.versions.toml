@@ -3,7 +3,7 @@ publish_plugin = "1.3.0"
 release_plugin = "3.0.2"
 quarkus_plugin = "3.5.0"
 
-kafka = "3.6.0"
+kafka = "3.6.1"
 datastax_java_driver = "4.17.0"
 scylladb_java_driver = "4.17.0.0"
 
