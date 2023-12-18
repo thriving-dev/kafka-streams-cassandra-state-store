@@ -84,7 +84,7 @@ jobs:
           echo "<!DOCTYPE html><html lang=en><meta content=\"text/html; charset=utf-8\"http-equiv=Content-Type><meta content=\"index redirect\"name=description><link href=/$GITHUB_REPOSITORY_NAME/javadoc/ rel=canonical><link href=stylesheet.css rel=stylesheet title=Style><script>window.location.replace(\"/$GITHUB_REPOSITORY_NAME/javadoc/\")</script><noscript><meta content=0;/$GITHUB_REPOSITORY_NAME/javadoc/ http-equiv=Refresh></noscript><main role=main><noscript><p>JavaScript is disabled on your browser.</p></noscript><p><a href=/$GITHUB_REPOSITORY_NAME/javadoc/ >/$GITHUB_REPOSITORY_NAME/javadoc/</a></main>" > index.html
 
       - name: Download artifact from build job
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: javadoc.zip
 
