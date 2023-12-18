@@ -46,7 +46,7 @@ jobs:
           zip -r ../../../../javadoc.zip .
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: javadoc.zip
           path: javadoc.zip
