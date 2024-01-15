@@ -21,16 +21,12 @@ For now, only KeyValueStore type is supported.
 * **Demo:** https://youtu.be/2Co9-8E-uJE
 
 
-### Project Status
-⚠️ Current project status is to be considered **EXPERIMENTAL!!** ⚠️   
-Please carefully read documentation provided on [store types](#store-types) and [limitations](#known-limitations).
-
 ## Stack
 
 ### Implemented/compiled with
 * Java 17
-* kafka-streams 3.5
-* datastax java-driver-core 4.16.0
+* kafka-streams 3.6
+* datastax java-driver-core 4.17.0
 
 ### Supported client-libs
 * Kafka Streams 2.7.0+ (maybe even earlier versions, but wasn't tested further back)
@@ -72,8 +68,8 @@ implementation 'dev.thriving.oss:kafka-streams-cassandra-state-store:${version}'
 To avoid library collisions, the cassandra java driver is non-transitive.    
 Therefore you have to choose and add a _datastax driver based_ java client dependency to your project.
 
-* Datastax java client (v4) `'com.datastax.oss:java-driver-core:4.16.0'` (works for Cassandra 3.11, 4.0, 4.11)
-* ScyllaDB shard-aware datastax java client (v4) fork `'com.scylladb:java-driver-core:4.15.0.1'`
+* Datastax java client (v4) `'com.datastax.oss:java-driver-core:4.17.0'` (works for Cassandra 3.11, 4.0, 4.11)
+* ScyllaDB shard-aware datastax java client (v4) fork `'com.scylladb:java-driver-core:4.17.0.0'`
 
 ## Usage
 ### Quick start
@@ -114,17 +110,15 @@ When using the Processor API, i.e., `Topology`, users create `StoreBuilder`s tha
 For example, you can create a cassandra stringKey value store with custom key/value serdes, logging and caching disabled like:
 
 ```java
-Topology topology = new Topology();
-
-StoreBuilder<KeyValueStore<String, Long>> storeBuilder = Stores.keyValueStoreBuilder(
-                CassandraStores.builder(session, "store-name")
-                        .partitionedKeyValueStore(),
-                Serdes.String(),
-                Serdes.Long())
-        .withLoggingDisabled()
-        .withCachingDisabled();
-
-topology.addStateStore(storeBuilder);
+StoreBuilder<KeyValueStore<String, Long>> sb = 
+    Stores.keyValueStoreBuilder(
+        CassandraStores.builder(session, "store-name")
+                .partitionedKeyValueStore(),
+        Serdes.String(),
+        Serdes.Long())
+    .withLoggingDisabled()
+    .withCachingDisabled();
+topology.addStateStore(sb);
 ```
 
 ### Examples
@@ -269,7 +263,7 @@ Advanced usage example:
 ```java
 CassandraStores.builder(session, "word-grouped-count")
         .withKeyspace("poc")
-        .withKeyspace(true)
+        .withCountAllEnabled()
         .withTableOptions("""
                 compaction = { 'class' : 'LeveledCompactionStrategy' }
                 AND default_time_to_live = 86400
