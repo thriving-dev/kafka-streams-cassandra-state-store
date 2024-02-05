@@ -6,7 +6,7 @@
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](CODE_OF_CONDUCT.md)
 [![Javadoc](https://img.shields.io/badge/JavaDoc-Online-green)](https://thriving-dev.github.io/kafka-streams-cassandra-state-store/javadoc/)
 
-## Overview 
+## Overview
 Kafka Streams State Store implementation that persists data to Apache Cassandra.
 For now, only KeyValueStore type is supported.
 
@@ -30,14 +30,14 @@ For now, only KeyValueStore type is supported.
 
 ### Supported client-libs
 * Kafka Streams 2.7.0+ (maybe even earlier versions, but wasn't tested further back)
-* Datastax java client (v4) `'com.datastax.oss:java-driver-core:4.16.0'`
-* ScyllaDB shard-aware datastax java client (v4) fork `'com.scylladb:java-driver-core:4.15.0.1'`
+* Datastax java client (v4) `'com.datastax.oss:java-driver-core:4.17.0'`
+* ScyllaDB shard-aware datastax java client (v4) fork `'com.scylladb:java-driver-core:4.17.0.0'`
 
 ### Supported databases
 * Apache Cassandra 3.11
 * Apache Cassandra 4.0
 * Apache Cassandra 4.1
-* ScyllaDB (should work from 4.3+)
+* ScyllaDB (tested from 4.3+)
 
 #### Integration Tests
 * JUnit 5, AssertJ
@@ -77,9 +77,9 @@ Therefore you have to choose and add a _datastax driver based_ java client depen
 #### ‼️**Important:** notes upfront
 
 1. Disable logging => `withLoggingDisabled()`    
-   ...enabled by default, kafka streams is 'logging' the events making up the store's state against a _changelog topic_ to be able to restore state following a rebalance or application restart. Since cassandra is a permanent external store, state does not need to be _restored_ but is always available.   
+   ...enabled by default, kafka streams is 'logging' the events making up the store's state against a _changelog topic_ to be able to restore state following a rebalance or application restart. Since cassandra is a permanent external store, state does not need to be _restored_ but is always available.
 1. Disable caching => `withCachingDisabled()`    
-   ...enabled by default, kafka streams is buffering writes - which is not what we want when working with cassandra state store  
+   ...enabled by default, kafka streams is buffering writes - which is not what we want when working with cassandra state store
 1. Do not use [standby replicas](https://docs.confluent.io/platform/current/streams/developer-guide/config-streams.html#streams-developer-guide-standby-replicas) => `num.standby.replicas=0`    
    ...standby replicas are used to minimize the latency of task failover by keeping shadow copies of local state stores as a hot standby. The state store backed by cassandra does not need to be restored or re-balanced since all streams instances can directly access any partitions state.
 
@@ -273,7 +273,7 @@ CassandraStores.builder(session, "word-grouped-count")
         .partitionedKeyValueStore()
 ```
 
-Please also see [Quick start](#quick-start) for full kafka-streams example. 
+Please also see [Quick start](#quick-start) for full kafka-streams example.
 
 #### Builder options
 
@@ -342,7 +342,7 @@ Set to `null` to disable (basic applies).
 Default: `null`
 
 
-## Fine Print 
+## Fine Print
 
 ### Known Limitations
 Adding additional infrastructure for data persistence external to Kafka comes with certain risks and constraints.
@@ -350,9 +350,9 @@ Adding additional infrastructure for data persistence external to Kafka comes wi
 #### Consistency
 Kafka Streams supports _at-least-once_ and _exactly-once_ processing guarantees. At-least-once semantics is enabled by default.
 
-Kafka Streams _exactly-once_ processing guarantees is using Kafka transactions. These transactions wrap the entirety of processing a message throughout your streams topology, including messages published to outbound topic(s), changelog topic(s), and consumer offsets topic(s). 
+Kafka Streams _exactly-once_ processing guarantees is using Kafka transactions. These transactions wrap the entirety of processing a message throughout your streams topology, including messages published to outbound topic(s), changelog topic(s), and consumer offsets topic(s).
 
-This is possible through transactional interaction with a single distributed system (Apache Kafka). Bringing an external system (Cassandra) into play breaks this pattern. Once data is written to the database it can't be rolled back in the event of a subsequent error / failure to complete the current message processing. 
+This is possible through transactional interaction with a single distributed system (Apache Kafka). Bringing an external system (Cassandra) into play breaks this pattern. Once data is written to the database it can't be rolled back in the event of a subsequent error / failure to complete the current message processing.
 
 ⚠️ => If you need strong consistency, have _exactly-once_ processing enabled (streams config: `processing.guarantee="exactly_once_v2"`), and/or your processing logic is not fully idempotent then using **kafka-streams-cassandra-state-store** is discouraged! ⚠️
 
@@ -367,7 +367,7 @@ For more information on Kafka Streams processing guarantees, check the sources r
 
 #### Incomplete Implementation of Interfaces `StateStore` & `ReadOnlyKeyValueStore`
 
-Not all methods have been implemented. Please check [store types method support table](#store-types) above for more details. 
+Not all methods have been implemented. Please check [store types method support table](#store-types) above for more details.
 
 
 ### Cassandra Specifics
@@ -378,10 +378,10 @@ Not all methods have been implemented. Please check [store types method support 
 Using defaults, for a state store named "word-count" following CQL Schema applies:
 ```sql
 CREATE TABLE IF NOT EXISTS word_count_kstreams_store (
-    partition int,
-    key blob,
-    time timestamp,
-    value blob,
+    partition INT,
+    key BLOB,
+    value BLOB,
+    time TIMESTAMP,
     PRIMARY KEY ((partition), key)
 ) WITH compaction = { 'class' : 'LeveledCompactionStrategy' }
 ```
@@ -390,9 +390,9 @@ CREATE TABLE IF NOT EXISTS word_count_kstreams_store (
 Using defaults, for a state store named "clicks-global" following CQL Schema applies:
 ```sql
 CREATE TABLE IF NOT EXISTS clicks_global_kstreams_store (
-    key blob,
-    time timestamp,
-    value blob,
+    key BLOB,
+    value BLOB,
+    time TIMESTAMP,
     PRIMARY KEY (key)
 ) WITH compaction = { 'class' : 'LeveledCompactionStrategy' }
 ```
@@ -401,12 +401,12 @@ CREATE TABLE IF NOT EXISTS clicks_global_kstreams_store (
 Using defaults, for a state store named "word-count" following CQL Schema applies:
 ```sql
 CREATE TABLE IF NOT EXISTS word_count_kstreams_store (
-    partition int,
-    key blob,
-    validFrom timestamp,
-    validTo timestamp,
-    time timestamp,
-    value blob,
+    partition INT,
+    key BLOB,
+    validFrom TIMESTAMP,
+    validTo TIMESTAMP,
+    value BLOB,
+    time TIMESTAMP,
     PRIMARY KEY ((partition), key, validTo)
 ) WITH compaction = { 'class' : 'LeveledCompactionStrategy' }
 ```
@@ -415,11 +415,11 @@ CREATE TABLE IF NOT EXISTS word_count_kstreams_store (
 Using defaults, for a state store named "clicks-global" following CQL Schema applies:
 ```sql
 CREATE TABLE IF NOT EXISTS clicks_global_kstreams_store (
-    key blob,
-    validFrom timestamp,
-    validTo timestamp,
-    time timestamp,
-    value blob,
+    key BLOB,
+    validFrom TIMESTAMP,
+    validTo TIMESTAMP,
+    value BLOB,
+    time TIMESTAMP,
     PRIMARY KEY ((key), validTo)
 ) WITH compaction = { 'class' : 'LeveledCompactionStrategy' }
 ```
@@ -428,7 +428,7 @@ CREATE TABLE IF NOT EXISTS clicks_global_kstreams_store (
 
 💡 **Tip:** Cassandra has a table option `default_time_to_live` (default expiration time (“TTL”) in seconds for a table) which can be useful for certain use cases where data (state) can or should expire.
 
-Please note writes to cassandra are made with system time. The table TTL will therefore apply based on the time of write (not stream time). 
+Please note writes to cassandra are made with system time. The table TTL will therefore apply based on the time of write (not stream time).
 
 #### Cassandra table partitioning (avoiding large partitions)
 
@@ -493,7 +493,7 @@ Integration tests can be run separately via
   - [x] WordCount Cassandra 3 (v4 client lib)
   - [x] WordCount ScyllaDB
   - [x] WordCount Processor + all + range + prefixScan + approximateNumEntries
-  - [x] GlobalCassandraStore + KStream enrichment 
+  - [x] GlobalCassandraStore + KStream enrichment
   - [x] Quarkus examples app as GraalVM native image (https://github.com/thriving-dev/kafka-streams-cassandra-state-store/issues/7)
 - [x] additional features
   - [x] ~~Prefix scan with `stringKeyValueStore` (ScyllaDB only)~~ (removed with v0.3)
@@ -523,7 +523,7 @@ Integration tests can be run separately via
       - https://github.com/renovatebot/github-action
       - https://docs.renovatebot.com/java/
   - [x] github actions to publish to maven central (snapshot, releases) https://julien.ponge.org/blog/publishing-from-gradle-to-maven-central-with-github-actions/
-  - [x] github actions for triggering 'gradle release' from repo with automatic semver 
+  - [x] github actions for triggering 'gradle release' from repo with automatic semver
 - [x] Write Documentation
   - [x] summary
   - [x] compatibility cassandra 3.11, 4.x, ScyllaDB
