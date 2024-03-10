@@ -20,6 +20,8 @@ jersey_container_servlet = "3.1.5"
 jersey_hk2 = "3.1.5"
 jersey_media_json_jackson = "3.1.5"
 
+quarkus = "3.6.5"
+
 [libraries]
 junit = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit" }
 assertj = { module = "org.assertj:assertj-core", version.ref = "assertj" }
@@ -38,11 +40,14 @@ jersey_hk2 = { module = "org.glassfish.jersey.inject:jersey-hk2", version.ref = 
 jersey_media_json_jackson = { module = "org.glassfish.jersey.media:jersey-media-json-jackson", version.ref = "jersey_media_json_jackson" }
 jetty_server = { module = "org.eclipse.jetty:jetty-server", version.ref = "jetty" }
 jetty_servlet = { module = "org.eclipse.jetty:jetty-servlet", version.ref = "jetty" }
+quarkus_bom = { module = "io.quarkus.platform:quarkus-bom", version.ref = "quarkus" }
+quarkus_cassandra_bom = { module = "io.quarkus.platform:quarkus-cassandra-bom", version.ref = "quarkus" }
 
 [bundles]
 testcontainers = ["testcontainers_core", "testcontainers_junit5", "testcontainers_redpanda", "testcontainers_cassandra"]
 jersey = ["jersey_container_servlet", "jersey_hk2", "jersey_media_json_jackson"]
 jetty = ["jetty_server", "jetty_servlet"]
+quarkus = ["quarkus_bom", "quarkus_cassandra_bom"]
 
 [plugins]
 publish = { id = "io.github.gradle-nexus.publish-plugin", version.ref = "publish_plugin" }
