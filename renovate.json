@@ -22,7 +22,7 @@
       "registryUrlTemplate": "https://plugins.gradle.org/m2",
       "depNameTemplate": "quarkus",
       "packageNameTemplate": "io.quarkus.platform:quarkus-bom",
-      "fileMatch": ["(^|/)gradle\\.properties"],
+      "fileMatch": ["(^|.*/)gradle\\.properties"],
       "matchStrings": [
         "quarkusPlatformVersion=(?<currentValue>[\\w+\\.\\-]*)"
       ]
@@ -34,7 +34,7 @@
       "depNameTemplate": "io.quarkus",
       "depTypeTemplate": "plugin",
       "packageNameTemplate": "io.quarkus:io.quarkus.gradle.plugin",
-      "fileMatch": ["(^|/)gradle\\.properties"],
+      "fileMatch": ["(^|.*/)gradle\\.properties"],
       "matchStrings": [
         "quarkusPluginVersion=(?<currentValue>[\\w+\\.\\-]*)"
       ]
