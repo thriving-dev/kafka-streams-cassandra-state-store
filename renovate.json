@@ -14,5 +14,30 @@
       "matchPackagePatterns": ["^org\\.eclipse\\.jetty:.+"],
       "allowedVersions": "<12.0.0"
     }
+  ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "datasourceTemplate": "maven",
+      "registryUrlTemplate": "https://plugins.gradle.org/m2",
+      "depNameTemplate": "quarkus",
+      "packageNameTemplate": "io.quarkus.platform:quarkus-bom",
+      "fileMatch": ["(^|/)gradle\\.properties"],
+      "matchStrings": [
+        "quarkusPlatformVersion=(?<currentValue>[\\w+\\.\\-]*)"
+      ]
+    },
+    {
+      "customType": "regex",
+      "datasourceTemplate": "maven",
+      "registryUrlTemplate": "https://plugins.gradle.org/m2",
+      "depNameTemplate": "io.quarkus",
+      "depTypeTemplate": "plugin",
+      "packageNameTemplate": "io.quarkus:io.quarkus.gradle.plugin",
+      "fileMatch": ["(^|/)gradle\\.properties"],
+      "matchStrings": [
+        "quarkusPluginVersion=(?<currentValue>[\\w+\\.\\-]*)"
+      ]
+    }
   ]
 }
