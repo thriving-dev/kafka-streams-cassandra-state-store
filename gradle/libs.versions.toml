@@ -5,7 +5,7 @@ quarkus_plugin = "3.8.2"
 
 kafka = "3.6.1"
 datastax_java_driver = "4.17.0"
-scylladb_java_driver = "4.17.0.0"
+scylladb_java_driver = "4.17.0.1"
 
 junit = "5.10.2"
 assertj = "3.25.3"
