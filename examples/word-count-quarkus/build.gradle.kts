@@ -14,6 +14,7 @@ val quarkusPlatformVersion: String by project
 dependencies {
     implementation(enforcedPlatform(libs.quarkus.bom))
     implementation(enforcedPlatform(libs.quarkus.cassandra.bom))
+    implementation("io.quarkus:quarkus-container-image-docker")
 
     // Root lib
     implementation(project(":kafka-streams-cassandra-state-store"))

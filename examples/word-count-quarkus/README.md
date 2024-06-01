@@ -47,7 +47,8 @@ _Note: for other OS / JVM, see [quarkus](#quarkus) section below..._
 On Mac with Apple Silicon (M1/M2 chip) use:
 ```shell script
 ../../gradlew clean build \
-  -Dquarkus.package.type=native \
+  -Dquarkus.package.jar.enabled=false \
+  -Dquarkus.native.enabled=true \
   -Dquarkus.native.container-build=true \
   -Dquarkus.native.container-runtime-options="--platform=linux/arm64" \
   -Dquarkus.native.resources.includes="librocksdbjni-linux-aarch64.so" \

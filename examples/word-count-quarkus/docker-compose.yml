@@ -77,7 +77,7 @@ services:
   scylla-1:
     container_name: scylla-1
     image: scylladb/scylla:5.2
-    command: --smp 1 --memory 750M --overprovisioned 1 --experimental 1 --api-address 0.0.0.0
+    command: --smp 1 --memory 750M --overprovisioned 1 --experimental 1 --api-address 0.0.0.0 --reactor-backend=epoll
     ports:
       - 19042:9042
     restart: always
@@ -90,7 +90,7 @@ services:
   scylla-2:
     container_name: scylla-2
     image: scylladb/scylla:5.2
-    command: --seeds=scylla-1 --smp 1 --memory 750M --overprovisioned 1 --experimental 1 --api-address 0.0.0.0
+    command: --seeds=scylla-1 --smp 1 --memory 750M --overprovisioned 1 --experimental 1 --api-address 0.0.0.0 --reactor-backend=epoll
     ports:
       - 29042:9042
     restart: always
@@ -103,7 +103,7 @@ services:
   scylla-3:
     container_name: scylla-3
     image: scylladb/scylla:5.2
-    command: --seeds=scylla-1 --smp 1 --memory 750M --overprovisioned 1 --experimental 1 --api-address 0.0.0.0
+    command: --seeds=scylla-1 --smp 1 --memory 750M --overprovisioned 1 --experimental 1 --api-address 0.0.0.0 --reactor-backend=epoll
     ports:
       - 39042:9042
     restart: always
