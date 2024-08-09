@@ -16,9 +16,9 @@ logback = "1.5.6"
 slf4j = "2.0.15"
 
 jetty = "11.0.22"
-jersey_container_servlet = "3.1.7"
-jersey_hk2 = "3.1.7"
-jersey_media_json_jackson = "3.1.7"
+jersey_container_servlet = "3.1.8"
+jersey_hk2 = "3.1.8"
+jersey_media_json_jackson = "3.1.8"
 
 quarkus = "3.11.0"
 
