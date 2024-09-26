@@ -20,7 +20,7 @@ jersey_container_servlet = "3.1.8"
 jersey_hk2 = "3.1.8"
 jersey_media_json_jackson = "3.1.8"
 
-quarkus = "3.11.0"
+quarkus = "3.15.1"
 
 [libraries]
 junit = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit" }
