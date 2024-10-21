@@ -7,7 +7,7 @@ kafka = "3.7.1"
 datastax_java_driver = "4.17.0"
 scylladb_java_driver = "4.18.0.1"
 
-junit = "5.10.3"
+junit = "5.11.3"
 assertj = "3.26.3"
 testcontainers = "1.20.1"
 guava = "33.2.1-jre"
